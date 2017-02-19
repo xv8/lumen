@@ -7,7 +7,7 @@
     (if (not ok)
         (target
           js: (print (get v 'stack))
-          lua: (print (cat "error: " (get v 'message) "\n" (get v 'stack))))
+          lua: (print (cat "error: " (or (get v 'message) "") "\n" (get v 'stack))))
         (is? v) (print (str v)))))
 
 (define rep (s)

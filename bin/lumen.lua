@@ -1052,7 +1052,7 @@ local function eval_print(form)
   local ok = _id[1]
   local v = _id[2]
   if not ok then
-    return(print("error: " .. v.message .. "\n" .. v.stack))
+    return(print("error: " .. (v.message or "") .. "\n" .. v.stack))
   else
     if is63(v) then
       return(print(str(v)))
