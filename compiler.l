@@ -77,17 +77,34 @@
       (inc k)))
   k)
 
+(define map* (f x)
+  (let (ks () from inf upto -inf)
+    (each (k v) x
+      (if (string? k)
+          (add ks k)
+        (set from (min from k)
+             upto (max upto k))))
+    (let i from
+      (while (<= i upto)
+        (let v (get x i)
+          (f i v)
+          (inc i))))
+    (step k (sort ks)
+      (let v (get x k)
+        (f k v)))))
+
 (define-global bind (lh rh)
   (if (atom? lh) `(,lh ,rh)
     (let-unique (id)
       (with bs (list id rh)
-        (each (k v) lh
-          (let x (if (= k 'rest)
-                     `(cut ,id ,(# lh))
-                   `(get ,id ',(bias k)))
-            (when (is? k)
-              (let k (if (= v true) k v)
-                (join! bs (bind k x))))))))))
+        (map* (fn (k v)
+                (let x (if (= k 'rest)
+                           `(cut ,id ,(# lh))
+                         `(get ,id ',(bias k)))
+                  (when (is? k)
+                    (let k (if (= v true) k v)
+                      (join! bs (bind k x))))))
+              lh)))))
 
 (define-macro arguments% (from)
   `((get (get (get Array 'prototype) 'slice) 'call) arguments ,from))
@@ -699,7 +716,7 @@
 (define-special %object forms
   (let (s "{" c ""
         sep (if (= target 'lua) " = " ": "))
-    (each (k v) (pair forms)
+    (each (k v) (sort (pair forms) (fn ((a) (b)) (< a b)))
       (when (number? k)
         (let ((k v) v)
           (unless (string? k)
