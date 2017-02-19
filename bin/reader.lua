@@ -75,13 +75,13 @@ local function flag63(atom)
   return(string63(atom) and _35(atom) > 1 and char(atom, 0) == ":")
 end
 local function expected(s, c)
-  local _id1 = s
-  local more = _id1.more
-  local pos = _id1.pos
-  local _id2 = more
+  local _id = s
+  local more = _id.more
+  local pos = _id.pos
+  local _id = more
   local _e
-  if _id2 then
-    _e = _id2
+  if _id then
+    _e = _id
   else
     error("Expected " .. c .. " at " .. pos)
     _e = nil

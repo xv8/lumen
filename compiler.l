@@ -50,14 +50,18 @@
 (define literal (s)
   (if (string-literal? s) s (quoted s)))
 
-(let (names (obj))
-  (define-global unique (x)
-    (if (get names x)
-        (let i (get names x)
-          (inc (get names x))
-          (unique (cat x i)))
-      (do (set (get names x) 1)
-          (cat "_" x)))))
+(define unique! (x names)
+  (if (get names x)
+      (let i (get names x)
+        (inc (get names x))
+        (unique! (cat x i) names))
+    (do (set (get names x) 1)
+        (cat "_" x))))
+
+(let (names1 (obj))
+  (define-global unique (x names)
+    (let ns (or names (getenv '%scope 'unique) names1)
+      (unique! x ns))))
 
 (define stash* (args)
   (if (keys? args)
@@ -117,21 +121,20 @@
         (do (add args1 '|...|) '(unstash (list |...|)))))
     (if (atom? args)
         (list args1 `(let ,(list args (rest)) ,@body))
-      (let bs ()
-        (let-unique (r)
-          (each (k v) args
-            (when (number? k)
-              (if (atom? v) (add args1 v)
-                (let-unique (x)
-                  (add args1 x)
-                  (join! bs (list v x))))))
-          (when (keys? args)
-            (join! bs (list r (rest)))
-            (let n (if (= target 'lua) (edge args1) (# args1))
-              (for i n
-                (let v (at args1 i)
-                  (join! bs (list v `(destash! ,v ,r))))))
-            (join! bs (list (keys args) r))))
+      (let (bs () names (obj) r '_rest)
+        (each (k v) args
+          (when (number? k)
+            (if (atom? v) (add args1 v)
+              (let x (unique 'x names)
+                (add args1 x)
+                (join! bs (list v x))))))
+        (when (keys? args)
+          (join! bs (list r (rest)))
+          (let n (if (= target 'lua) (edge args1) (# args1))
+            (for i n
+              (let v (at args1 i)
+                (join! bs (list v `(destash! ,v ,r))))))
+          (join! bs (list (keys args) r)))
         (list args1 `(let ,bs ,@body))))))
 
 (define quoting? (depth)
@@ -152,11 +155,11 @@
   `(%local ,name ,(macroexpand value)))
 
 (define expand-function ((x args rest: body))
-  (with-bindings (args)
+  (with-bindings (args "#<function>")
     `(%function ,args ,@(macroexpand body))))
 
 (define expand-definition ((x name args rest: body))
-  (with-bindings (args)
+  (with-bindings (args name)
     `(,x ,name ,args ,@(macroexpand body))))
 
 (define expand-form (form)
@@ -258,7 +261,10 @@
           "function" "not" "true" "elseif" "if" "or" "until"))
 
 (define-global reserved? (x)
-  (get reserved x))
+  (target
+    lua: (get reserved x)
+    js: (and ((get reserved 'hasOwnProperty) x)
+             (get reserved x))))
 
 (define valid-code? (n)
   (or (number-code? n)         ; 0-9
@@ -523,11 +529,13 @@
 
 (define lower-function (args)
   (let ((a rest: body) args)
-    `(%function ,a ,(lower-body body true))))
+    (with-bindings (a "#<function>")
+      `(%function ,a ,(lower-body body true)))))
 
 (define lower-definition (kind args hoist)
   (let ((name args rest: body) args)
-    (add hoist `(,kind ,name ,args ,(lower-body body true)))))
+    (with-bindings (args name)
+      (add hoist `(,kind ,name ,args ,(lower-body body true))))))
 
 (define lower-call (form hoist)
   (let form (map (fn (x) (lower x hoist)) form)

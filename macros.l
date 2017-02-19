@@ -117,11 +117,12 @@
          (with ,x (do ,@body)
            (drop environment)))))
 
-(define-macro with-bindings ((names) rest: body)
+(define-macro with-bindings ((names id) rest: body)
   (let-unique (x)
    `(with-frame
       (each ,x ,names
         (setenv ,x :variable))
+      (setenv '%scope :variable id: ,id args: ,names unique: (obj))
       ,@body)))
 
 (define-macro let-macro (definitions rest: body)

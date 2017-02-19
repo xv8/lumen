@@ -75,13 +75,13 @@ var flag63 = function (atom) {
   return(string63(atom) && _35(atom) > 1 && char(atom, 0) === ":");
 };
 var expected = function (s, c) {
-  var _id1 = s;
-  var more = _id1.more;
-  var pos = _id1.pos;
-  var _id2 = more;
+  var _id = s;
+  var more = _id.more;
+  var pos = _id.pos;
+  var _id = more;
   var _e;
-  if (_id2) {
-    _e = _id2;
+  if (_id) {
+    _e = _id;
   } else {
     throw new Error("Expected " + c + " at " + pos);
     _e = undefined;
