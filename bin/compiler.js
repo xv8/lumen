@@ -1289,7 +1289,7 @@ setenv("%return", {_stash: true, special: function (x) {
   var _x = _e;
   return(indentation() + _x);
 }, stmt: true});
-setenv("new", {_stash: true, special: function (x) {
+setenv("%new", {_stash: true, special: function (x) {
   return("new " + compile(x));
 }});
 setenv("typeof", {_stash: true, special: function (x) {
@@ -1298,7 +1298,7 @@ setenv("typeof", {_stash: true, special: function (x) {
 setenv("error", {_stash: true, special: function (x) {
   var _e;
   if (target === "js") {
-    _e = "throw " + compile(["new", ["Error", x]]);
+    _e = "throw " + compile(["%new", ["Error", x]]);
   } else {
     _e = "error(" + compile(x) + ")";
   }

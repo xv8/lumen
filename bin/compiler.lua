@@ -1221,7 +1221,7 @@ setenv("%return", {_stash = true, special = function (x)
   local _x = _e
   return(indentation() .. _x)
 end, stmt = true})
-setenv("new", {_stash = true, special = function (x)
+setenv("%new", {_stash = true, special = function (x)
   return("new " .. compile(x))
 end})
 setenv("typeof", {_stash = true, special = function (x)
@@ -1230,7 +1230,7 @@ end})
 setenv("error", {_stash = true, special = function (x)
   local _e
   if target == "js" then
-    _e = "throw " .. compile({"new", {"Error", x}})
+    _e = "throw " .. compile({"%new", {"Error", x}})
   else
     _e = "error(" .. compile(x) .. ")"
   end
