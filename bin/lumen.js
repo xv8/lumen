@@ -1161,6 +1161,10 @@ setenv("do", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));
   return(join(["%do"], args));
 }});
+setenv("while", {_stash: true, macro: function () {
+  var args = unstash(Array.prototype.slice.call(arguments, 0));
+  return(join(["%while"], args));
+}});
 setenv("not", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));
   return(join(["%not"], args));

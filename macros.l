@@ -243,6 +243,9 @@
 (define-macro do args
   `(%do ,@args))
 
+(define-macro while args
+  `(%while ,@args))
+
 (define-macro not args
   `(%not ,@args))
 

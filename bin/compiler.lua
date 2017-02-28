@@ -941,9 +941,9 @@ local function lower_while(args, hoist)
   local _c = lower(c, pre)
   local _e
   if none63(pre) then
-    _e = {"while", _c, lower_body(body)}
+    _e = {"%while", _c, lower_body(body)}
   else
-    _e = {"while", true, join({"%do"}, pre, {{"%if", {"not", _c}, {"break"}}, lower_body(body)})}
+    _e = {"%while", true, join({"%do"}, pre, {{"%if", {"not", _c}, {"break"}}, lower_body(body)})}
   end
   return(add(hoist, _e))
 end
@@ -1040,7 +1040,7 @@ function lower(form, hoist, stmt63, tail63)
                 if x == "%try" then
                   return(lower_try(args, hoist, tail63))
                 else
-                  if x == "while" then
+                  if x == "%while" then
                     return(lower_while(args, hoist))
                   else
                     if x == "%for" then
@@ -1146,7 +1146,7 @@ setenv("%if", {_stash = true, special = function (cond, cons, alt)
     return(s .. "\n")
   end
 end, stmt = true, tr = true})
-setenv("while", {_stash = true, special = function (cond, form)
+setenv("%while", {_stash = true, special = function (cond, form)
   local _cond = compile(cond)
   indent_level = indent_level + 1
   local _x = compile(form, {_stash = true, stmt = true})

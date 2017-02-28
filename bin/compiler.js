@@ -1002,9 +1002,9 @@ var lower_while = function (args, hoist) {
   var _c = lower(c, pre);
   var _e;
   if (none63(pre)) {
-    _e = ["while", _c, lower_body(body)];
+    _e = ["%while", _c, lower_body(body)];
   } else {
-    _e = ["while", true, join(["%do"], pre, [["%if", ["not", _c], ["break"]], lower_body(body)])];
+    _e = ["%while", true, join(["%do"], pre, [["%if", ["not", _c], ["break"]], lower_body(body)])];
   }
   return(add(hoist, _e));
 };
@@ -1115,7 +1115,7 @@ lower = function (form, hoist, stmt63, tail63) {
                 if (x === "%try") {
                   return(lower_try(args, hoist, tail63));
                 } else {
-                  if (x === "while") {
+                  if (x === "%while") {
                     return(lower_while(args, hoist));
                   } else {
                     if (x === "%for") {
@@ -1214,7 +1214,7 @@ setenv("%if", {_stash: true, special: function (cond, cons, alt) {
     return(s + "\n");
   }
 }, stmt: true, tr: true});
-setenv("while", {_stash: true, special: function (cond, form) {
+setenv("%while", {_stash: true, special: function (cond, form) {
   var _cond = compile(cond);
   indent_level = indent_level + 1;
   var _x = compile(form, {_stash: true, stmt: true});
