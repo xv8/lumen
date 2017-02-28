@@ -261,6 +261,9 @@
 (define-macro typeof args
   `(%type ,@args))
 
+(define-macro error args
+  `(%error ,@args))
+
 (define-macro not args
   `(%not ,@args))
 

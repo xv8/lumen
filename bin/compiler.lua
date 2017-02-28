@@ -1227,7 +1227,7 @@ end})
 setenv("%type", {_stash = true, special = function (x)
   return("typeof(" .. compile(x) .. ")")
 end})
-setenv("error", {_stash = true, special = function (x)
+setenv("%error", {_stash = true, special = function (x)
   local _e
   if target == "js" then
     _e = "throw " .. compile({"%new", {"Error", x}})

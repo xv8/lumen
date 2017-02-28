@@ -1185,6 +1185,10 @@ setenv("typeof", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));
   return(join(["%type"], args));
 }});
+setenv("error", {_stash: true, macro: function () {
+  var args = unstash(Array.prototype.slice.call(arguments, 0));
+  return(join(["%error"], args));
+}});
 setenv("not", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));
   return(join(["%not"], args));

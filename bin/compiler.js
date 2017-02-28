@@ -1295,7 +1295,7 @@ setenv("%new", {_stash: true, special: function (x) {
 setenv("%type", {_stash: true, special: function (x) {
   return("typeof(" + compile(x) + ")");
 }});
-setenv("error", {_stash: true, special: function (x) {
+setenv("%error", {_stash: true, special: function (x) {
   var _e;
   if (target === "js") {
     _e = "throw " + compile(["%new", ["Error", x]]);
