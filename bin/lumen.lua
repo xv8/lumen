@@ -1059,9 +1059,16 @@ setenv("typeof", {_stash = true, macro = function (...)
   local args = unstash({...})
   return(join({"%type"}, args))
 end})
-setenv("error", {_stash = true, macro = function (...)
-  local args = unstash({...})
-  return(join({"%error"}, args))
+setenv("error", {_stash = true, macro = function (msg, ...)
+  local _rest = unstash({...})
+  local _msg = destash33(msg, _rest)
+  local _id = _rest
+  local args = cut(_id, 0)
+  if none63(args) then
+    return({"%error", _msg})
+  else
+    return({"%error", {"cat", _msg, "\" \"", {"str", join({"list"}, args)}}})
+  end
 end})
 setenv("not", {_stash = true, macro = function (...)
   local args = unstash({...})

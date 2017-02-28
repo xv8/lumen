@@ -1185,9 +1185,16 @@ setenv("typeof", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));
   return(join(["%type"], args));
 }});
-setenv("error", {_stash: true, macro: function () {
-  var args = unstash(Array.prototype.slice.call(arguments, 0));
-  return(join(["%error"], args));
+setenv("error", {_stash: true, macro: function (msg) {
+  var _rest = unstash(Array.prototype.slice.call(arguments, 1));
+  var _msg = destash33(msg, _rest);
+  var _id = _rest;
+  var args = cut(_id, 0);
+  if (none63(args)) {
+    return(["%error", _msg]);
+  } else {
+    return(["%error", ["cat", _msg, "\" \"", ["str", join(["list"], args)]]]);
+  }
 }});
 setenv("not", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));

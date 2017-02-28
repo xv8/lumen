@@ -261,8 +261,10 @@
 (define-macro typeof args
   `(%type ,@args))
 
-(define-macro error args
-  `(%error ,@args))
+(define-macro error (msg rest: args)
+  (if (none? args)
+      `(%error ,msg)
+    `(%error (cat ,msg " " (str (list ,@args))))))
 
 (define-macro not args
   `(%not ,@args))
