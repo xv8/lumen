@@ -1292,7 +1292,7 @@ setenv("%return", {_stash: true, special: function (x) {
 setenv("%new", {_stash: true, special: function (x) {
   return("new " + compile(x));
 }});
-setenv("typeof", {_stash: true, special: function (x) {
+setenv("%type", {_stash: true, special: function (x) {
   return("typeof(" + compile(x) + ")");
 }});
 setenv("error", {_stash: true, special: function (x) {

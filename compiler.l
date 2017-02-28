@@ -679,7 +679,7 @@
 (define-special %new (x)
   (cat "new " (compile x)))
 
-(define-special typeof (x)
+(define-special %type (x)
   (cat "typeof(" (compile x) ")"))
 
 (define-special error (x) :stmt
