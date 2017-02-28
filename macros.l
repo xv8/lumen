@@ -240,6 +240,44 @@
 (define-macro when-compiling body
   (eval `(do ,@body)))
 
+(define-macro not args
+  `(%not ,@args))
+
+(define-macro * args
+  `(%mul ,@args))
+
+(define-macro / args
+  `(%div ,@args))
+
+(define-macro % args
+  `(%mod ,@args))
+
+(define-macro + args
+  `(%add ,@args))
+
+(define-macro - args
+  (if (< (# args) 2)
+      `(%neg ,@args)
+    `(%sub ,@args)))
+
+(define-macro cat args
+  `(%cat ,@args))
+
+(define-macro < args
+  `(%lt ,@args))
+
+(define-macro > args
+  `(%gt ,@args))
+
+(define-macro <= args
+  `(%le ,@args))
+
+(define-macro >= args
+  `(%ge ,@args))
+
+(define-macro = args
+  `(%eq ,@args))
+
 (define-macro and args
   `(%and ,@args))
 

@@ -539,32 +539,33 @@ mapo = function (f, t) {
   return(o);
 };
 var __x1 = [];
+__x1["%neg"] = "-";
 var _x2 = [];
 _x2.js = "!";
 _x2.lua = "not";
-__x1["not"] = _x2;
+__x1["%not"] = _x2;
 var __x3 = [];
-__x3["%"] = true;
-__x3["*"] = true;
-__x3["/"] = true;
+__x3["%div"] = "/";
+__x3["%mod"] = "%";
+__x3["%mul"] = "*";
 var __x4 = [];
-__x4["+"] = true;
-__x4["-"] = true;
+__x4["%add"] = "+";
+__x4["%sub"] = "-";
 var __x5 = [];
 var _x6 = [];
 _x6.js = "+";
 _x6.lua = "..";
-__x5.cat = _x6;
+__x5["%cat"] = _x6;
 var __x7 = [];
-__x7["<"] = true;
-__x7["<="] = true;
-__x7[">"] = true;
-__x7[">="] = true;
+__x7["%ge"] = ">=";
+__x7["%gt"] = ">";
+__x7["%le"] = "<=";
+__x7["%lt"] = "<";
 var __x8 = [];
 var _x9 = [];
 _x9.js = "===";
 _x9.lua = "==";
-__x8["="] = _x9;
+__x8["%eq"] = _x9;
 var __x10 = [];
 var _x11 = [];
 _x11.js = "&&";
@@ -577,7 +578,7 @@ _x13.lua = "or";
 __x12["%or"] = _x13;
 var infix = [__x1, __x3, __x4, __x5, __x7, __x8, __x10, __x12];
 var unary63 = function (form) {
-  return(two63(form) && in63(hd(form), ["not", "-"]));
+  return(two63(form) && in63(hd(form), ["%not", "%neg"]));
 };
 var index = function (k) {
   return(k);
@@ -608,8 +609,12 @@ var getop = function (op) {
     if (x === true) {
       return(op);
     } else {
-      if (is63(x)) {
-        return(x[target]);
+      if (string63(x)) {
+        return(x);
+      } else {
+        if (is63(x)) {
+          return(x[target]);
+        }
       }
     }
   }, infix));

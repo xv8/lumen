@@ -483,32 +483,33 @@ function mapo(f, t)
   return(o)
 end
 local __x1 = {}
+__x1["%neg"] = "-"
 local _x2 = {}
 _x2.js = "!"
 _x2.lua = "not"
-__x1["not"] = _x2
+__x1["%not"] = _x2
 local __x3 = {}
-__x3["%"] = true
-__x3["*"] = true
-__x3["/"] = true
+__x3["%div"] = "/"
+__x3["%mod"] = "%"
+__x3["%mul"] = "*"
 local __x4 = {}
-__x4["+"] = true
-__x4["-"] = true
+__x4["%add"] = "+"
+__x4["%sub"] = "-"
 local __x5 = {}
 local _x6 = {}
 _x6.js = "+"
 _x6.lua = ".."
-__x5.cat = _x6
+__x5["%cat"] = _x6
 local __x7 = {}
-__x7["<"] = true
-__x7["<="] = true
-__x7[">"] = true
-__x7[">="] = true
+__x7["%ge"] = ">="
+__x7["%gt"] = ">"
+__x7["%le"] = "<="
+__x7["%lt"] = "<"
 local __x8 = {}
 local _x9 = {}
 _x9.js = "==="
 _x9.lua = "=="
-__x8["="] = _x9
+__x8["%eq"] = _x9
 local __x10 = {}
 local _x11 = {}
 _x11.js = "&&"
@@ -521,7 +522,7 @@ _x13.lua = "or"
 __x12["%or"] = _x13
 local infix = {__x1, __x3, __x4, __x5, __x7, __x8, __x10, __x12}
 local function unary63(form)
-  return(two63(form) and in63(hd(form), {"not", "-"}))
+  return(two63(form) and in63(hd(form), {"%not", "%neg"}))
 end
 local function index(k)
   if number63(k) then
@@ -547,8 +548,12 @@ local function getop(op)
     if x == true then
       return(op)
     else
-      if is63(x) then
-        return(x[target])
+      if string63(x) then
+        return(x)
+      else
+        if is63(x) then
+          return(x[target])
+        end
       end
     end
   end, infix))

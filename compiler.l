@@ -295,17 +295,17 @@
           (add o x))))))
 
 (define infix
-  `((not: (js: ! lua: ,"not"))
-    (:* :/ :%)
-    (:+ :-)
-    (cat: (js: + lua: ..))
-    (:< :> :<= :>=)
-    (=: (js: === lua: ==))
+  `((%not: (js: ! lua: ,"not") %neg: -)
+    (%mul: * %div: / %mod: %)
+    (%add: + %sub: -)
+    (%cat: (js: + lua: ..))
+    (%lt: < %gt: > %le: <= %ge: >=)
+    (%eq: (js: === lua: ==))
     (%and: (js: && lua: and))
     (%or: (js: ,"||" lua: or))))
 
 (define unary? (form)
-  (and (two? form) (in? (hd form) '(not -))))
+  (and (two? form) (in? (hd form) '(%not %neg))))
 
 (define index (k)
   (target js: k lua: (when (number? k) (- k 1))))
@@ -320,6 +320,7 @@
   (find (fn (level)
           (let x (get level op)
             (if (= x true) op
+                (string? x) x
                 (is? x) (get x target))))
         infix))
 
