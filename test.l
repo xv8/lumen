@@ -880,7 +880,9 @@ c"
   (let t '(1 2 3)
     (test= () (cut t (# t))))
   (let t '(1 2 3 :a)
-    (test= '(:a) (cut t (# t)))))
+    (test= '(:a) (cut t (# t))))
+  (let t '(1 2 3 :a :b)
+    (test= '(:a) (cut t (# t) nil '(:b)))))
 
 (define-test clip
   (test= "uux" (clip "quux" 1))
