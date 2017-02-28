@@ -191,6 +191,7 @@ function bind42(args, body)
     return({args1, join({"let", {args, rest()}}, body)})
   else
     local bs = {}
+    local exprs = {}
     local names = {}
     local r = "_rest"
     local _o = args
@@ -222,9 +223,15 @@ function bind42(args, body)
         bs = join(bs, {v, {"destash!", v, r}})
         i = i + 1
       end
-      bs = join(bs, {keys(args), r})
+      local ks = keys(args)
+      bs = join(bs, {ks, r})
+      map42(function (k, v)
+        if not( k == "rest") then
+          return(add(exprs, {"wipe", {"get", r, {"quote", k}}}))
+        end
+      end, ks)
     end
-    return({args1, join({"let", bs}, body)})
+    return({args1, join({"let", bs}, exprs, body)})
   end
 end
 local function quoting63(depth)
@@ -725,6 +732,7 @@ local function op_delims(parent, child, ...)
   local _child = destash33(child, _rest)
   local _id = _rest
   local right = _id.right
+  _rest.right = nil
   local _e
   if right then
     _e = _6261
@@ -765,6 +773,8 @@ function compile_function(args, body, ...)
   local _id = _rest
   local name = _id.name
   local prefix = _id.prefix
+  _rest.name = nil
+  _rest.prefix = nil
   local _e
   if name then
     _e = compile(name)
@@ -809,6 +819,7 @@ function compile(form, ...)
   local _form = destash33(form, _rest)
   local _id = _rest
   local stmt = _id.stmt
+  _rest.stmt = nil
   if nil63(_form) then
     return("")
   else

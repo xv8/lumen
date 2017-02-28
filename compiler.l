@@ -126,7 +126,7 @@
         (do (add args1 '|...|) '(unstash (list |...|)))))
     (if (atom? args)
         (list args1 `(let ,(list args (rest)) ,@body))
-      (let (bs () names (obj) r '_rest)
+      (let (bs () exprs () names (obj) r '_rest)
         (each (k v) args
           (when (number? k)
             (if (atom? v) (add args1 v)
@@ -139,8 +139,13 @@
             (for i n
               (let v (at args1 i)
                 (join! bs (list v `(destash! ,v ,r))))))
-          (join! bs (list (keys args) r)))
-        (list args1 `(let ,bs ,@body))))))
+          (let ks (keys args)
+            (join! bs (list ks r))
+            (map* (fn (k v)
+                    (unless (= k 'rest)
+                      (add exprs `(wipe (get ,r ',k)))))
+                  ks)))
+        (list args1 `(let ,bs ,@exprs ,@body))))))
 
 (define quoting? (depth)
   (number? depth))

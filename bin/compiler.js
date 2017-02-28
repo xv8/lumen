@@ -205,6 +205,7 @@ bind42 = function (args, body) {
     return([args1, join(["let", [args, rest()]], body)]);
   } else {
     var bs = [];
+    var exprs = [];
     var names = {};
     var r = "_rest";
     var _o = args;
@@ -243,9 +244,15 @@ bind42 = function (args, body) {
         bs = join(bs, [v, ["destash!", v, r]]);
         i = i + 1;
       }
-      bs = join(bs, [keys(args), r]);
+      var ks = keys(args);
+      bs = join(bs, [ks, r]);
+      map42(function (k, v) {
+        if (!( k === "rest")) {
+          return(add(exprs, ["wipe", ["get", r, ["quote", k]]]));
+        }
+      }, ks);
     }
-    return([args1, join(["let", bs], body)]);
+    return([args1, join(["let", bs], exprs, body)]);
   }
 };
 var quoting63 = function (depth) {
@@ -786,6 +793,7 @@ var op_delims = function (parent, child) {
   var _child = destash33(child, _rest);
   var _id = _rest;
   var right = _id.right;
+  delete _rest.right;
   var _e;
   if (right) {
     _e = _6261;
@@ -826,6 +834,8 @@ compile_function = function (args, body) {
   var _id = _rest;
   var name = _id.name;
   var prefix = _id.prefix;
+  delete _rest.name;
+  delete _rest.prefix;
   var _e;
   if (name) {
     _e = compile(name);
@@ -870,6 +880,7 @@ compile = function (form) {
   var _form = destash33(form, _rest);
   var _id = _rest;
   var stmt = _id.stmt;
+  delete _rest.stmt;
   if (nil63(_form)) {
     return("");
   } else {
