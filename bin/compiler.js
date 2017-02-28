@@ -524,7 +524,9 @@ expand_if = function (_x) {
     }
   }
 };
-indent_level = 0;
+if (typeof(indent_level) === "undefined" || indent_level === null) {
+  indent_level = 0;
+}
 indentation = function () {
   var s = "";
   var i = 0;

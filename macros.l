@@ -114,6 +114,9 @@
       `(%global-function ,name ,@(bind* x body))
     `(set ,name ,x)))
 
+(define-macro define-variable (name x)
+  `(init! ,name ,x))
+
 (define-macro with-frame body
   (let-unique (x)
     `(do (add environment (obj))
@@ -254,6 +257,15 @@
 
 (define-macro when-compiling body
   (eval `(do ,@body)))
+
+(define-macro undefined? (var)
+  (if (= target 'js)
+      `(%or (%eq (%type ,var) "undefined")
+            (%eq ,var null))
+    `(%eq ,var nil)))
+
+(define-macro init! (var val)
+  `(%if (undefined? ,var) (%set ,var ,val)))
 
 (define-macro do args
   `(%do ,@args))

@@ -1,5 +1,9 @@
-environment = {{}}
-target = "lua"
+if environment == nil then
+  environment = {{}}
+end
+if target == nil then
+  target = "lua"
+end
 function nil63(x)
   return(x == nil)
 end
@@ -815,6 +819,9 @@ setenv("define-global", {_stash = true, macro = function (name, x, ...)
     return({"set", _name, _x1})
   end
 end})
+setenv("define-variable", {_stash = true, macro = function (name, x)
+  return({"init!", name, x})
+end})
 setenv("with-frame", {_stash = true, macro = function (...)
   local body = unstash({...})
   local x = unique("x")
@@ -1046,6 +1053,16 @@ end})
 setenv("when-compiling", {_stash = true, macro = function (...)
   local body = unstash({...})
   return(eval(join({"do"}, body)))
+end})
+setenv("undefined?", {_stash = true, macro = function (_var)
+  if target == "js" then
+    return({"%or", {"%eq", {"%type", _var}, "\"undefined\""}, {"%eq", _var, "null"}})
+  else
+    return({"%eq", _var, "nil"})
+  end
+end})
+setenv("init!", {_stash = true, macro = function (_var, val)
+  return({"%if", {"undefined?", _var}, {"%set", _var, val}})
 end})
 setenv("do", {_stash = true, macro = function (...)
   local args = unstash({...})

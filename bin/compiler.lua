@@ -468,7 +468,9 @@ function expand_if(_x)
     end
   end
 end
-indent_level = 0
+if indent_level == nil then
+  indent_level = 0
+end
 function indentation()
   local s = ""
   local i = 0

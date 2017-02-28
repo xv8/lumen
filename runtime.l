@@ -1,5 +1,5 @@
-(define-global environment (list (obj)))
-(define-global target (language))
+(define-variable environment (list (obj)))
+(define-variable target (language))
 
 (define-global nil? (x)
   (target

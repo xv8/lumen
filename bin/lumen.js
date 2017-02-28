@@ -1,5 +1,9 @@
-environment = [{}];
-target = "js";
+if (typeof(environment) === "undefined" || environment === null) {
+  environment = [{}];
+}
+if (typeof(target) === "undefined" || target === null) {
+  target = "js";
+}
 nil63 = function (x) {
   return(x === undefined || x === null);
 };
@@ -934,6 +938,9 @@ setenv("define-global", {_stash: true, macro: function (name, x) {
     return(["set", _name, _x]);
   }
 }});
+setenv("define-variable", {_stash: true, macro: function (name, x) {
+  return(["init!", name, x]);
+}});
 setenv("with-frame", {_stash: true, macro: function () {
   var body = unstash(Array.prototype.slice.call(arguments, 0));
   var x = unique("x");
@@ -1179,6 +1186,16 @@ setenv("export", {_stash: true, macro: function () {
 setenv("when-compiling", {_stash: true, macro: function () {
   var body = unstash(Array.prototype.slice.call(arguments, 0));
   return(eval(join(["do"], body)));
+}});
+setenv("undefined?", {_stash: true, macro: function (_var) {
+  if (target === "js") {
+    return(["%or", ["%eq", ["%type", _var], "\"undefined\""], ["%eq", _var, "null"]]);
+  } else {
+    return(["%eq", _var, "nil"]);
+  }
+}});
+setenv("init!", {_stash: true, macro: function (_var, val) {
+  return(["%if", ["undefined?", _var], ["%set", _var, val]]);
 }});
 setenv("do", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));
