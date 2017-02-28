@@ -569,12 +569,12 @@ var __x10 = [];
 var _x11 = [];
 _x11.js = "&&";
 _x11.lua = "and";
-__x10["and"] = _x11;
+__x10["%and"] = _x11;
 var __x12 = [];
 var _x13 = [];
 _x13.js = "||";
 _x13.lua = "or";
-__x12["or"] = _x13;
+__x12["%or"] = _x13;
 var infix = [__x1, __x3, __x4, __x5, __x7, __x8, __x10, __x12];
 var unary63 = function (form) {
   return(two63(form) && in63(hd(form), ["not", "-"]));
@@ -976,7 +976,7 @@ var lower_short = function (x, args, hoist) {
   if (some63(hoist1)) {
     var _id1 = unique("id");
     var _e;
-    if (x === "and") {
+    if (x === "%and") {
       _e = ["%if", _id1, b, _id1];
     } else {
       _e = ["%if", _id1, _id1, b];
@@ -1122,7 +1122,7 @@ lower = function (form, hoist, stmt63, tail63) {
                         if (x === "%local-function" || x === "%global-function") {
                           return(lower_definition(x, args, hoist));
                         } else {
-                          if (in63(x, ["and", "or"])) {
+                          if (in63(x, ["%and", "%or"])) {
                             return(lower_short(x, args, hoist));
                           } else {
                             if (statement63(x)) {

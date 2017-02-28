@@ -513,12 +513,12 @@ local __x10 = {}
 local _x11 = {}
 _x11.js = "&&"
 _x11.lua = "and"
-__x10["and"] = _x11
+__x10["%and"] = _x11
 local __x12 = {}
 local _x13 = {}
 _x13.js = "||"
 _x13.lua = "or"
-__x12["or"] = _x13
+__x12["%or"] = _x13
 local infix = {__x1, __x3, __x4, __x5, __x7, __x8, __x10, __x12}
 local function unary63(form)
   return(two63(form) and in63(hd(form), {"not", "-"}))
@@ -915,7 +915,7 @@ local function lower_short(x, args, hoist)
   if some63(hoist1) then
     local _id1 = unique("id")
     local _e
-    if x == "and" then
+    if x == "%and" then
       _e = {"%if", _id1, b, _id1}
     else
       _e = {"%if", _id1, _id1, b}
@@ -1047,7 +1047,7 @@ function lower(form, hoist, stmt63, tail63)
                         if x == "%local-function" or x == "%global-function" then
                           return(lower_definition(x, args, hoist))
                         else
-                          if in63(x, {"and", "or"}) then
+                          if in63(x, {"%and", "%or"}) then
                             return(lower_short(x, args, hoist))
                           else
                             if statement63(x) then

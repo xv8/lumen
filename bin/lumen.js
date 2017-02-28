@@ -1157,6 +1157,14 @@ setenv("when-compiling", {_stash: true, macro: function () {
   var body = unstash(Array.prototype.slice.call(arguments, 0));
   return(eval(join(["do"], body)));
 }});
+setenv("and", {_stash: true, macro: function () {
+  var args = unstash(Array.prototype.slice.call(arguments, 0));
+  return(join(["%and"], args));
+}});
+setenv("or", {_stash: true, macro: function () {
+  var args = unstash(Array.prototype.slice.call(arguments, 0));
+  return(join(["%or"], args));
+}});
 var reader = require("reader");
 var compiler = require("compiler");
 var system = require("system");

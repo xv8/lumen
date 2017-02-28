@@ -239,3 +239,9 @@
 
 (define-macro when-compiling body
   (eval `(do ,@body)))
+
+(define-macro and args
+  `(%and ,@args))
+
+(define-macro or args
+  `(%or ,@args))
