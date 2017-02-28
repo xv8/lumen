@@ -138,6 +138,19 @@ local function map42(f, x)
     _i1 = _i1 + 1
   end
 end
+local function get37(id, lh, k)
+  if k == "rest" then
+    local ks = keys(lh)
+    ks.rest = nil
+    local _e
+    if not empty63(ks) then
+      _e = {"nil", {"quote", ks}}
+    end
+    return(join({"cut", id, _35(lh)}, _e))
+  else
+    return({"get", id, {"quote", bias(k)}})
+  end
+end
 function bind(lh, rh)
   if atom63(lh) then
     return({lh, rh})
@@ -145,21 +158,15 @@ function bind(lh, rh)
     local id = unique("id")
     local bs = {id, rh}
     map42(function (k, v)
-      local _e
-      if k == "rest" then
-        _e = {"cut", id, _35(lh)}
-      else
-        _e = {"get", id, {"quote", bias(k)}}
-      end
-      local x = _e
+      local x = get37(id, lh, k)
       if is63(k) then
-        local _e1
+        local _e
         if v == true then
-          _e1 = k
+          _e = k
         else
-          _e1 = v
+          _e = v
         end
-        local _k = _e1
+        local _k = _e
         bs = join(bs, bind(_k, x))
         return(bs)
       end

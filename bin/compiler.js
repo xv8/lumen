@@ -152,6 +152,19 @@ var map42 = function (f, x) {
     _i1 = _i1 + 1;
   }
 };
+var get37 = function (id, lh, k) {
+  if (k === "rest") {
+    var ks = keys(lh);
+    delete ks.rest;
+    var _e;
+    if (! empty63(ks)) {
+      _e = ["nil", ["quote", ks]];
+    }
+    return(join(["cut", id, _35(lh)], _e));
+  } else {
+    return(["get", id, ["quote", bias(k)]]);
+  }
+};
 bind = function (lh, rh) {
   if (atom63(lh)) {
     return([lh, rh]);
@@ -159,21 +172,15 @@ bind = function (lh, rh) {
     var id = unique("id");
     var bs = [id, rh];
     map42(function (k, v) {
-      var _e;
-      if (k === "rest") {
-        _e = ["cut", id, _35(lh)];
-      } else {
-        _e = ["get", id, ["quote", bias(k)]];
-      }
-      var x = _e;
+      var x = get37(id, lh, k);
       if (is63(k)) {
-        var _e1;
+        var _e;
         if (v === true) {
-          _e1 = k;
+          _e = k;
         } else {
-          _e1 = v;
+          _e = v;
         }
-        var _k = _e1;
+        var _k = _e;
         bs = join(bs, bind(_k, x));
         return(bs);
       }
