@@ -702,6 +702,10 @@ setenv("set", {_stash: true, macro: function () {
     return(["%set", lh, rh]);
   }, pair(args))));
 }});
+setenv("get", {_stash: true, macro: function () {
+  var args = unstash(Array.prototype.slice.call(arguments, 0));
+  return(join(["%get"], args));
+}});
 setenv("at", {_stash: true, macro: function (l, i) {
   if (target === "lua" && number63(i)) {
     i = i + 1;

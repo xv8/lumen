@@ -8,6 +8,9 @@
   `(do ,@(map (fn ((lh rh)) `(%set ,lh ,rh))
               (pair args))))
 
+(define-macro get args
+  `(%get ,@args))
+
 (define-macro at (l i)
   (if (and (= target 'lua) (number? i))
       (inc i)

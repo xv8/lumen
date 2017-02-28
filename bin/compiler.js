@@ -918,7 +918,7 @@ var literal63 = function (form) {
   return(atom63(form) || hd(form) === "%array" || hd(form) === "%object");
 };
 var standalone63 = function (form) {
-  return(! atom63(form) && ! infix63(hd(form)) && ! literal63(form) && !( "get" === hd(form)) || id_literal63(form));
+  return(! atom63(form) && ! infix63(hd(form)) && ! literal63(form) && !( "%get" === hd(form)) || id_literal63(form));
 };
 var lower_do = function (args, hoist, stmt63, tail63) {
   var _x = almost(args);
@@ -1336,7 +1336,7 @@ setenv("%set", {_stash: true, special: function (lh, rh) {
   var _rh = compile(_e);
   return(indentation() + _lh + " = " + _rh);
 }, stmt: true});
-setenv("get", {_stash: true, special: function (t, k) {
+setenv("%get", {_stash: true, special: function (t, k) {
   var _t = compile(t);
   var k1 = compile(k);
   if (target === "lua" && char(_t, 0) === "{") {

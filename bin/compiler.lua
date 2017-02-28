@@ -857,7 +857,7 @@ local function literal63(form)
   return(atom63(form) or hd(form) == "%array" or hd(form) == "%object")
 end
 local function standalone63(form)
-  return(not atom63(form) and not infix63(hd(form)) and not literal63(form) and not( "get" == hd(form)) or id_literal63(form))
+  return(not atom63(form) and not infix63(hd(form)) and not literal63(form) and not( "%get" == hd(form)) or id_literal63(form))
 end
 local function lower_do(args, hoist, stmt63, tail63)
   local _x = almost(args)
@@ -1268,7 +1268,7 @@ setenv("%set", {_stash = true, special = function (lh, rh)
   local _rh = compile(_e)
   return(indentation() .. _lh .. " = " .. _rh)
 end, stmt = true})
-setenv("get", {_stash = true, special = function (t, k)
+setenv("%get", {_stash = true, special = function (t, k)
   local _t = compile(t)
   local k1 = compile(k)
   if target == "lua" and char(_t, 0) == "{" then

@@ -458,7 +458,7 @@
   (or (and (not (atom? form))
            (not (infix? (hd form)))
            (not (literal? form))
-           (not (= 'get (hd form))))
+           (not (= '%get (hd form))))
       (id-literal? form)))
 
 (define lower-do (args hoist stmt? tail?)
@@ -701,7 +701,7 @@
         rh (compile (if (nil? rh) 'nil rh)))
     (cat (indentation) lh " = " rh)))
 
-(define-special get (t k)
+(define-special %get (t k)
   (let (t (compile t)
         k1 (compile k))
     (when (and (= target 'lua)

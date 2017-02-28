@@ -597,6 +597,10 @@ setenv("set", {_stash = true, macro = function (...)
     return({"%set", lh, rh})
   end, pair(args))))
 end})
+setenv("get", {_stash = true, macro = function (...)
+  local args = unstash({...})
+  return(join({"%get"}, args))
+end})
 setenv("at", {_stash = true, macro = function (l, i)
   if target == "lua" and number63(i) then
     i = i + 1
