@@ -898,13 +898,13 @@ var lower_statement = function (form, tail63) {
   var hoist = [];
   var e = lower(form, hoist, true, tail63);
   if (some63(hoist) && is63(e)) {
-    return(join(["do"], hoist, [e]));
+    return(join(["%do"], hoist, [e]));
   } else {
     if (is63(e)) {
       return(e);
     } else {
       if (_35(hoist) > 1) {
-        return(join(["do"], hoist));
+        return(join(["%do"], hoist));
       } else {
         return(hd(hoist));
       }
@@ -912,7 +912,7 @@ var lower_statement = function (form, tail63) {
   }
 };
 var lower_body = function (body, tail63) {
-  return(lower_statement(join(["do"], body), tail63));
+  return(lower_statement(join(["%do"], body), tail63));
 };
 var literal63 = function (form) {
   return(atom63(form) || hd(form) === "%array" || hd(form) === "%object");
@@ -986,7 +986,7 @@ var lower_short = function (x, args, hoist) {
     } else {
       _e = ["%if", _id1, _id1, b];
     }
-    return(lower(["do", ["%local", _id1, a], _e], hoist));
+    return(lower(["%do", ["%local", _id1, a], _e], hoist));
   } else {
     return([x, lower(a, hoist), b1]);
   }
@@ -1004,7 +1004,7 @@ var lower_while = function (args, hoist) {
   if (none63(pre)) {
     _e = ["while", _c, lower_body(body)];
   } else {
-    _e = ["while", true, join(["do"], pre, [["%if", ["not", _c], ["break"]], lower_body(body)])];
+    _e = ["while", true, join(["%do"], pre, [["%if", ["not", _c], ["break"]], lower_body(body)])];
   }
   return(add(hoist, _e));
 };
@@ -1103,7 +1103,7 @@ lower = function (form, hoist, stmt63, tail63) {
           var _id = form;
           var x = _id[0];
           var args = cut(_id, 1);
-          if (x === "do") {
+          if (x === "%do") {
             return(lower_do(args, hoist, stmt63, tail63));
           } else {
             if (x === "%set") {
@@ -1163,7 +1163,7 @@ eval = function (form) {
   run(code);
   return(_37result);
 };
-setenv("do", {_stash: true, special: function () {
+setenv("%do", {_stash: true, special: function () {
   var forms = unstash(Array.prototype.slice.call(arguments, 0));
   var s = "";
   var _x = forms;

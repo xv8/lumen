@@ -1157,6 +1157,10 @@ setenv("when-compiling", {_stash: true, macro: function () {
   var body = unstash(Array.prototype.slice.call(arguments, 0));
   return(eval(join(["do"], body)));
 }});
+setenv("do", {_stash: true, macro: function () {
+  var args = unstash(Array.prototype.slice.call(arguments, 0));
+  return(join(["%do"], args));
+}});
 setenv("not", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));
   return(join(["%not"], args));

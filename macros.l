@@ -240,6 +240,9 @@
 (define-macro when-compiling body
   (eval `(do ,@body)))
 
+(define-macro do args
+  `(%do ,@args))
+
 (define-macro not args
   `(%not ,@args))
 

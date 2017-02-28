@@ -837,13 +837,13 @@ local function lower_statement(form, tail63)
   local hoist = {}
   local e = lower(form, hoist, true, tail63)
   if some63(hoist) and is63(e) then
-    return(join({"do"}, hoist, {e}))
+    return(join({"%do"}, hoist, {e}))
   else
     if is63(e) then
       return(e)
     else
       if _35(hoist) > 1 then
-        return(join({"do"}, hoist))
+        return(join({"%do"}, hoist))
       else
         return(hd(hoist))
       end
@@ -851,7 +851,7 @@ local function lower_statement(form, tail63)
   end
 end
 local function lower_body(body, tail63)
-  return(lower_statement(join({"do"}, body), tail63))
+  return(lower_statement(join({"%do"}, body), tail63))
 end
 local function literal63(form)
   return(atom63(form) or hd(form) == "%array" or hd(form) == "%object")
@@ -925,7 +925,7 @@ local function lower_short(x, args, hoist)
     else
       _e = {"%if", _id1, _id1, b}
     end
-    return(lower({"do", {"%local", _id1, a}, _e}, hoist))
+    return(lower({"%do", {"%local", _id1, a}, _e}, hoist))
   else
     return({x, lower(a, hoist), b1})
   end
@@ -943,7 +943,7 @@ local function lower_while(args, hoist)
   if none63(pre) then
     _e = {"while", _c, lower_body(body)}
   else
-    _e = {"while", true, join({"do"}, pre, {{"%if", {"not", _c}, {"break"}}, lower_body(body)})}
+    _e = {"while", true, join({"%do"}, pre, {{"%if", {"not", _c}, {"break"}}, lower_body(body)})}
   end
   return(add(hoist, _e))
 end
@@ -1028,7 +1028,7 @@ function lower(form, hoist, stmt63, tail63)
           local _id = form
           local x = _id[1]
           local args = cut(_id, 1)
-          if x == "do" then
+          if x == "%do" then
             return(lower_do(args, hoist, stmt63, tail63))
           else
             if x == "%set" then
@@ -1095,7 +1095,7 @@ function eval(form)
   run(code)
   return(_37result)
 end
-setenv("do", {_stash = true, special = function (...)
+setenv("%do", {_stash = true, special = function (...)
   local forms = unstash({...})
   local s = ""
   local _x1 = forms

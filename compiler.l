@@ -441,13 +441,13 @@
 (define lower-statement (form tail?)
   (let (hoist () e (lower form hoist true tail?))
     (if (and (some? hoist) (is? e))
-        `(do ,@hoist ,e)
+        `(%do ,@hoist ,e)
         (is? e) e
-        (> (# hoist) 1) `(do ,@hoist)
+        (> (# hoist) 1) `(%do ,@hoist)
       (hd hoist))))
 
 (define lower-body (body tail?)
-  (lower-statement `(do ,@body) tail?))
+  (lower-statement `(%do ,@body) tail?))
 
 (define literal? (form)
   (or (atom? form)
@@ -499,10 +499,10 @@
         b1 (lower b hoist1))
     (if (some? hoist1)
         (let-unique (id)
-          (lower `(do (%local ,id ,a)
-                      ,(if (= x '%and)
-                           `(%if ,id ,b ,id)
-                         `(%if ,id ,id ,b)))
+          (lower `(%do (%local ,id ,a)
+                       ,(if (= x '%and)
+                            `(%if ,id ,b ,id)
+                          `(%if ,id ,id ,b)))
                  hoist))
       `(,x ,(lower a hoist) ,b1))))
 
@@ -518,9 +518,9 @@
           `(while ,c
             ,(lower-body body))
         `(while true
-           (do ,@pre
-               (%if (not ,c) (break))
-               ,(lower-body body)))))))
+           (%do ,@pre
+                (%if (not ,c) (break))
+                ,(lower-body body)))))))
 
 (define lower-for (args hoist)
   (let ((t k rest: body) args)
@@ -562,7 +562,7 @@
       (nil? hoist) (lower-statement form)
       (lower-infix? form) (lower-infix form hoist)
     (let ((x rest: args) form)
-      (if (= x 'do) (lower-do args hoist stmt? tail?)
+      (if (= x '%do) (lower-do args hoist stmt? tail?)
           (= x '%set) (lower-set args hoist stmt? tail?)
           (= x '%if) (lower-if args hoist stmt? tail?)
           (= x '%try) (lower-try args hoist tail?)
@@ -599,7 +599,7 @@
       (run code)
       %result)))
 
-(define-special do forms :stmt :tr
+(define-special %do forms :stmt :tr
   (with s ""
     (step x forms
       (cat! s (compile x :stmt))
