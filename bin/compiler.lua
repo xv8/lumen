@@ -138,6 +138,35 @@ local function map42(f, x)
     _i1 = _i1 + 1
   end
 end
+local function ontree(f, l, ...)
+  local _rest = unstash({...})
+  local _f = destash33(f, _rest)
+  local _l = destash33(l, _rest)
+  local skip = _rest.skip
+  _rest.skip = nil
+  if not( skip and skip(_l)) then
+    local y = _f(_l)
+    if y then
+      return(y)
+    end
+    if not atom63(_l) then
+      local _o = _l
+      local _i = nil
+      for _i in next, _o do
+        local x = _o[_i]
+        local _y = ontree(_f, x, {_stash = true, skip = skip})
+        if _y then
+          return(_y)
+        end
+      end
+    end
+  end
+end
+local function simple63(lh, rh)
+  return(atom63(rh) and not ontree(function (x)
+    return(x == rh)
+  end, lh))
+end
 local function get37(id, lh, k)
   if k == "rest" then
     local ks = keys(lh)
@@ -156,7 +185,12 @@ function bind(lh, rh)
     return({lh, rh})
   else
     local id = unique("id")
-    local bs = {id, rh}
+    local r = macroexpand(rh)
+    local bs = {id, r}
+    if simple63(lh, r) then
+      bs = {}
+      id = r
+    end
     map42(function (k, v)
       local x = get37(id, lh, k)
       if is63(k) then
@@ -247,17 +281,15 @@ local function quasisplice63(x, depth)
   return(can_unquote63(depth) and not atom63(x) and hd(x) == "unquote-splicing")
 end
 local function expand_local(_x)
-  local _id = _x
-  local x = _id[1]
-  local name = _id[2]
-  local value = _id[3]
+  local x = _x[1]
+  local name = _x[2]
+  local value = _x[3]
   return({"%local", name, macroexpand(value)})
 end
 local function expand_function(_x)
-  local _id = _x
-  local x = _id[1]
-  local args = _id[2]
-  local body = cut(_id, 2)
+  local x = _x[1]
+  local args = _x[2]
+  local body = cut(_x, 2)
   add(environment, {})
   local _o = args
   local _i = nil
@@ -271,11 +303,10 @@ local function expand_function(_x)
   return(_x1)
 end
 local function expand_definition(_x)
-  local _id = _x
-  local x = _id[1]
-  local name = _id[2]
-  local args = _id[3]
-  local body = cut(_id, 3)
+  local x = _x[1]
+  local name = _x[2]
+  local args = _x[3]
+  local body = cut(_x, 3)
   add(environment, {})
   local _o = args
   local _i = nil
@@ -313,9 +344,8 @@ local function expand_form(form)
   end
 end
 function expand1(_x)
-  local _id = _x
-  local name = _id[1]
-  local body = cut(_id, 1)
+  local name = _x[1]
+  local body = cut(_x, 1)
   return(apply(macro_function(name), body))
 end
 function macroexpand(form)
@@ -427,10 +457,9 @@ function quasiexpand(form, depth)
   end
 end
 function expand_if(_x)
-  local _id = _x
-  local a = _id[1]
-  local b = _id[2]
-  local c = cut(_id, 2)
+  local a = _x[1]
+  local b = _x[2]
+  local c = cut(_x, 2)
   if is63(b) then
     return({join({"%if", a, b}, expand_if(c))})
   else
@@ -703,9 +732,8 @@ local function terminator(stmt63)
   end
 end
 local function compile_special(form, stmt63)
-  local _id = form
-  local x = _id[1]
-  local args = cut(_id, 1)
+  local x = form[1]
+  local args = cut(form, 1)
   local _id1 = getenv(x)
   local special = _id1.special
   local stmt = _id1.stmt
@@ -730,8 +758,7 @@ local function op_delims(parent, child, ...)
   local _rest = unstash({...})
   local _parent = destash33(parent, _rest)
   local _child = destash33(child, _rest)
-  local _id = _rest
-  local right = _id.right
+  local right = _rest.right
   _rest.right = nil
   local _e
   if right then
@@ -746,9 +773,8 @@ local function op_delims(parent, child, ...)
   end
 end
 local function compile_infix(form)
-  local _id = form
-  local op = _id[1]
-  local _id1 = cut(_id, 1)
+  local op = form[1]
+  local _id1 = cut(form, 1)
   local a = _id1[1]
   local b = _id1[2]
   local _id2 = op_delims(form, a)
@@ -770,9 +796,8 @@ function compile_function(args, body, ...)
   local _rest = unstash({...})
   local _args = destash33(args, _rest)
   local _body = destash33(body, _rest)
-  local _id = _rest
-  local name = _id.name
-  local prefix = _id.prefix
+  local name = _rest.name
+  local prefix = _rest.prefix
   _rest.name = nil
   _rest.prefix = nil
   local _e
@@ -817,8 +842,7 @@ end
 function compile(form, ...)
   local _rest = unstash({...})
   local _form = destash33(form, _rest)
-  local _id = _rest
-  local stmt = _id.stmt
+  local stmt = _rest.stmt
   _rest.stmt = nil
   if nil63(_form) then
     return("")
@@ -899,19 +923,17 @@ local function lower_do(args, hoist, stmt63, tail63)
   end
 end
 local function lower_set(args, hoist, stmt63, tail63)
-  local _id = args
-  local lh = _id[1]
-  local rh = _id[2]
+  local lh = args[1]
+  local rh = args[2]
   add(hoist, {"%set", lh, lower(rh, hoist)})
   if not( stmt63 and not tail63) then
     return(lh)
   end
 end
 local function lower_if(args, hoist, stmt63, tail63)
-  local _id = args
-  local cond = _id[1]
-  local _then = _id[2]
-  local _else = _id[3]
+  local cond = args[1]
+  local _then = args[2]
+  local _else = args[3]
   if stmt63 then
     local _e1
     if is63(_else) then
@@ -930,9 +952,8 @@ local function lower_if(args, hoist, stmt63, tail63)
   end
 end
 local function lower_short(x, args, hoist)
-  local _id = args
-  local a = _id[1]
-  local b = _id[2]
+  local a = args[1]
+  local b = args[2]
   local hoist1 = {}
   local b1 = lower(b, hoist1)
   if some63(hoist1) then
@@ -952,9 +973,8 @@ local function lower_try(args, hoist, tail63)
   return(add(hoist, {"%try", lower_body(args, tail63)}))
 end
 local function lower_while(args, hoist)
-  local _id = args
-  local c = _id[1]
-  local body = cut(_id, 1)
+  local c = args[1]
+  local body = cut(args, 1)
   local pre = {}
   local _c = lower(c, pre)
   local _e
@@ -966,16 +986,14 @@ local function lower_while(args, hoist)
   return(add(hoist, _e))
 end
 local function lower_for(args, hoist)
-  local _id = args
-  local t = _id[1]
-  local k = _id[2]
-  local body = cut(_id, 2)
+  local t = args[1]
+  local k = args[2]
+  local body = cut(args, 2)
   return(add(hoist, {"%for", lower(t, hoist), k, lower_body(body)}))
 end
 local function lower_function(args)
-  local _id = args
-  local a = _id[1]
-  local body = cut(_id, 1)
+  local a = args[1]
+  local body = cut(args, 1)
   add(environment, {})
   local _o = a
   local _i = nil
@@ -1017,9 +1035,8 @@ local function lower_infix63(form)
   return(infix63(hd(form)) and _35(form) > 3)
 end
 local function lower_infix(form, hoist)
-  local _id = form
-  local x = _id[1]
-  local args = cut(_id, 1)
+  local x = form[1]
+  local args = cut(form, 1)
   return(lower(reduce(function (a, b)
     return({x, b, a})
   end, reverse(args)), hoist))
@@ -1043,9 +1060,8 @@ function lower(form, hoist, stmt63, tail63)
         if lower_infix63(form) then
           return(lower_infix(form, hoist))
         else
-          local _id = form
-          local x = _id[1]
-          local args = cut(_id, 1)
+          local x = form[1]
+          local args = cut(form, 1)
           if x == "%do" then
             return(lower_do(args, hoist, stmt63, tail63))
           else
@@ -1339,10 +1355,8 @@ setenv("%object", {_stash = true, special = function (...)
   end
   local sep = _e
   local _o = sort(pair(forms), function (_x, _x1)
-    local _id = _x
-    local a = _id[1]
-    local _id1 = _x1
-    local b = _id1[1]
+    local a = _x[1]
+    local b = _x1[1]
     return(a < b)
   end)
   local k = nil

@@ -152,6 +152,42 @@ var map42 = function (f, x) {
     _i1 = _i1 + 1;
   }
 };
+var ontree = function (f, l) {
+  var _rest = unstash(Array.prototype.slice.call(arguments, 2));
+  var _f = destash33(f, _rest);
+  var _l = destash33(l, _rest);
+  var skip = _rest.skip;
+  delete _rest.skip;
+  if (!( skip && skip(_l))) {
+    var y = _f(_l);
+    if (y) {
+      return(y);
+    }
+    if (! atom63(_l)) {
+      var _o = _l;
+      var _i = undefined;
+      for (_i in _o) {
+        var x = _o[_i];
+        var _e;
+        if (numeric63(_i)) {
+          _e = parseInt(_i);
+        } else {
+          _e = _i;
+        }
+        var __i = _e;
+        var _y = ontree(_f, x, {_stash: true, skip: skip});
+        if (_y) {
+          return(_y);
+        }
+      }
+    }
+  }
+};
+var simple63 = function (lh, rh) {
+  return(atom63(rh) && ! ontree(function (x) {
+    return(x === rh);
+  }, lh));
+};
 var get37 = function (id, lh, k) {
   if (k === "rest") {
     var ks = keys(lh);
@@ -170,7 +206,12 @@ bind = function (lh, rh) {
     return([lh, rh]);
   } else {
     var id = unique("id");
-    var bs = [id, rh];
+    var r = macroexpand(rh);
+    var bs = [id, r];
+    if (simple63(lh, r)) {
+      bs = [];
+      id = r;
+    }
     map42(function (k, v) {
       var x = get37(id, lh, k);
       if (is63(k)) {
@@ -268,17 +309,15 @@ var quasisplice63 = function (x, depth) {
   return(can_unquote63(depth) && ! atom63(x) && hd(x) === "unquote-splicing");
 };
 var expand_local = function (_x) {
-  var _id = _x;
-  var x = _id[0];
-  var name = _id[1];
-  var value = _id[2];
+  var x = _x[0];
+  var name = _x[1];
+  var value = _x[2];
   return(["%local", name, macroexpand(value)]);
 };
 var expand_function = function (_x) {
-  var _id = _x;
-  var x = _id[0];
-  var args = _id[1];
-  var body = cut(_id, 2);
+  var x = _x[0];
+  var args = _x[1];
+  var body = cut(_x, 2);
   add(environment, {});
   var _o = args;
   var _i = undefined;
@@ -299,11 +338,10 @@ var expand_function = function (_x) {
   return(_x1);
 };
 var expand_definition = function (_x) {
-  var _id = _x;
-  var x = _id[0];
-  var name = _id[1];
-  var args = _id[2];
-  var body = cut(_id, 3);
+  var x = _x[0];
+  var name = _x[1];
+  var args = _x[2];
+  var body = cut(_x, 3);
   add(environment, {});
   var _o = args;
   var _i = undefined;
@@ -355,9 +393,8 @@ var expand_form = function (form) {
   }
 };
 expand1 = function (_x) {
-  var _id = _x;
-  var name = _id[0];
-  var body = cut(_id, 1);
+  var name = _x[0];
+  var body = cut(_x, 1);
   return(apply(macro_function(name), body));
 };
 macroexpand = function (form) {
@@ -476,10 +513,9 @@ quasiexpand = function (form, depth) {
   }
 };
 expand_if = function (_x) {
-  var _id = _x;
-  var a = _id[0];
-  var b = _id[1];
-  var c = cut(_id, 2);
+  var a = _x[0];
+  var b = _x[1];
+  var c = cut(_x, 2);
   if (is63(b)) {
     return([join(["%if", a, b], expand_if(c))]);
   } else {
@@ -764,9 +800,8 @@ var terminator = function (stmt63) {
   }
 };
 var compile_special = function (form, stmt63) {
-  var _id = form;
-  var x = _id[0];
-  var args = cut(_id, 1);
+  var x = form[0];
+  var args = cut(form, 1);
   var _id1 = getenv(x);
   var special = _id1.special;
   var stmt = _id1.stmt;
@@ -791,8 +826,7 @@ var op_delims = function (parent, child) {
   var _rest = unstash(Array.prototype.slice.call(arguments, 2));
   var _parent = destash33(parent, _rest);
   var _child = destash33(child, _rest);
-  var _id = _rest;
-  var right = _id.right;
+  var right = _rest.right;
   delete _rest.right;
   var _e;
   if (right) {
@@ -807,9 +841,8 @@ var op_delims = function (parent, child) {
   }
 };
 var compile_infix = function (form) {
-  var _id = form;
-  var op = _id[0];
-  var _id1 = cut(_id, 1);
+  var op = form[0];
+  var _id1 = cut(form, 1);
   var a = _id1[0];
   var b = _id1[1];
   var _id2 = op_delims(form, a);
@@ -831,9 +864,8 @@ compile_function = function (args, body) {
   var _rest = unstash(Array.prototype.slice.call(arguments, 2));
   var _args = destash33(args, _rest);
   var _body = destash33(body, _rest);
-  var _id = _rest;
-  var name = _id.name;
-  var prefix = _id.prefix;
+  var name = _rest.name;
+  var prefix = _rest.prefix;
   delete _rest.name;
   delete _rest.prefix;
   var _e;
@@ -878,8 +910,7 @@ var can_return63 = function (form) {
 compile = function (form) {
   var _rest = unstash(Array.prototype.slice.call(arguments, 1));
   var _form = destash33(form, _rest);
-  var _id = _rest;
-  var stmt = _id.stmt;
+  var stmt = _rest.stmt;
   delete _rest.stmt;
   if (nil63(_form)) {
     return("");
@@ -960,19 +991,17 @@ var lower_do = function (args, hoist, stmt63, tail63) {
   }
 };
 var lower_set = function (args, hoist, stmt63, tail63) {
-  var _id = args;
-  var lh = _id[0];
-  var rh = _id[1];
+  var lh = args[0];
+  var rh = args[1];
   add(hoist, ["%set", lh, lower(rh, hoist)]);
   if (!( stmt63 && ! tail63)) {
     return(lh);
   }
 };
 var lower_if = function (args, hoist, stmt63, tail63) {
-  var _id = args;
-  var cond = _id[0];
-  var _then = _id[1];
-  var _else = _id[2];
+  var cond = args[0];
+  var _then = args[1];
+  var _else = args[2];
   if (stmt63) {
     var _e1;
     if (is63(_else)) {
@@ -991,9 +1020,8 @@ var lower_if = function (args, hoist, stmt63, tail63) {
   }
 };
 var lower_short = function (x, args, hoist) {
-  var _id = args;
-  var a = _id[0];
-  var b = _id[1];
+  var a = args[0];
+  var b = args[1];
   var hoist1 = [];
   var b1 = lower(b, hoist1);
   if (some63(hoist1)) {
@@ -1013,9 +1041,8 @@ var lower_try = function (args, hoist, tail63) {
   return(add(hoist, ["%try", lower_body(args, tail63)]));
 };
 var lower_while = function (args, hoist) {
-  var _id = args;
-  var c = _id[0];
-  var body = cut(_id, 1);
+  var c = args[0];
+  var body = cut(args, 1);
   var pre = [];
   var _c = lower(c, pre);
   var _e;
@@ -1027,16 +1054,14 @@ var lower_while = function (args, hoist) {
   return(add(hoist, _e));
 };
 var lower_for = function (args, hoist) {
-  var _id = args;
-  var t = _id[0];
-  var k = _id[1];
-  var body = cut(_id, 2);
+  var t = args[0];
+  var k = args[1];
+  var body = cut(args, 2);
   return(add(hoist, ["%for", lower(t, hoist), k, lower_body(body)]));
 };
 var lower_function = function (args) {
-  var _id = args;
-  var a = _id[0];
-  var body = cut(_id, 1);
+  var a = args[0];
+  var body = cut(args, 1);
   add(environment, {});
   var _o = a;
   var _i = undefined;
@@ -1092,9 +1117,8 @@ var lower_infix63 = function (form) {
   return(infix63(hd(form)) && _35(form) > 3);
 };
 var lower_infix = function (form, hoist) {
-  var _id = form;
-  var x = _id[0];
-  var args = cut(_id, 1);
+  var x = form[0];
+  var args = cut(form, 1);
   return(lower(reduce(function (a, b) {
     return([x, b, a]);
   }, reverse(args)), hoist));
@@ -1118,9 +1142,8 @@ lower = function (form, hoist, stmt63, tail63) {
         if (lower_infix63(form)) {
           return(lower_infix(form, hoist));
         } else {
-          var _id = form;
-          var x = _id[0];
-          var args = cut(_id, 1);
+          var x = form[0];
+          var args = cut(form, 1);
           if (x === "%do") {
             return(lower_do(args, hoist, stmt63, tail63));
           } else {
@@ -1414,10 +1437,8 @@ setenv("%object", {_stash: true, special: function () {
   }
   var sep = _e;
   var _o = sort(pair(forms), function (_x, _x1) {
-    var _id = _x;
-    var a = _id[0];
-    var _id1 = _x1;
-    var b = _id1[0];
+    var a = _x[0];
+    var b = _x1[0];
     return(a < b);
   });
   var k = undefined;
