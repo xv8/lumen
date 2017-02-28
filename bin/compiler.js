@@ -1257,7 +1257,7 @@ setenv("%try", {_stash: true, special: function (form) {
 setenv("%delete", {_stash: true, special: function (place) {
   return(indentation() + "delete " + compile(place));
 }, stmt: true});
-setenv("break", {_stash: true, special: function () {
+setenv("%break", {_stash: true, special: function () {
   return(indentation() + "break");
 }, stmt: true});
 setenv("%function", {_stash: true, special: function (args, body) {

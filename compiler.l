@@ -652,7 +652,7 @@
 (define-special %delete (place) :stmt
   (cat (indentation) "delete " (compile place)))
 
-(define-special break () :stmt
+(define-special %break () :stmt
   (cat (indentation) "break"))
 
 (define-special %function (args body)
