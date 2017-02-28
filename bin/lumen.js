@@ -62,6 +62,9 @@ inf63 = function (n) {
 clip = function (s, from, upto) {
   return(s.substring(from, upto));
 };
+has63 = function (l, k) {
+  return(l.hasOwnProperty(k));
+};
 cut = function (x, from, upto) {
   var l = [];
   var j = 0;

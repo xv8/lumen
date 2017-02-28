@@ -59,6 +59,9 @@ end
 function clip(s, from, upto)
   return(string.sub(s, from + 1, upto))
 end
+function has63(l, k)
+  return(is63(l[k]))
+end
 function cut(x, from, upto)
   local l = {}
   local j = 0

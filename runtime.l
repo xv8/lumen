@@ -48,6 +48,11 @@
   (target js: ((get s 'substring) from upto)
           lua: ((get string 'sub) s (+ from 1) upto)))
 
+(define-global has? (l k)
+  (target
+    lua: (is? (get l k))
+    js: ((get l 'hasOwnProperty) k)))
+
 (define-global cut (x from upto)
   (with l ()
     (let (j 0
