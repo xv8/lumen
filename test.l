@@ -994,7 +994,16 @@ c"
     (test= 17 (apply (fn a (get a 'foo)) t)))
   (test= 42 (apply (fn (:foo) foo) (list foo: 42)))
   (test= 42 (apply (fn ((:foo)) foo) (list (list foo: 42))))
-  (test= 116 (apply + 1 5 '(100 10))))
+  (test= 116 (apply + 1 5 '(100 10)))
+  (test= 3 (apply (fn (a :b) (+ a b)) (list 1 b: 2)))
+  (test= 4 (apply (fn (a :b) (+ a b)) (list 1 b: 2) b: 3))
+  (test= 4 (apply (fn (a :b) (+ a b)) 1 (list b: 2) b: 3))
+  (test= 4 (apply (fn (a :b) (+ a b)) 1 (list) b: 3))
+  (let (l '(b: 2) f (fn args args))
+    (test= '(1 b: 2) (apply f 1 l))
+    (test= '(1 b: 3) (apply f 1 l b: 3))
+    (test= '(1 2 b: 3) (apply f 1 l b: 3 rest: '(2)))
+    (test= '(1 2 b: 3) (apply f 1 l rest: '(2 b: 3)))))
 
 (define-test eval
   (let eval (get compiler 'eval)
