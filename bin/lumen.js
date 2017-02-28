@@ -1019,16 +1019,42 @@ setenv("fn", {_stash: true, macro: function (args) {
   var body = cut(_id, 0);
   return(join(["%function"], bind42(_args, body)));
 }});
-setenv("apply", {_stash: true, macro: function (f) {
-  var _rest = unstash(Array.prototype.slice.call(arguments, 1));
-  var _f = destash33(f, _rest);
-  var _id = _rest;
-  var args = cut(_id, 0);
+setenv("apply", {_stash: true, macro: function () {
+  var args = unstash(Array.prototype.slice.call(arguments, 0));
+  var f = hd(args);
+  var ks = keys(args);
+  var x1 = cut(args, 1, edge(args), ks);
+  var _e;
   if (_35(args) > 1) {
-    return([["do", "apply"], _f, ["join", join(["list"], almost(args)), last(args)]]);
-  } else {
-    return(join([["do", "apply"], _f], args));
+    _e = last(args);
   }
+  var x2 = _e;
+  var e = [];
+  if (! empty63(x1)) {
+    add(e, join(["list"], x1));
+  }
+  if (has63(ks, "rest")) {
+    if (is63(x2)) {
+      add(e, x2);
+    }
+    add(e, ks.rest);
+    delete ks.rest;
+  } else {
+    if (is63(x2)) {
+      add(e, x2);
+    }
+  }
+  if (! empty63(ks)) {
+    add(e, join(["list"], ks));
+  }
+  var _e1;
+  if (_35(e) > 1) {
+    _e1 = join(["join"], e);
+  } else {
+    _e1 = hd(e);
+  }
+  var args1 = _e1;
+  return([["do", "apply"], f, args1]);
 }});
 setenv("guard", {_stash: true, macro: function (expr) {
   if (target === "js") {

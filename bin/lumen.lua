@@ -900,16 +900,42 @@ setenv("fn", {_stash = true, macro = function (args, ...)
   local body = cut(_id, 0)
   return(join({"%function"}, bind42(_args, body)))
 end})
-setenv("apply", {_stash = true, macro = function (f, ...)
-  local _rest = unstash({...})
-  local _f = destash33(f, _rest)
-  local _id = _rest
-  local args = cut(_id, 0)
+setenv("apply", {_stash = true, macro = function (...)
+  local args = unstash({...})
+  local f = hd(args)
+  local ks = keys(args)
+  local x1 = cut(args, 1, edge(args), ks)
+  local _e
   if _35(args) > 1 then
-    return({{"do", "apply"}, _f, {"join", join({"list"}, almost(args)), last(args)}})
-  else
-    return(join({{"do", "apply"}, _f}, args))
+    _e = last(args)
   end
+  local x2 = _e
+  local e = {}
+  if not empty63(x1) then
+    add(e, join({"list"}, x1))
+  end
+  if has63(ks, "rest") then
+    if is63(x2) then
+      add(e, x2)
+    end
+    add(e, ks.rest)
+    ks.rest = nil
+  else
+    if is63(x2) then
+      add(e, x2)
+    end
+  end
+  if not empty63(ks) then
+    add(e, join({"list"}, ks))
+  end
+  local _e1
+  if _35(e) > 1 then
+    _e1 = join({"join"}, e)
+  else
+    _e1 = hd(e)
+  end
+  local args1 = _e1
+  return({{"do", "apply"}, f, args1})
 end})
 setenv("guard", {_stash = true, macro = function (expr)
   if target == "js" then
