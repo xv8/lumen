@@ -856,7 +856,7 @@ compile_function = function (args, body) {
   }
 };
 var can_return63 = function (form) {
-  return(is63(form) && (atom63(form) || !( hd(form) === "return") && ! statement63(hd(form))));
+  return(is63(form) && (atom63(form) || !( hd(form) === "%return") && ! statement63(hd(form))));
 };
 compile = function (form) {
   var _rest = unstash(Array.prototype.slice.call(arguments, 1));
@@ -936,7 +936,7 @@ var lower_do = function (args, hoist, stmt63, tail63) {
   }
   var e = lower(last(args), hoist, stmt63, tail63);
   if (tail63 && can_return63(e)) {
-    return(["return", e]);
+    return(["%return", e]);
   } else {
     return(e);
   }
@@ -1172,7 +1172,7 @@ setenv("%do", {_stash: true, special: function () {
     var x = _x[_i];
     s = s + compile(x, {_stash: true, stmt: true});
     if (! atom63(x)) {
-      if (hd(x) === "return" || hd(x) === "break") {
+      if (hd(x) === "%return" || hd(x) === "%break") {
         break;
       }
     }
@@ -1247,7 +1247,7 @@ setenv("%try", {_stash: true, special: function (form) {
   var _x = compile(form, {_stash: true, stmt: true});
   indent_level = indent_level - 1;
   var body = _x;
-  var hf = ["return", ["%array", false, e]];
+  var hf = ["%return", ["%array", false, e]];
   indent_level = indent_level + 1;
   var _x3 = compile(hf, {_stash: true, stmt: true});
   indent_level = indent_level - 1;
@@ -1279,7 +1279,7 @@ setenv("%local-function", {_stash: true, special: function (name, args, body) {
     return(compile(["%local", name, ["%function", args, body]], {_stash: true, stmt: true}));
   }
 }, stmt: true, tr: true});
-setenv("return", {_stash: true, special: function (x) {
+setenv("%return", {_stash: true, special: function (x) {
   var _e;
   if (nil63(x)) {
     _e = "return";

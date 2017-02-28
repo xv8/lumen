@@ -252,6 +252,9 @@
 (define-macro break args
   `(%break ,@args))
 
+(define-macro return args
+  `(%return ,@args))
+
 (define-macro not args
   `(%not ,@args))
 

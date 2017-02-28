@@ -424,7 +424,7 @@
 (define can-return? (form)
   (and (is? form)
        (or (atom? form)
-           (and (not (= (hd form) 'return))
+           (and (not (= (hd form) '%return))
                 (not (statement? (hd form)))))))
 
 (define-global compile (form :stmt)
@@ -468,7 +468,7 @@
         (add hoist e))))
   (let e (lower (last args) hoist stmt? tail?)
     (if (and tail? (can-return? e))
-        `(return ,e)
+        `(%return ,e)
       e)))
 
 (define lower-set (args hoist stmt? tail?)
@@ -604,8 +604,8 @@
     (step x forms
       (cat! s (compile x :stmt))
       (unless (atom? x)
-        (if (or (= (hd x) 'return)
-                (= (hd x) 'break))
+        (if (or (= (hd x) '%return)
+                (= (hd x) '%break))
             (break))))))
 
 (define-special %if (cond cons alt) :stmt :tr
@@ -644,7 +644,7 @@
   (let-unique (e)
     (let (ind (indentation)
           body (with-indent (compile form :stmt))
-          hf `(return (%array false ,e))
+          hf `(%return (%array false ,e))
           h (with-indent (compile hf :stmt)))
       (cat ind "try {\n" body ind "}\n"
            ind "catch (" e ") {\n" h ind "}\n"))))
@@ -670,7 +670,7 @@
         (cat (indentation) x))
     (compile `(%local ,name (%function ,args ,body)) :stmt)))
 
-(define-special return (x) :stmt
+(define-special %return (x) :stmt
   (let x (if (nil? x)
              "return"
            (cat "return(" (compile x) ")"))

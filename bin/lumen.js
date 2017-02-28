@@ -1173,6 +1173,10 @@ setenv("break", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));
   return(join(["%break"], args));
 }});
+setenv("return", {_stash: true, macro: function () {
+  var args = unstash(Array.prototype.slice.call(arguments, 0));
+  return(join(["%return"], args));
+}});
 setenv("not", {_stash: true, macro: function () {
   var args = unstash(Array.prototype.slice.call(arguments, 0));
   return(join(["%not"], args));

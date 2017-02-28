@@ -795,7 +795,7 @@ function compile_function(args, body, ...)
   end
 end
 local function can_return63(form)
-  return(is63(form) and (atom63(form) or not( hd(form) == "return") and not statement63(hd(form))))
+  return(is63(form) and (atom63(form) or not( hd(form) == "%return") and not statement63(hd(form))))
 end
 function compile(form, ...)
   local _rest = unstash({...})
@@ -875,7 +875,7 @@ local function lower_do(args, hoist, stmt63, tail63)
   end
   local e = lower(last(args), hoist, stmt63, tail63)
   if tail63 and can_return63(e) then
-    return({"return", e})
+    return({"%return", e})
   else
     return(e)
   end
@@ -1104,7 +1104,7 @@ setenv("%do", {_stash = true, special = function (...)
     local x = _x1[_i + 1]
     s = s .. compile(x, {_stash = true, stmt = true})
     if not atom63(x) then
-      if hd(x) == "return" or hd(x) == "break" then
+      if hd(x) == "%return" or hd(x) == "%break" then
         break
       end
     end
@@ -1179,7 +1179,7 @@ setenv("%try", {_stash = true, special = function (form)
   local _x = compile(form, {_stash = true, stmt = true})
   indent_level = indent_level - 1
   local body = _x
-  local hf = {"return", {"%array", false, e}}
+  local hf = {"%return", {"%array", false, e}}
   indent_level = indent_level + 1
   local _x3 = compile(hf, {_stash = true, stmt = true})
   indent_level = indent_level - 1
@@ -1211,7 +1211,7 @@ setenv("%local-function", {_stash = true, special = function (name, args, body)
     return(compile({"%local", name, {"%function", args, body}}, {_stash = true, stmt = true}))
   end
 end, stmt = true, tr = true})
-setenv("return", {_stash = true, special = function (x)
+setenv("%return", {_stash = true, special = function (x)
   local _e
   if nil63(x) then
     _e = "return"
