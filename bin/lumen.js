@@ -65,7 +65,7 @@ clip = function (s, from, upto) {
 has63 = function (l, k) {
   return(l.hasOwnProperty(k));
 };
-cut = function (x, from, upto) {
+cut = function (x, from, upto, exclude) {
   var l = [];
   var j = 0;
   var _e;
@@ -88,19 +88,37 @@ cut = function (x, from, upto) {
     i = i + 1;
     j = j + 1;
   }
-  var _o = x;
-  var k = undefined;
-  for (k in _o) {
-    var v = _o[k];
-    var _e2;
-    if (numeric63(k)) {
-      _e2 = parseInt(k);
-    } else {
-      _e2 = k;
+  if (exclude) {
+    var _o = x;
+    var k = undefined;
+    for (k in _o) {
+      var v = _o[k];
+      var _e3;
+      if (numeric63(k)) {
+        _e3 = parseInt(k);
+      } else {
+        _e3 = k;
+      }
+      var _k = _e3;
+      if (!( number63(_k) || has63(exclude, _k))) {
+        l[_k] = v;
+      }
     }
-    var _k = _e2;
-    if (! number63(_k)) {
-      l[_k] = v;
+  } else {
+    var _o1 = x;
+    var k = undefined;
+    for (k in _o1) {
+      var v = _o1[k];
+      var _e2;
+      if (numeric63(k)) {
+        _e2 = parseInt(k);
+      } else {
+        _e2 = k;
+      }
+      var _k1 = _e2;
+      if (! number63(_k1)) {
+        l[_k1] = v;
+      }
     }
   }
   return(l);

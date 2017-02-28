@@ -53,7 +53,7 @@
     lua: (is? (get l k))
     js: ((get l 'hasOwnProperty) k)))
 
-(define-global cut (x from upto)
+(define-global cut (x from upto exclude)
   (with l ()
     (let (j 0
           i (if (or (nil? from) (< from 0)) 0 from)
@@ -63,9 +63,13 @@
         (set (at l j) (at x i))
         (inc i)
         (inc j))
-      (each (k v) x
-        (unless (number? k)
-          (set (get l k) v))))))
+      (if exclude
+          (each (k v) x
+            (unless (or (number? k) (has? exclude k))
+              (set (get l k) v)))
+        (each (k v) x
+          (unless (number? k)
+            (set (get l k) v)))))))
 
 (define-global keys (x)
   (with t ()

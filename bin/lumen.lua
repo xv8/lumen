@@ -62,7 +62,7 @@ end
 function has63(l, k)
   return(is63(l[k]))
 end
-function cut(x, from, upto)
+function cut(x, from, upto, exclude)
   local l = {}
   local j = 0
   local _e
@@ -85,12 +85,23 @@ function cut(x, from, upto)
     i = i + 1
     j = j + 1
   end
-  local _o = x
-  local k = nil
-  for k in next, _o do
-    local v = _o[k]
-    if not number63(k) then
-      l[k] = v
+  if exclude then
+    local _o = x
+    local k = nil
+    for k in next, _o do
+      local v = _o[k]
+      if not( number63(k) or has63(exclude, k)) then
+        l[k] = v
+      end
+    end
+  else
+    local _o1 = x
+    local k = nil
+    for k in next, _o1 do
+      local v = _o1[k]
+      if not number63(k) then
+        l[k] = v
+      end
     end
   end
   return(l)
