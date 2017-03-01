@@ -983,7 +983,7 @@ local function lower_while(args, hoist)
   if none63(pre) then
     _e = {"%while", _c, lower_body(body)}
   else
-    _e = {"%while", true, join({"%do"}, pre, {{"%if", {"not", _c}, {"break"}}, lower_body(body)})}
+    _e = {"%while", true, join({"%do"}, pre, {{"%if", {"%not", _c}, {"%break"}}, lower_body(body)})}
   end
   return(add(hoist, _e))
 end

@@ -544,7 +544,7 @@
             ,(lower-body body))
         `(%while true
            (%do ,@pre
-                (%if (not ,c) (break))
+                (%if (%not ,c) (%break))
                 ,(lower-body body)))))))
 
 (define lower-for (args hoist)
