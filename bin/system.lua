@@ -32,16 +32,16 @@ local function file_exists63(path)
 end
 local function directory_exists63(path)
   local f = io.open(path)
-  local _id1 = is63(f)
-  local _e1
-  if _id1 then
+  local _id = is63(f)
+  local _e
+  if _id then
     local r = not f.read(f, 0) and not( 0 == f.seek(f, "end"))
     f.close(f)
-    _e1 = r
+    _e = r
   else
-    _e1 = _id1
+    _e = _id
   end
-  return(_e1)
+  return(_e)
 end
 local path_separator = char(_G.package.config, 0)
 local function path_join(...)
@@ -70,4 +70,4 @@ local function run(command)
   f.close(f)
   return(x)
 end
-return({["path-separator"] = path_separator, ["read-file"] = read_file, write = write, ["write-file"] = write_file, ["get-environment-variable"] = get_environment_variable, run = run, reload = reload, argv = argv, exit = exit, ["directory-exists?"] = directory_exists63, ["file-exists?"] = file_exists63, ["path-join"] = path_join})
+return({argv = argv, ["directory-exists?"] = directory_exists63, exit = exit, ["file-exists?"] = file_exists63, ["get-environment-variable"] = get_environment_variable, ["path-join"] = path_join, ["path-separator"] = path_separator, ["read-file"] = read_file, reload = reload, run = run, write = write, ["write-file"] = write_file})
