@@ -153,6 +153,9 @@ end
 function drop(l)
   return(table.remove(l))
 end
+function insert(l, pos, x)
+  return(table.insert(l, pos + 1, x))
+end
 function last(l)
   return(l[edge(l) + 1])
 end

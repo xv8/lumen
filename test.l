@@ -824,6 +824,14 @@ c"
     (test= 'a (drop l))
     (test= nil (drop l))))
 
+(define-test insert
+  (let l ()
+    (insert l 0 'a)
+    (insert l 0 'b)
+    (insert l 0 'c)
+    (test= '(c b a) l)
+    (test= nil (insert () 0 'a))))
+
 (define-test last
   (test= 3 (last '(1 2 3)))
   (test= nil (last ()))

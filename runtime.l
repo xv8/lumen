@@ -107,6 +107,10 @@
   (target js: ((get l 'pop))
           lua: ((get table 'remove) l)))
 
+(define-global insert (l pos x)
+  (target js: (do ((get l 'splice) pos 0 x) nil)
+          lua: ((get table 'insert) l (+ pos 1) x)))
+
 (define-global last (l)
   (at l (edge l)))
 

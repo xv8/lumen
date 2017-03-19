@@ -174,6 +174,10 @@ add = function (l, x) {
 drop = function (l) {
   return(l.pop());
 };
+insert = function (l, pos, x) {
+  l.splice(pos, 0, x);
+  return(undefined);
+};
 last = function (l) {
   return(l[edge(l)]);
 };
