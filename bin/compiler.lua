@@ -648,7 +648,7 @@ local function id(id)
     local c = char(id, i)
     local n = code(c)
     local _e1
-    if c == "-" then
+    if c == "-" and not( id == "-") then
       _e1 = "_"
     else
       local _e2
