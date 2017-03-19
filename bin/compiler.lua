@@ -874,25 +874,51 @@ local function lower_set(args, hoist, stmt63, tail63)
     return(lh)
   end
 end
+local function can_ternary63(x)
+  return(atom63(x) or not standalone63(x) or "%function" == hd(x) or "%ternary" == hd(x) or not special_form63(x))
+end
+local function lower_ternary63(expr)
+  return(nil63(expr) or hd(expr) == "%set" and can_ternary63(last(expr)))
+end
 local function lower_if(args, hoist, stmt63, tail63)
   local cond = args[1]
   local _then = args[2]
   local _else = args[3]
   if stmt63 then
-    local _e1
+    local _e4
     if is63(_else) then
-      _e1 = {lower_body({_else}, tail63)}
+      _e4 = {lower_body({_else}, tail63)}
     end
-    return(add(hoist, join({"%if", lower(cond, hoist), lower_body({_then}, tail63)}, _e1)))
+    return(add(hoist, join({"%if", lower(cond, hoist), lower_body({_then}, tail63)}, _e4)))
   else
     local e = unique("e")
-    add(hoist, {"%local", e})
+    local n = _35(hoist)
+    local cond1 = lower(cond, hoist)
+    local then1 = lower({"%set", e, _then})
     local _e
     if is63(_else) then
-      _e = {lower({"%set", e, _else})}
+      _e = lower({"%set", e, _else})
     end
-    add(hoist, join({"%if", lower(cond, hoist), lower({"%set", e, _then})}, _e))
-    return(e)
+    local else1 = _e
+    if target == "js" and lower_ternary63(then1) and lower_ternary63(else1) then
+      local _e2
+      if is63(_then) then
+        _e2 = last(then1)
+      end
+      local _e3
+      if is63(_else) then
+        _e3 = last(else1)
+      end
+      return({"%ternary", cond1, _e2, _e3})
+    else
+      insert(hoist, n, {"%local", e})
+      local _e1
+      if is63(_else) then
+        _e1 = {else1}
+      end
+      add(hoist, join({"%if", cond1, then1}, _e1))
+      return(e)
+    end
   end
 end
 local function lower_short(x, args, hoist)
@@ -1066,6 +1092,22 @@ setenv("%do", {_stash = true, special = function (...)
   end
   return(s)
 end, stmt = true, tr = true})
+setenv("%ternary", {_stash = true, special = function (cond, _then, _else)
+  local a = compile(cond)
+  local b = compile(_then)
+  local _e
+  if nil63(_else) then
+    _e = "nil"
+  else
+    _e = _else
+  end
+  local c = compile(_e)
+  if target == "js" then
+    return("(" .. a .. " ? " .. b .. " : " .. c .. ")")
+  else
+    return("((" .. a .. ") and {" .. b .. "} or {" .. c .. "})[1]")
+  end
+end})
 setenv("%if", {_stash = true, special = function (cond, cons, alt)
   local ind = indentation()
   local _cond = compile(cond)

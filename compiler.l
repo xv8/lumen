@@ -504,6 +504,18 @@
     (unless (and stmt? (not tail?))
       lh)))
 
+(define can-ternary? (x)
+  (or (atom? x)
+      (not (standalone? x))
+      (= '%function (hd x))
+      (= '%ternary (hd x))
+      (not (special-form? x))))
+
+(define lower-ternary? (expr)
+  (or (nil? expr)
+      (and (= (hd expr) '%set)
+           (can-ternary? (last expr)))))
+
 (define lower-if (args hoist stmt? tail?)
   (let ((cond then else) args)
     (if stmt?
@@ -512,13 +524,21 @@
                    ,(lower-body (list then) tail?)
                    ,@(if (is? else) (list (lower-body (list else) tail?)))))
       (let-unique (e)
-        (add hoist `(%local ,e))
-        (add hoist
-             `(%if ,(lower cond hoist)
-                   ,(lower `(%set ,e ,then))
-                   ,@(if (is? else)
-                         (list (lower `(%set ,e ,else))))))
-        e))))
+        (let (n (# hoist)
+              cond1 (lower cond hoist)
+              then1 (lower `(%set ,e ,then))
+              else1 (if (is? else) (lower `(%set ,e ,else))))
+          (if (and (= target 'js)
+                   (lower-ternary? then1)
+                   (lower-ternary? else1))
+              `(%ternary ,cond1
+                         ,(if (is? then) (last then1))
+                         ,(if (is? else) (last else1)))
+          (do (insert hoist n `(%local ,e))
+              (add hoist `(%if ,cond1
+                               ,then1
+                               ,@(if (is? else) (list else1))))
+              e)))))))
 
 (define lower-short (x args hoist)
   (let ((a b) args
@@ -634,6 +654,14 @@
         (if (or (= (hd x) '%return)
                 (= (hd x) '%break))
             (break))))))
+
+(define-special %ternary (cond then else)
+  (let (a (compile cond)
+        b (compile then)
+        c (compile (if (nil? else) 'nil else)))
+    (if (= target 'js)
+        (cat "(" a " ? " b " : " c ")")
+      (cat "((" a ") and {" b "} or {" c "})[1]"))))
 
 (define-special %if (cond cons alt) :stmt :tr
   (let (ind (indentation)
