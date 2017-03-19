@@ -171,12 +171,10 @@ end
 function reduce(f, x)
   if none63(x) then
     return(nil)
+  elseif one63(x) then
+    return(hd(x))
   else
-    if one63(x) then
-      return(hd(x))
-    else
-      return(f(hd(x), reduce(f, tl(x))))
-    end
+    return(f(hd(x), reduce(f, tl(x))))
   end
 end
 function join(...)
@@ -475,73 +473,55 @@ end
 function str(x, stack)
   if nil63(x) then
     return("nil")
-  else
-    if nan63(x) then
-      return("nan")
+  elseif nan63(x) then
+    return("nan")
+  elseif x == inf then
+    return("inf")
+  elseif x == -inf then
+    return("-inf")
+  elseif boolean63(x) then
+    if x then
+      return("true")
     else
-      if x == inf then
-        return("inf")
+      return("false")
+    end
+  elseif string63(x) then
+    return(escape(x))
+  elseif atom63(x) then
+    return(tostring(x))
+  elseif function63(x) then
+    return("function")
+  elseif stack and in63(x, stack) then
+    return("circular")
+  elseif not( type(x) == "table") then
+    return(escape(tostring(x)))
+  else
+    local s = "("
+    local sp = ""
+    local xs = {}
+    local ks = {}
+    local l = stack or {}
+    add(l, x)
+    local _o = x
+    local k = nil
+    for k in next, _o do
+      local v = _o[k]
+      if number63(k) then
+        xs[k] = str(v, l)
       else
-        if x == -inf then
-          return("-inf")
-        else
-          if boolean63(x) then
-            if x then
-              return("true")
-            else
-              return("false")
-            end
-          else
-            if string63(x) then
-              return(escape(x))
-            else
-              if atom63(x) then
-                return(tostring(x))
-              else
-                if function63(x) then
-                  return("function")
-                else
-                  if stack and in63(x, stack) then
-                    return("circular")
-                  else
-                    if not( type(x) == "table") then
-                      return(escape(tostring(x)))
-                    else
-                      local s = "("
-                      local sp = ""
-                      local xs = {}
-                      local ks = {}
-                      local l = stack or {}
-                      add(l, x)
-                      local _o = x
-                      local k = nil
-                      for k in next, _o do
-                        local v = _o[k]
-                        if number63(k) then
-                          xs[k] = str(v, l)
-                        else
-                          add(ks, k .. ":")
-                          add(ks, str(v, l))
-                        end
-                      end
-                      drop(l)
-                      local _o1 = join(xs, ks)
-                      local _i1 = nil
-                      for _i1 in next, _o1 do
-                        local v = _o1[_i1]
-                        s = s .. sp .. v
-                        sp = " "
-                      end
-                      return(s .. ")")
-                    end
-                  end
-                end
-              end
-            end
-          end
-        end
+        add(ks, k .. ":")
+        add(ks, str(v, l))
       end
     end
+    drop(l)
+    local _o1 = join(xs, ks)
+    local _i1 = nil
+    for _i1 in next, _o1 do
+      local v = _o1[_i1]
+      s = s .. sp .. v
+      sp = " "
+    end
+    return(s .. ")")
   end
 end
 local values = unpack or table.unpack
@@ -620,10 +600,8 @@ end})
 setenv("at", {_stash = true, macro = function (l, i)
   if target == "lua" and number63(i) then
     i = i + 1
-  else
-    if target == "lua" then
-      i = {"+", i, 1}
-    end
+  elseif target == "lua" then
+    i = {"+", i, 1}
   end
   return({"get", l, i})
 end})
@@ -681,18 +659,12 @@ setenv("case", {_stash = true, macro = function (expr, ...)
     local b = _x[2]
     if nil63(b) then
       return({a})
-    else
-      if string63(a) or number63(a) then
-        return({eq(a), b})
-      else
-        if one63(a) then
-          return({eq(hd(a)), b})
-        else
-          if _35(a) > 1 then
-            return({join({"or"}, map(eq, a)), b})
-          end
-        end
-      end
+    elseif string63(a) or number63(a) then
+      return({eq(a), b})
+    elseif one63(a) then
+      return({eq(hd(a)), b})
+    elseif _35(a) > 1 then
+      return({join({"or"}, map(eq, a)), b})
     end
   end
   return({"let", x, _expr, join({"if"}, apply(join, map(cl, pair(clauses))))})
@@ -721,27 +693,25 @@ setenv("let", {_stash = true, macro = function (bs, ...)
   local body = cut(_rest, 0)
   if atom63(_bs) then
     return(join({"let", {_bs, hd(body)}}, tl(body)))
+  elseif none63(_bs) then
+    return(join({"do"}, body))
   else
-    if none63(_bs) then
-      return(join({"do"}, body))
+    local lh = _bs[1]
+    local rh = _bs[2]
+    local bs2 = cut(_bs, 2)
+    local _id2 = bind(lh, rh)
+    local id = _id2[1]
+    local val = _id2[2]
+    local bs1 = cut(_id2, 2)
+    local renames = {}
+    if bound63(id) or toplevel63() then
+      local id1 = unique(id)
+      renames = {id, id1}
+      id = id1
     else
-      local lh = _bs[1]
-      local rh = _bs[2]
-      local bs2 = cut(_bs, 2)
-      local _id2 = bind(lh, rh)
-      local id = _id2[1]
-      local val = _id2[2]
-      local bs1 = cut(_id2, 2)
-      local renames = {}
-      if bound63(id) or toplevel63() then
-        local id1 = unique(id)
-        renames = {id, id1}
-        id = id1
-      else
-        setenv(id, {_stash = true, variable = true})
-      end
-      return({"do", {"%local", id, val}, {"let-symbol", renames, join({"let", join(bs1, bs2)}, body)}})
+      setenv(id, {_stash = true, variable = true})
     end
+    return({"do", {"%local", id, val}, {"let-symbol", renames, join({"let", join(bs1, bs2)}, body)}})
   end
 end})
 setenv("with", {_stash = true, macro = function (x, v, ...)
@@ -904,10 +874,8 @@ setenv("apply", {_stash = true, macro = function (...)
     end
     add(e, ks.rest)
     ks.rest = nil
-  else
-    if is63(x2) then
-      add(e, x2)
-    end
+  elseif is63(x2) then
+    add(e, x2)
   end
   if not empty63(ks) then
     add(e, join({"list"}, ks))
@@ -1195,10 +1163,8 @@ local function eval_print(form)
   local v = _id[2]
   if not ok then
     return(print("error: " .. (v.message or "") .. "\n" .. v.stack))
-  else
-    if is63(v) then
-      return(print(str(v)))
-    end
+  elseif is63(v) then
+    return(print(str(v)))
   end
 end
 local function rep(s)
@@ -1260,71 +1226,61 @@ local function main()
   local arg = hd(system.argv)
   if arg and script_file63(arg) then
     return(load(arg))
+  elseif arg == "-h" or arg == "--help" then
+    return(usage())
   else
-    if arg == "-h" or arg == "--help" then
-      return(usage())
-    else
-      local pre = {}
-      local input = nil
-      local output = nil
-      local target1 = nil
-      local expr = nil
-      local argv = system.argv
-      local i = 0
-      while i < _35(argv) do
-        local a = argv[i + 1]
-        if a == "-c" or a == "-o" or a == "-t" or a == "-e" then
-          if i == edge(argv) then
-            print("missing argument for " .. a)
-          else
-            i = i + 1
-            local val = argv[i + 1]
-            if a == "-c" then
-              input = val
-            else
-              if a == "-o" then
-                output = val
-              else
-                if a == "-t" then
-                  target1 = val
-                else
-                  if a == "-e" then
-                    expr = val
-                  end
-                end
-              end
-            end
-          end
+    local pre = {}
+    local input = nil
+    local output = nil
+    local target1 = nil
+    local expr = nil
+    local argv = system.argv
+    local i = 0
+    while i < _35(argv) do
+      local a = argv[i + 1]
+      if a == "-c" or a == "-o" or a == "-t" or a == "-e" then
+        if i == edge(argv) then
+          print("missing argument for " .. a)
         else
-          if not( "-" == char(a, 0)) then
-            add(pre, a)
+          i = i + 1
+          local val = argv[i + 1]
+          if a == "-c" then
+            input = val
+          elseif a == "-o" then
+            output = val
+          elseif a == "-t" then
+            target1 = val
+          elseif a == "-e" then
+            expr = val
           end
         end
-        i = i + 1
+      elseif not( "-" == char(a, 0)) then
+        add(pre, a)
       end
-      local _x = pre
-      local _i = 0
-      while _i < _35(_x) do
-        local file = _x[_i + 1]
-        run_file(file)
-        _i = _i + 1
-      end
-      if nil63(input) then
-        if expr then
-          return(rep(expr))
-        else
-          return(repl())
-        end
+      i = i + 1
+    end
+    local _x = pre
+    local _i = 0
+    while _i < _35(_x) do
+      local file = _x[_i + 1]
+      run_file(file)
+      _i = _i + 1
+    end
+    if nil63(input) then
+      if expr then
+        return(rep(expr))
       else
-        if target1 then
-          target = target1
-        end
-        local code = compile_file(input)
-        if nil63(output) or output == "-" then
-          return(print(code))
-        else
-          return(system["write-file"](output, code))
-        end
+        return(repl())
+      end
+    else
+      if target1 then
+        target = target1
+      end
+      local code = compile_file(input)
+      if nil63(output) or output == "-" then
+        return(print(code))
+      else
+        return(system["write-file"](output, code))
       end
     end
   end

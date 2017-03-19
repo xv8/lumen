@@ -51,12 +51,10 @@ end
 function quoted(form)
   if string63(form) then
     return(escape(form))
+  elseif atom63(form) then
+    return(form)
   else
-    if atom63(form) then
-      return(form)
-    else
-      return(join({"list"}, map(quoted, form)))
-    end
+    return(join({"list"}, map(quoted, form)))
   end
 end
 local function literal(s)
@@ -351,32 +349,22 @@ end
 function macroexpand(form)
   if symbol63(form) then
     return(macroexpand(symbol_expansion(form)))
+  elseif atom63(form) then
+    return(form)
+  elseif none63(form) then
+    return(form)
   else
-    if atom63(form) then
-      return(form)
+    local x = hd(form)
+    if x == "%local" then
+      return(expand_local(form))
+    elseif x == "%function" then
+      return(expand_function(form))
+    elseif x == "%global-function" then
+      return(expand_definition(form))
+    elseif x == "%local-function" then
+      return(expand_definition(form))
     else
-      if none63(form) then
-        return(form)
-      else
-        local x = hd(form)
-        if x == "%local" then
-          return(expand_local(form))
-        else
-          if x == "%function" then
-            return(expand_function(form))
-          else
-            if x == "%global-function" then
-              return(expand_definition(form))
-            else
-              if x == "%local-function" then
-                return(expand_definition(form))
-              else
-                return(expand_form(form))
-              end
-            end
-          end
-        end
-      end
+      return(expand_form(form))
     end
   end
 end
@@ -423,37 +411,25 @@ function quasiexpand(form, depth)
   if quasiquoting63(depth) then
     if atom63(form) then
       return({"quote", form})
+    elseif can_unquote63(depth) and hd(form) == "unquote" then
+      return(quasiexpand(form[2]))
+    elseif hd(form) == "unquote" or hd(form) == "unquote-splicing" then
+      return(quasiquote_list(form, depth - 1))
+    elseif hd(form) == "quasiquote" then
+      return(quasiquote_list(form, depth + 1))
     else
-      if can_unquote63(depth) and hd(form) == "unquote" then
-        return(quasiexpand(form[2]))
-      else
-        if hd(form) == "unquote" or hd(form) == "unquote-splicing" then
-          return(quasiquote_list(form, depth - 1))
-        else
-          if hd(form) == "quasiquote" then
-            return(quasiquote_list(form, depth + 1))
-          else
-            return(quasiquote_list(form, depth))
-          end
-        end
-      end
+      return(quasiquote_list(form, depth))
     end
+  elseif atom63(form) then
+    return(form)
+  elseif hd(form) == "quote" then
+    return(form)
+  elseif hd(form) == "quasiquote" then
+    return(quasiexpand(form[2], 1))
   else
-    if atom63(form) then
-      return(form)
-    else
-      if hd(form) == "quote" then
-        return(form)
-      else
-        if hd(form) == "quasiquote" then
-          return(quasiexpand(form[2], 1))
-        else
-          return(map(function (x)
-            return(quasiexpand(x, depth))
-          end, form))
-        end
-      end
-    end
+    return(map(function (x)
+      return(quasiexpand(x, depth))
+    end, form))
   end
 end
 function expand_if(_x)
@@ -462,10 +438,8 @@ function expand_if(_x)
   local c = cut(_x, 2)
   if is63(b) then
     return({join({"%if", a, b}, expand_if(c))})
-  else
-    if is63(a) then
-      return({a})
-    end
+  elseif is63(a) then
+    return({a})
   end
 end
 if indent_level == nil then
@@ -505,12 +479,10 @@ function key(k)
   local i = inner(k)
   if valid_id63(i) then
     return(i)
+  elseif target == "js" then
+    return(k)
   else
-    if target == "js" then
-      return(k)
-    else
-      return("[" .. k .. "]")
-    end
+    return("[" .. k .. "]")
   end
 end
 function mapo(f, t)
@@ -592,14 +564,10 @@ local function getop(op)
     local x = level[op]
     if x == true then
       return(op)
-    else
-      if string63(x) then
-        return(x)
-      else
-        if is63(x) then
-          return(x[target])
-        end
-      end
+    elseif string63(x) then
+      return(x)
+    elseif is63(x) then
+      return(x[target])
     end
   end, infix))
 end
@@ -678,59 +646,39 @@ end
 local function compile_atom(x)
   if x == "nil" and target == "lua" then
     return(x)
-  else
-    if x == "nil" then
-      return("undefined")
+  elseif x == "nil" then
+    return("undefined")
+  elseif id_literal63(x) then
+    return(inner(x))
+  elseif string_literal63(x) then
+    return(escape_newlines(x))
+  elseif string63(x) then
+    return(id(x))
+  elseif boolean63(x) then
+    if x then
+      return("true")
     else
-      if id_literal63(x) then
-        return(inner(x))
-      else
-        if string_literal63(x) then
-          return(escape_newlines(x))
-        else
-          if string63(x) then
-            return(id(x))
-          else
-            if boolean63(x) then
-              if x then
-                return("true")
-              else
-                return("false")
-              end
-            else
-              if nan63(x) then
-                return("nan")
-              else
-                if x == inf then
-                  return("inf")
-                else
-                  if x == -inf then
-                    return("-inf")
-                  else
-                    if number63(x) then
-                      return(x .. "")
-                    else
-                      error("Cannot compile atom: " .. str(x))
-                    end
-                  end
-                end
-              end
-            end
-          end
-        end
-      end
+      return("false")
     end
+  elseif nan63(x) then
+    return("nan")
+  elseif x == inf then
+    return("inf")
+  elseif x == -inf then
+    return("-inf")
+  elseif number63(x) then
+    return(x .. "")
+  else
+    error("Cannot compile atom: " .. str(x))
   end
 end
 local function terminator(stmt63)
   if not stmt63 then
     return("")
+  elseif target == "js" then
+    return(";\n")
   else
-    if target == "js" then
-      return(";\n")
-    else
-      return("\n")
-    end
+    return("\n")
   end
 end
 local function compile_special(form, stmt63)
@@ -848,33 +796,31 @@ function compile(form, ...)
   _rest.stmt = nil
   if nil63(_form) then
     return("")
+  elseif special_form63(_form) then
+    return(compile_special(_form, stmt))
   else
-    if special_form63(_form) then
-      return(compile_special(_form, stmt))
+    local tr = terminator(stmt)
+    local _e
+    if stmt then
+      _e = indentation()
     else
-      local tr = terminator(stmt)
-      local _e
-      if stmt then
-        _e = indentation()
-      else
-        _e = ""
-      end
-      local ind = _e
-      local _e1
-      if atom63(_form) then
-        _e1 = compile_atom(_form)
-      else
-        local _e2
-        if infix63(hd(_form)) then
-          _e2 = compile_infix(_form)
-        else
-          _e2 = compile_call(_form)
-        end
-        _e1 = _e2
-      end
-      local _form1 = _e1
-      return(ind .. _form1 .. tr)
+      _e = ""
     end
+    local ind = _e
+    local _e1
+    if atom63(_form) then
+      _e1 = compile_atom(_form)
+    else
+      local _e2
+      if infix63(hd(_form)) then
+        _e2 = compile_infix(_form)
+      else
+        _e2 = compile_call(_form)
+      end
+      _e1 = _e2
+    end
+    local _form1 = _e1
+    return(ind .. _form1 .. tr)
   end
 end
 local function lower_statement(form, tail63)
@@ -882,16 +828,12 @@ local function lower_statement(form, tail63)
   local e = lower(form, hoist, true, tail63)
   if some63(hoist) and is63(e) then
     return(join({"%do"}, hoist, {e}))
+  elseif is63(e) then
+    return(e)
+  elseif _35(hoist) > 1 then
+    return(join({"%do"}, hoist))
   else
-    if is63(e) then
-      return(e)
-    else
-      if _35(hoist) > 1 then
-        return(join({"%do"}, hoist))
-      else
-        return(hd(hoist))
-      end
-    end
+    return(hd(hoist))
   end
 end
 local function lower_body(body, tail63)
@@ -1052,61 +994,37 @@ end
 function lower(form, hoist, stmt63, tail63)
   if atom63(form) then
     return(form)
+  elseif empty63(form) then
+    return({"%array"})
+  elseif nil63(hoist) then
+    return(lower_statement(form))
+  elseif lower_infix63(form) then
+    return(lower_infix(form, hoist))
   else
-    if empty63(form) then
-      return({"%array"})
+    local x = form[1]
+    local args = cut(form, 1)
+    if x == "%do" then
+      return(lower_do(args, hoist, stmt63, tail63))
+    elseif x == "%set" then
+      return(lower_set(args, hoist, stmt63, tail63))
+    elseif x == "%if" then
+      return(lower_if(args, hoist, stmt63, tail63))
+    elseif x == "%try" then
+      return(lower_try(args, hoist, tail63))
+    elseif x == "%while" then
+      return(lower_while(args, hoist))
+    elseif x == "%for" then
+      return(lower_for(args, hoist))
+    elseif x == "%function" then
+      return(lower_function(args))
+    elseif x == "%local-function" or x == "%global-function" then
+      return(lower_definition(x, args, hoist))
+    elseif in63(x, {"%and", "%or"}) then
+      return(lower_short(x, args, hoist))
+    elseif statement63(x) then
+      return(lower_special(form, hoist))
     else
-      if nil63(hoist) then
-        return(lower_statement(form))
-      else
-        if lower_infix63(form) then
-          return(lower_infix(form, hoist))
-        else
-          local x = form[1]
-          local args = cut(form, 1)
-          if x == "%do" then
-            return(lower_do(args, hoist, stmt63, tail63))
-          else
-            if x == "%set" then
-              return(lower_set(args, hoist, stmt63, tail63))
-            else
-              if x == "%if" then
-                return(lower_if(args, hoist, stmt63, tail63))
-              else
-                if x == "%try" then
-                  return(lower_try(args, hoist, tail63))
-                else
-                  if x == "%while" then
-                    return(lower_while(args, hoist))
-                  else
-                    if x == "%for" then
-                      return(lower_for(args, hoist))
-                    else
-                      if x == "%function" then
-                        return(lower_function(args))
-                      else
-                        if x == "%local-function" or x == "%global-function" then
-                          return(lower_definition(x, args, hoist))
-                        else
-                          if in63(x, {"%and", "%or"}) then
-                            return(lower_short(x, args, hoist))
-                          else
-                            if statement63(x) then
-                              return(lower_special(form, hoist))
-                            else
-                              return(lower_call(form, hoist))
-                            end
-                          end
-                        end
-                      end
-                    end
-                  end
-                end
-              end
-            end
-          end
-        end
-      end
+      return(lower_call(form, hoist))
     end
   end
 end
@@ -1149,34 +1067,49 @@ setenv("%do", {_stash = true, special = function (...)
   return(s)
 end, stmt = true, tr = true})
 setenv("%if", {_stash = true, special = function (cond, cons, alt)
+  local ind = indentation()
   local _cond = compile(cond)
   indent_level = indent_level + 1
   local _x = compile(cons, {_stash = true, stmt = true})
   indent_level = indent_level - 1
   local _cons = _x
+  local elif = obj63(alt) and hd(alt) == "%if"
   local _e
-  if alt then
-    indent_level = indent_level + 1
-    local _x1 = compile(alt, {_stash = true, stmt = true})
-    indent_level = indent_level - 1
-    _e = _x1
+  if elif then
+    _e = clip(compile(alt, {_stash = true, stmt = true}), _35(ind))
+  else
+    local _e1
+    if alt then
+      indent_level = indent_level + 1
+      local _x1 = compile(alt, {_stash = true, stmt = true})
+      indent_level = indent_level - 1
+      _e1 = _x1
+    end
+    _e = _e1
   end
   local _alt = _e
-  local ind = indentation()
   local s = ""
   if target == "js" then
     s = s .. ind .. "if (" .. _cond .. ") {\n" .. _cons .. ind .. "}"
   else
     s = s .. ind .. "if " .. _cond .. " then\n" .. _cons
   end
-  if _alt and target == "js" then
-    s = s .. " else {\n" .. _alt .. ind .. "}"
-  else
-    if _alt then
+  if elif then
+    if target == "js" then
+      s = s .. " else " .. _alt
+    else
+      s = s .. ind .. "else" .. _alt
+    end
+  elseif _alt then
+    if target == "js" then
+      s = s .. " else {\n" .. _alt .. ind .. "}"
+    else
       s = s .. ind .. "else\n" .. _alt
     end
   end
-  if target == "lua" then
+  if elif then
+    return(s)
+  elseif target == "lua" then
     return(s .. ind .. "end\n")
   else
     return(s .. "\n")

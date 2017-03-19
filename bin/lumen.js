@@ -192,12 +192,10 @@ reverse = function (l) {
 reduce = function (f, x) {
   if (none63(x)) {
     return(undefined);
+  } else if (one63(x)) {
+    return(hd(x));
   } else {
-    if (one63(x)) {
-      return(hd(x));
-    } else {
-      return(f(hd(x), reduce(f, tl(x))));
-    }
+    return(f(hd(x), reduce(f, tl(x))));
   }
 };
 join = function () {
@@ -564,87 +562,69 @@ escape = function (s) {
 str = function (x, stack) {
   if (nil63(x)) {
     return("nil");
-  } else {
-    if (nan63(x)) {
-      return("nan");
+  } else if (nan63(x)) {
+    return("nan");
+  } else if (x === inf) {
+    return("inf");
+  } else if (x === -inf) {
+    return("-inf");
+  } else if (boolean63(x)) {
+    if (x) {
+      return("true");
     } else {
-      if (x === inf) {
-        return("inf");
+      return("false");
+    }
+  } else if (string63(x)) {
+    return(escape(x));
+  } else if (atom63(x)) {
+    return(tostring(x));
+  } else if (function63(x)) {
+    return("function");
+  } else if (stack && in63(x, stack)) {
+    return("circular");
+  } else if (false) {
+    return(escape(tostring(x)));
+  } else {
+    var s = "(";
+    var sp = "";
+    var xs = [];
+    var ks = [];
+    var l = stack || [];
+    add(l, x);
+    var _o = x;
+    var k = undefined;
+    for (k in _o) {
+      var v = _o[k];
+      var _e;
+      if (numeric63(k)) {
+        _e = parseInt(k);
       } else {
-        if (x === -inf) {
-          return("-inf");
-        } else {
-          if (boolean63(x)) {
-            if (x) {
-              return("true");
-            } else {
-              return("false");
-            }
-          } else {
-            if (string63(x)) {
-              return(escape(x));
-            } else {
-              if (atom63(x)) {
-                return(tostring(x));
-              } else {
-                if (function63(x)) {
-                  return("function");
-                } else {
-                  if (stack && in63(x, stack)) {
-                    return("circular");
-                  } else {
-                    if (false) {
-                      return(escape(tostring(x)));
-                    } else {
-                      var s = "(";
-                      var sp = "";
-                      var xs = [];
-                      var ks = [];
-                      var l = stack || [];
-                      add(l, x);
-                      var _o = x;
-                      var k = undefined;
-                      for (k in _o) {
-                        var v = _o[k];
-                        var _e;
-                        if (numeric63(k)) {
-                          _e = parseInt(k);
-                        } else {
-                          _e = k;
-                        }
-                        var _k = _e;
-                        if (number63(_k)) {
-                          xs[_k] = str(v, l);
-                        } else {
-                          add(ks, _k + ":");
-                          add(ks, str(v, l));
-                        }
-                      }
-                      drop(l);
-                      var _o1 = join(xs, ks);
-                      var _i1 = undefined;
-                      for (_i1 in _o1) {
-                        var v = _o1[_i1];
-                        var _e1;
-                        if (numeric63(_i1)) {
-                          _e1 = parseInt(_i1);
-                        } else {
-                          _e1 = _i1;
-                        }
-                        var __i1 = _e1;
-                        s = s + sp + v;
-                        sp = " ";
-                      }
-                      return(s + ")");
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        _e = k;
+      }
+      var _k = _e;
+      if (number63(_k)) {
+        xs[_k] = str(v, l);
+      } else {
+        add(ks, _k + ":");
+        add(ks, str(v, l));
       }
     }
+    drop(l);
+    var _o1 = join(xs, ks);
+    var _i1 = undefined;
+    for (_i1 in _o1) {
+      var v = _o1[_i1];
+      var _e1;
+      if (numeric63(_i1)) {
+        _e1 = parseInt(_i1);
+      } else {
+        _e1 = _i1;
+      }
+      var __i1 = _e1;
+      s = s + sp + v;
+      sp = " ";
+    }
+    return(s + ")");
   }
 };
 apply = function (f, args) {
@@ -732,10 +712,8 @@ setenv("get", {_stash: true, macro: function () {
 setenv("at", {_stash: true, macro: function (l, i) {
   if (target === "lua" && number63(i)) {
     i = i + 1;
-  } else {
-    if (target === "lua") {
-      i = ["+", i, 1];
-    }
+  } else if (target === "lua") {
+    i = ["+", i, 1];
   }
   return(["get", l, i]);
 }});
@@ -800,18 +778,12 @@ setenv("case", {_stash: true, macro: function (expr) {
     var b = _x[1];
     if (nil63(b)) {
       return([a]);
-    } else {
-      if (string63(a) || number63(a)) {
-        return([eq(a), b]);
-      } else {
-        if (one63(a)) {
-          return([eq(hd(a)), b]);
-        } else {
-          if (_35(a) > 1) {
-            return([join(["or"], map(eq, a)), b]);
-          }
-        }
-      }
+    } else if (string63(a) || number63(a)) {
+      return([eq(a), b]);
+    } else if (one63(a)) {
+      return([eq(hd(a)), b]);
+    } else if (_35(a) > 1) {
+      return([join(["or"], map(eq, a)), b]);
     }
   };
   return(["let", x, _expr, join(["if"], apply(join, map(cl, pair(clauses))))]);
@@ -840,27 +812,25 @@ setenv("let", {_stash: true, macro: function (bs) {
   var body = cut(_rest, 0);
   if (atom63(_bs)) {
     return(join(["let", [_bs, hd(body)]], tl(body)));
+  } else if (none63(_bs)) {
+    return(join(["do"], body));
   } else {
-    if (none63(_bs)) {
-      return(join(["do"], body));
+    var lh = _bs[0];
+    var rh = _bs[1];
+    var bs2 = cut(_bs, 2);
+    var _id2 = bind(lh, rh);
+    var id = _id2[0];
+    var val = _id2[1];
+    var bs1 = cut(_id2, 2);
+    var renames = [];
+    if (bound63(id) || toplevel63()) {
+      var id1 = unique(id);
+      renames = [id, id1];
+      id = id1;
     } else {
-      var lh = _bs[0];
-      var rh = _bs[1];
-      var bs2 = cut(_bs, 2);
-      var _id2 = bind(lh, rh);
-      var id = _id2[0];
-      var val = _id2[1];
-      var bs1 = cut(_id2, 2);
-      var renames = [];
-      if (bound63(id) || toplevel63()) {
-        var id1 = unique(id);
-        renames = [id, id1];
-        id = id1;
-      } else {
-        setenv(id, {_stash: true, variable: true});
-      }
-      return(["do", ["%local", id, val], ["let-symbol", renames, join(["let", join(bs1, bs2)], body)]]);
+      setenv(id, {_stash: true, variable: true});
     }
+    return(["do", ["%local", id, val], ["let-symbol", renames, join(["let", join(bs1, bs2)], body)]]);
   }
 }});
 setenv("with", {_stash: true, macro: function (x, v) {
@@ -1023,10 +993,8 @@ setenv("apply", {_stash: true, macro: function () {
     }
     add(e, ks.rest);
     delete ks.rest;
-  } else {
-    if (is63(x2)) {
-      add(e, x2);
-    }
+  } else if (is63(x2)) {
+    add(e, x2);
   }
   if (! empty63(ks)) {
     add(e, join(["list"], ks));
@@ -1307,10 +1275,8 @@ var eval_print = function (form) {
   var v = _id[1];
   if (! ok) {
     return(print(v.stack));
-  } else {
-    if (is63(v)) {
-      return(print(str(v)));
-    }
+  } else if (is63(v)) {
+    return(print(str(v)));
   }
 };
 var rep = function (s) {
@@ -1367,71 +1333,61 @@ var main = function () {
   var arg = hd(system.argv);
   if (arg && script_file63(arg)) {
     return(load(arg));
+  } else if (arg === "-h" || arg === "--help") {
+    return(usage());
   } else {
-    if (arg === "-h" || arg === "--help") {
-      return(usage());
-    } else {
-      var pre = [];
-      var input = undefined;
-      var output = undefined;
-      var target1 = undefined;
-      var expr = undefined;
-      var argv = system.argv;
-      var i = 0;
-      while (i < _35(argv)) {
-        var a = argv[i];
-        if (a === "-c" || a === "-o" || a === "-t" || a === "-e") {
-          if (i === edge(argv)) {
-            print("missing argument for " + a);
-          } else {
-            i = i + 1;
-            var val = argv[i];
-            if (a === "-c") {
-              input = val;
-            } else {
-              if (a === "-o") {
-                output = val;
-              } else {
-                if (a === "-t") {
-                  target1 = val;
-                } else {
-                  if (a === "-e") {
-                    expr = val;
-                  }
-                }
-              }
-            }
-          }
+    var pre = [];
+    var input = undefined;
+    var output = undefined;
+    var target1 = undefined;
+    var expr = undefined;
+    var argv = system.argv;
+    var i = 0;
+    while (i < _35(argv)) {
+      var a = argv[i];
+      if (a === "-c" || a === "-o" || a === "-t" || a === "-e") {
+        if (i === edge(argv)) {
+          print("missing argument for " + a);
         } else {
-          if (!( "-" === char(a, 0))) {
-            add(pre, a);
+          i = i + 1;
+          var val = argv[i];
+          if (a === "-c") {
+            input = val;
+          } else if (a === "-o") {
+            output = val;
+          } else if (a === "-t") {
+            target1 = val;
+          } else if (a === "-e") {
+            expr = val;
           }
         }
-        i = i + 1;
+      } else if (!( "-" === char(a, 0))) {
+        add(pre, a);
       }
-      var _x = pre;
-      var _i = 0;
-      while (_i < _35(_x)) {
-        var file = _x[_i];
-        run_file(file);
-        _i = _i + 1;
-      }
-      if (nil63(input)) {
-        if (expr) {
-          return(rep(expr));
-        } else {
-          return(repl());
-        }
+      i = i + 1;
+    }
+    var _x = pre;
+    var _i = 0;
+    while (_i < _35(_x)) {
+      var file = _x[_i];
+      run_file(file);
+      _i = _i + 1;
+    }
+    if (nil63(input)) {
+      if (expr) {
+        return(rep(expr));
       } else {
-        if (target1) {
-          target = target1;
-        }
-        var code = compile_file(input);
-        if (nil63(output) || output === "-") {
-          return(print(code));
-        } else {
-          return(system["write-file"](output, code));
-        }
+        return(repl());
+      }
+    } else {
+      if (target1) {
+        target = target1;
+      }
+      var code = compile_file(input);
+      if (nil63(output) || output === "-") {
+        return(print(code));
+      } else {
+        return(system["write-file"](output, code));
       }
     }
   }

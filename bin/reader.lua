@@ -23,19 +23,15 @@ local function skip_non_code(s)
     local c = peek_char(s)
     if nil63(c) then
       break
-    else
-      if whitespace[c] then
-        read_char(s)
-      else
-        if c == ";" then
-          while c and not( c == "\n") do
-            c = read_char(s)
-          end
-          skip_non_code(s)
-        else
-          break
-        end
+    elseif whitespace[c] then
+      read_char(s)
+    elseif c == ";" then
+      while c and not( c == "\n") do
+        c = read_char(s)
       end
+      skip_non_code(s)
+    else
+      break
     end
   end
 end
@@ -131,36 +127,24 @@ read_table[""] = function (s)
   end
   if str == "true" then
     return(true)
+  elseif str == "false" then
+    return(false)
+  elseif str == "nan" then
+    return(nan)
+  elseif str == "-nan" then
+    return(nan)
+  elseif str == "inf" then
+    return(inf)
+  elseif str == "-inf" then
+    return(-inf)
   else
-    if str == "false" then
-      return(false)
+    local n = maybe_number(str)
+    if real63(n) then
+      return(n)
+    elseif dot63 and valid_access63(str) then
+      return(parse_access(str))
     else
-      if str == "nan" then
-        return(nan)
-      else
-        if str == "-nan" then
-          return(nan)
-        else
-          if str == "inf" then
-            return(inf)
-          else
-            if str == "-inf" then
-              return(-inf)
-            else
-              local n = maybe_number(str)
-              if real63(n) then
-                return(n)
-              else
-                if dot63 and valid_access63(str) then
-                  return(parse_access(str))
-                else
-                  return(str)
-                end
-              end
-            end
-          end
-        end
-      end
+      return(str)
     end
   end
 end
@@ -174,22 +158,18 @@ read_table["("] = function (s)
     if c == ")" then
       read_char(s)
       r = l
+    elseif nil63(c) then
+      r = expected(s, ")")
     else
-      if nil63(c) then
-        r = expected(s, ")")
+      local x = read(s)
+      if key63(x) then
+        local k = clip(x, 0, edge(x))
+        local v = read(s)
+        l[k] = v
+      elseif flag63(x) then
+        l[clip(x, 1)] = true
       else
-        local x = read(s)
-        if key63(x) then
-          local k = clip(x, 0, edge(x))
-          local v = read(s)
-          l[k] = v
-        else
-          if flag63(x) then
-            l[clip(x, 1)] = true
-          else
-            add(l, x)
-          end
-        end
+        add(l, x)
       end
     end
   end
@@ -206,15 +186,13 @@ read_table["\""] = function (s)
     local c = peek_char(s)
     if c == "\"" then
       r = str .. read_char(s)
+    elseif nil63(c) then
+      r = expected(s, "\"")
     else
-      if nil63(c) then
-        r = expected(s, "\"")
-      else
-        if c == "\\" then
-          str = str .. read_char(s)
-        end
+      if c == "\\" then
         str = str .. read_char(s)
       end
+      str = str .. read_char(s)
     end
   end
   return(r)
@@ -227,12 +205,10 @@ read_table["|"] = function (s)
     local c = peek_char(s)
     if c == "|" then
       r = str .. read_char(s)
+    elseif nil63(c) then
+      r = expected(s, "|")
     else
-      if nil63(c) then
-        r = expected(s, "|")
-      else
-        str = str .. read_char(s)
-      end
+      str = str .. read_char(s)
     end
   end
   return(r)
