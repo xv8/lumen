@@ -1,7 +1,7 @@
-if (typeof(environment) === "undefined" || environment === null) {
+if (typeof(environment) === "undefined") {
   environment = [{}];
 }
-if (typeof(target) === "undefined" || target === null) {
+if (typeof(target) === "undefined") {
   target = "js";
 }
 nil63 = function (x) {
@@ -979,7 +979,7 @@ setenv("when-compiling", {_stash: true, macro: function () {
 }});
 setenv("undefined?", {_stash: true, macro: function (_var) {
   if (target === "js") {
-    return(["%or", ["%eq", ["%type", _var], "\"undefined\""], ["%eq", _var, "null"]]);
+    return(["%eq", ["%type", _var], "\"undefined\""]);
   } else {
     return(["%eq", _var, "nil"]);
   }

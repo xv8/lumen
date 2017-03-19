@@ -1027,7 +1027,7 @@ setenv("when-compiling", {_stash = true, macro = function (...)
 end})
 setenv("undefined?", {_stash = true, macro = function (_var)
   if target == "js" then
-    return({"%or", {"%eq", {"%type", _var}, "\"undefined\""}, {"%eq", _var, "null"}})
+    return({"%eq", {"%type", _var}, "\"undefined\""})
   else
     return({"%eq", _var, "nil"})
   end

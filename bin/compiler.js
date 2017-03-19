@@ -422,7 +422,7 @@ expand_if = function (_x) {
     return([a]);
   }
 };
-if (typeof(indent_level) === "undefined" || indent_level === null) {
+if (typeof(indent_level) === "undefined") {
   indent_level = 0;
 }
 indentation = function () {

@@ -260,8 +260,7 @@
 
 (define-macro undefined? (var)
   (if (= target 'js)
-      `(%or (%eq (%type ,var) "undefined")
-            (%eq ,var null))
+      `(%eq (%type ,var) "undefined")
     `(%eq ,var nil)))
 
 (define-macro init! (var val)
