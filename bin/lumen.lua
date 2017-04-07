@@ -100,11 +100,11 @@ function cut(x, from, upto, exclude)
     end
   else
     local _o1 = x
-    local k = nil
-    for k in next, _o1 do
-      local v = _o1[k]
-      if not number63(k) then
-        l[k] = v
+    local _k = nil
+    for _k in next, _o1 do
+      local _v = _o1[_k]
+      if not number63(_k) then
+        l[_k] = _v
       end
     end
   end
@@ -260,11 +260,11 @@ function map(f, x)
   local _o = x
   local k = nil
   for k in next, _o do
-    local v = _o[k]
+    local _v = _o[k]
     if not number63(k) then
-      local y = f(v)
-      if is63(y) then
-        t[k] = y
+      local _y = f(_v)
+      if is63(_y) then
+        t[k] = _y
       end
     end
   end
@@ -520,8 +520,8 @@ function str(x, stack)
     local _o1 = join(xs, ks)
     local _i1 = nil
     for _i1 in next, _o1 do
-      local v = _o1[_i1]
-      s = s .. sp .. v
+      local _v = _o1[_i1]
+      s = s .. sp .. _v
       sp = " "
     end
     return(s .. ")")
@@ -634,9 +634,9 @@ setenv("list", {_stash = true, macro = function (...)
   local _x1 = sort(ks)
   local _i1 = 0
   while _i1 < _35(_x1) do
-    local k = _x1[_i1 + 1]
-    local v = body[k]
-    add(forms, {"set", {"get", x, {"quote", k}}, v})
+    local _k = _x1[_i1 + 1]
+    local _v = body[_k]
+    add(forms, {"set", {"get", x, {"quote", _k}}, _v})
     _i1 = _i1 + 1
   end
   if some63(forms) then

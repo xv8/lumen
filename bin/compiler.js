@@ -119,16 +119,16 @@ var map42 = function (f, x) {
   }
   var i = from;
   while (i <= upto) {
-    var v = x[i];
-    f(i, v);
+    var _v = x[i];
+    f(i, _v);
     i = i + 1;
   }
   var _x = sort(ks);
   var _i1 = 0;
   while (_i1 < _35(_x)) {
-    var k = _x[_i1];
-    var v = x[k];
-    f(k, v);
+    var _k1 = _x[_i1];
+    var _v1 = x[_k1];
+    f(_k1, _v1);
     _i1 = _i1 + 1;
   }
 };
@@ -233,8 +233,8 @@ bind42 = function (args, body) {
       var n = (target === "lua" ? edge(args1) : _35(args1));
       var i = 0;
       while (i < n) {
-        var v = args1[i];
-        bs = join(bs, [v, ["destash!", v, r]]);
+        var _v = args1[i];
+        bs = join(bs, [_v, ["destash!", _v, r]]);
         i = i + 1;
       }
       var ks = keys(args);
@@ -264,6 +264,7 @@ var expand_local = function (_x) {
   var x = _x[0];
   var name = _x[1];
   var value = _x[2];
+  setenv(name, {_stash: true, variable: true});
   return(["%local", name, macroexpand(value)]);
 };
 var expand_function = function (_x) {
@@ -767,11 +768,11 @@ var lower_do = function (args, hoist, stmt63, tail63) {
     }
     _i = _i + 1;
   }
-  var e = lower(last(args), hoist, stmt63, tail63);
-  if (tail63 && can_return63(e)) {
-    return(["%return", e]);
+  var _e = lower(last(args), hoist, stmt63, tail63);
+  if (tail63 && can_return63(_e)) {
+    return(["%return", _e]);
   } else {
-    return(e);
+    return(_e);
   }
 };
 var lower_set = function (args, hoist, stmt63, tail63) {

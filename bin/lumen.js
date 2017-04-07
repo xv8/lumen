@@ -92,12 +92,12 @@ cut = function (x, from, upto, exclude) {
     }
   } else {
     var _o1 = x;
-    var k = undefined;
-    for (k in _o1) {
-      var v = _o1[k];
-      var _k1 = (numeric63(k) ? parseInt(k) : k);
-      if (! number63(_k1)) {
-        l[_k1] = v;
+    var _k1 = undefined;
+    for (_k1 in _o1) {
+      var _v = _o1[_k1];
+      var _k2 = (numeric63(_k1) ? parseInt(_k1) : _k1);
+      if (! number63(_k2)) {
+        l[_k2] = _v;
       }
     }
   }
@@ -259,12 +259,12 @@ map = function (f, x) {
   var _o = x;
   var k = undefined;
   for (k in _o) {
-    var v = _o[k];
+    var _v = _o[k];
     var _k = (numeric63(k) ? parseInt(k) : k);
     if (! number63(_k)) {
-      var y = f(v);
-      if (is63(y)) {
-        t[_k] = y;
+      var _y = f(_v);
+      if (is63(_y)) {
+        t[_k] = _y;
       }
     }
   }
@@ -511,9 +511,9 @@ str = function (x, stack) {
     var _o1 = join(xs, ks);
     var _i1 = undefined;
     for (_i1 in _o1) {
-      var v = _o1[_i1];
+      var _v = _o1[_i1];
       var __i1 = (numeric63(_i1) ? parseInt(_i1) : _i1);
-      s = s + sp + v;
+      s = s + sp + _v;
       sp = " ";
     }
     return(s + ")");
@@ -624,9 +624,9 @@ setenv("list", {_stash: true, macro: function () {
   var _x = sort(ks);
   var _i1 = 0;
   while (_i1 < _35(_x)) {
-    var k = _x[_i1];
-    var v = body[k];
-    add(forms, ["set", ["get", x, ["quote", k]], v]);
+    var _k1 = _x[_i1];
+    var _v = body[_k1];
+    add(forms, ["set", ["get", x, ["quote", _k1]], _v]);
     _i1 = _i1 + 1;
   }
   if (some63(forms)) {

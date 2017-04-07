@@ -180,6 +180,7 @@
        (= (hd x) 'unquote-splicing)))
 
 (define expand-local ((x name value))
+  (setenv name :variable)
   `(%local ,name ,(macroexpand value)))
 
 (define expand-function ((x args rest: body))

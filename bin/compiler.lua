@@ -123,16 +123,16 @@ local function map42(f, x)
   end
   local i = from
   while i <= upto do
-    local v = x[i]
-    f(i, v)
+    local _v = x[i]
+    f(i, _v)
     i = i + 1
   end
   local _x = sort(ks)
   local _i1 = 0
   while _i1 < _35(_x) do
-    local k = _x[_i1 + 1]
-    local v = x[k]
-    f(k, v)
+    local _k = _x[_i1 + 1]
+    local _v1 = x[_k]
+    f(_k, _v1)
     _i1 = _i1 + 1
   end
 end
@@ -251,8 +251,8 @@ function bind42(args, body)
       local n = _e
       local i = 0
       while i < n do
-        local v = args1[i + 1]
-        bs = join(bs, {v, {"destash!", v, r}})
+        local _v = args1[i + 1]
+        bs = join(bs, {_v, {"destash!", _v, r}})
         i = i + 1
       end
       local ks = keys(args)
@@ -282,6 +282,7 @@ local function expand_local(_x)
   local x = _x[1]
   local name = _x[2]
   local value = _x[3]
+  setenv(name, {_stash = true, variable = true})
   return({"%local", name, macroexpand(value)})
 end
 local function expand_function(_x)
@@ -859,11 +860,11 @@ local function lower_do(args, hoist, stmt63, tail63)
     end
     _i = _i + 1
   end
-  local e = lower(last(args), hoist, stmt63, tail63)
-  if tail63 and can_return63(e) then
-    return({"%return", e})
+  local _e = lower(last(args), hoist, stmt63, tail63)
+  if tail63 and can_return63(_e) then
+    return({"%return", _e})
   else
-    return(e)
+    return(_e)
   end
 end
 local function lower_set(args, hoist, stmt63, tail63)
