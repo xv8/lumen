@@ -224,7 +224,6 @@ function bind42(args, body)
   else
     local bs = {}
     local exprs = {}
-    local names = {}
     local r = "_rest"
     local _o = args
     local k = nil
@@ -234,7 +233,14 @@ function bind42(args, body)
         if atom63(v) then
           add(args1, v)
         else
-          local x = unique("x", names)
+          local n = k - 1
+          local _e
+          if n > 0 then
+            _e = n
+          else
+            _e = ""
+          end
+          local x = "_x" .. _e
           add(args1, x)
           bs = join(bs, {v, x})
         end
@@ -242,15 +248,15 @@ function bind42(args, body)
     end
     if keys63(args) then
       bs = join(bs, {r, rest()})
-      local _e
+      local _e1
       if target == "lua" then
-        _e = edge(args1)
+        _e1 = edge(args1)
       else
-        _e = _35(args1)
+        _e1 = _35(args1)
       end
-      local n = _e
+      local _n1 = _e1
       local i = 0
-      while i < n do
+      while i < _n1 do
         local _v = args1[i + 1]
         bs = join(bs, {_v, {"destash!", _v, r}})
         i = i + 1

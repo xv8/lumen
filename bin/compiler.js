@@ -211,7 +211,6 @@ bind42 = function (args, body) {
   } else {
     var bs = [];
     var exprs = [];
-    var names = {};
     var r = "_rest";
     var _o = args;
     var k = undefined;
@@ -222,7 +221,8 @@ bind42 = function (args, body) {
         if (atom63(v)) {
           add(args1, v);
         } else {
-          var x = unique("x", names);
+          var n = _k;
+          var x = "_x" + (n > 0 ? n : "");
           add(args1, x);
           bs = join(bs, [v, x]);
         }
@@ -230,9 +230,9 @@ bind42 = function (args, body) {
     }
     if (keys63(args)) {
       bs = join(bs, [r, rest()]);
-      var n = (target === "lua" ? edge(args1) : _35(args1));
+      var _n1 = (target === "lua" ? edge(args1) : _35(args1));
       var i = 0;
-      while (i < n) {
+      while (i < _n1) {
         var _v = args1[i];
         bs = join(bs, [_v, ["destash!", _v, r]]);
         i = i + 1;
