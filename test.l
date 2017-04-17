@@ -788,11 +788,12 @@ c"
     (test= 40 d)))
 
 (define-test let-unique
-  (let-unique (ham chap)
-    (test= '_ham ham)
-    (test= '_chap chap)
-    (let-unique (ham)
-      (test= '_ham1 ham))))
+  (with-bindings (())
+    (let-unique (ham chap)
+      (test= '_ham ham)
+      (test= '_chap chap)
+      (let-unique (ham)
+        (test= '_ham1 ham)))))
 
 (define-test literals
   (test= true true)
