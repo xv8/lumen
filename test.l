@@ -652,11 +652,17 @@ c"
     (test= 10 zzop)
     (test= 20 zzap)
     (test= 1 zza)
-    (test= 2 zzb)))
+    (test= 2 zzb)
+    (let (l1 '(_zzop _zzap _zza _zzb)
+          l2 (when-compiling
+               `',(map expand '(zzop zzap zza zzb))))
+      (for i (# l1)
+        (test= true (= 0 (search (at l2 i) (at l1 i))))))))
 
 (define-test let-toplevel
   (test= 99 zzop)
-  (test= 100 zzap))
+  (test= 100 zzap)
+  (test= '(zzop zzap) (when-compiling `',(map expand '(zzop zzap)))))
 
 (define-test reserved
   (let (end 'zz

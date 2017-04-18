@@ -325,7 +325,10 @@
 (define-global call (f) (f))
 
 (define-global toplevel? ()
-  (one? environment))
+  (step x environment
+    (when (has? x '%scope)
+      (return false)))
+  (return true))
 
 (define-global setenv (k rest: keys)
   (when (string? k)

@@ -527,7 +527,16 @@ call = function (f) {
   return(f());
 };
 toplevel63 = function () {
-  return(one63(environment));
+  var _x = environment;
+  var _i = 0;
+  while (_i < _35(_x)) {
+    var x = _x[_i];
+    if (has63(x, "%scope")) {
+      return(false);
+    }
+    _i = _i + 1;
+  }
+  return(true);
 };
 setenv = function (k) {
   var _rest = unstash(Array.prototype.slice.call(arguments, 1));

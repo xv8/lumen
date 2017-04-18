@@ -536,7 +536,16 @@ function call(f)
   return(f())
 end
 function toplevel63()
-  return(one63(environment))
+  local _x = environment
+  local _i = 0
+  while _i < _35(_x) do
+    local x = _x[_i + 1]
+    if has63(x, "%scope") then
+      return(false)
+    end
+    _i = _i + 1
+  end
+  return(true)
 end
 function setenv(k, ...)
   local _rest = unstash({...})
