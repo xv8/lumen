@@ -653,7 +653,16 @@ c"
        (test= 9 q))))
   (test= 0 (+ (abs -1)
               (let abs (fn (x) x)
-                (abs -1)))))
+                (abs -1))))
+  (define %i 0)
+  (let %i 1
+    (test= 1 %i)
+    (define %i 2)
+    (test= 2 %i)
+    (let %i 3
+      (test= 3 %i))
+    (test= 2 %i))
+  (test= 2 %i))
 
 (define-test with
   (test= 10 (with x 9 (inc x))))

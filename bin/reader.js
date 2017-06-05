@@ -1,7 +1,7 @@
 var delimiters = {"(": true, ")": true, ";": true, "\n": true};
 var whitespace = {" ": true, "\t": true, "\n": true};
 var stream = function (str, more) {
-  return({pos: 0, string: str, len: _35(str), more: more});
+  return({pos: 0, string: str, len: __35_(str), more: more});
 };
 var peek_char = function (s) {
   var __id = s;
@@ -69,10 +69,10 @@ read_string = function (str, more) {
   }
 };
 var key63 = function (atom) {
-  return(string63(atom) && _35(atom) > 1 && char(atom, edge(atom)) === ":");
+  return(string63(atom) && __35_(atom) > 1 && char(atom, edge(atom)) === ":");
 };
 var flag63 = function (atom) {
-  return(string63(atom) && _35(atom) > 1 && char(atom, 0) === ":");
+  return(string63(atom) && __35_(atom) > 1 && char(atom, 0) === ":");
 };
 var expected = function (s, c) {
   var __id1 = s;

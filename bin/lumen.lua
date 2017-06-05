@@ -22,20 +22,20 @@ end
 function has63(l, k)
   return(is63(l[k]))
 end
-function _35(x)
+function __35_(x)
   return(#x)
 end
 function none63(x)
-  return(_35(x) == 0)
+  return(__35_(x) == 0)
 end
 function some63(x)
-  return(_35(x) > 0)
+  return(__35_(x) > 0)
 end
 function one63(x)
-  return(_35(x) == 1)
+  return(__35_(x) == 1)
 end
 function two63(x)
-  return(_35(x) == 2)
+  return(__35_(x) == 2)
 end
 function hd(l)
   return(l[1])
@@ -60,12 +60,12 @@ function atom63(x)
 end
 nan = 0 / 0
 inf = 1 / 0
-_inf = - inf
+__inf_ = - inf
 function nan63(n)
   return(not( n == n))
 end
 function inf63(n)
-  return(n == inf or n == _inf)
+  return(n == inf or n == __inf_)
 end
 function clip(s, from, upto)
   return(string.sub(s, from + 1, upto))
@@ -80,7 +80,7 @@ function cut(x, from, upto)
     _e = from
   end
   local _i = _e
-  local _n = _35(x)
+  local _n = __35_(x)
   local _e1
   if nil63(upto) or upto > _n then
     _e1 = _n
@@ -116,7 +116,7 @@ function keys(x)
   return(_t)
 end
 function edge(x)
-  return(_35(x) - 1)
+  return(__35_(x) - 1)
 end
 function inner(x)
   return(clip(x, 1, edge(x)))
@@ -177,10 +177,10 @@ function join(...)
   local _r36 = {}
   local __x2 = _ls
   local __i4 = 0
-  while __i4 < _35(__x2) do
+  while __i4 < __35_(__x2) do
     local _l11 = __x2[__i4 + 1]
     if _l11 then
-      local _n3 = _35(_r36)
+      local _n3 = __35_(_r36)
       local __o2 = _l11
       local _k2 = nil
       for _k2 in next, __o2 do
@@ -209,7 +209,7 @@ end
 function first(f, l)
   local __x4 = l
   local __i7 = 0
-  while __i7 < _35(__x4) do
+  while __i7 < __35_(__x4) do
     local _x5 = __x4[__i7 + 1]
     local _y1 = f(_x5)
     if _y1 then
@@ -226,7 +226,7 @@ end
 function pair(l)
   local _l12 = {}
   local _i8 = 0
-  while _i8 < _35(l) do
+  while _i8 < __35_(l) do
     add(_l12, {l[_i8 + 1], l[_i8 + 1 + 1]})
     _i8 = _i8 + 1
     _i8 = _i8 + 1
@@ -241,7 +241,7 @@ function map(f, x)
   local _t1 = {}
   local __x7 = x
   local __i9 = 0
-  while __i9 < _35(__x7) do
+  while __i9 < __35_(__x7) do
     local _v3 = __x7[__i9 + 1]
     local _y2 = f(_v3)
     if is63(_y2) then
@@ -354,7 +354,7 @@ function split(s, sep)
     return({})
   else
     local _l3 = {}
-    local _n12 = _35(sep)
+    local _n12 = __35_(sep)
     while true do
       local _i17 = search(s, sep)
       if nil63(_i17) then
@@ -374,31 +374,31 @@ function cat(...)
     return(a .. b)
   end, _xs), ""))
 end
-function _43(...)
+function __43_(...)
   local _xs1 = unstash({...})
   return(either(reduce(function (a, b)
     return(a + b)
   end, _xs1), 0))
 end
-function _45(...)
+function __45_(...)
   local _xs2 = unstash({...})
   return(either(reduce(function (b, a)
     return(a - b)
   end, reverse(_xs2)), 0))
 end
-function _42(...)
+function __42_(...)
   local _xs3 = unstash({...})
   return(either(reduce(function (a, b)
     return(a * b)
   end, _xs3), 1))
 end
-function _47(...)
+function __47_(...)
   local _xs4 = unstash({...})
   return(either(reduce(function (b, a)
     return(a / b)
   end, reverse(_xs4)), 1))
 end
-function _37(...)
+function __37_(...)
   local _xs5 = unstash({...})
   return(either(reduce(function (b, a)
     return(a % b)
@@ -416,31 +416,31 @@ local function pairwise(f, xs)
   end
   return(true)
 end
-function _60(...)
+function __60_(...)
   local _xs6 = unstash({...})
   return(pairwise(function (a, b)
     return(a < b)
   end, _xs6))
 end
-function _62(...)
+function __62_(...)
   local _xs7 = unstash({...})
   return(pairwise(function (a, b)
     return(a > b)
   end, _xs7))
 end
-function _61(...)
+function __61_(...)
   local _xs8 = unstash({...})
   return(pairwise(function (a, b)
     return(a == b)
   end, _xs8))
 end
-function _6061(...)
+function __6061_(...)
   local _xs9 = unstash({...})
   return(pairwise(function (a, b)
     return(a <= b)
   end, _xs9))
 end
-function _6261(...)
+function __6261_(...)
   local _xs10 = unstash({...})
   return(pairwise(function (a, b)
     return(a >= b)
@@ -453,7 +453,7 @@ function number_code63(n)
   return(n > 47 and n < 58)
 end
 function numeric63(s)
-  local _n13 = _35(s)
+  local _n13 = __35_(s)
   local _i19 = 0
   while _i19 < _n13 do
     if not number_code63(code(s, _i19)) then
@@ -466,7 +466,7 @@ end
 function escape(s)
   local _s1 = "\""
   local _i20 = 0
-  while _i20 < _35(s) do
+  while _i20 < __35_(s) do
     local _c = char(s, _i20)
     local _e4
     if _c == "\n" then
@@ -502,7 +502,7 @@ function str(x, stack)
       if x == inf then
         return("inf")
       else
-        if x == _inf then
+        if x == __inf_ then
           return("-inf")
         else
           if boolean63(x) then
@@ -703,7 +703,7 @@ setenv("case", {_stash = true, macro = function (expr, ...)
         if one63(_a1) then
           return({_eq1(hd(_a1)), _b1})
         else
-          if _35(_a1) > 1 then
+          if __35_(_a1) > 1 then
             return({join({"or"}, map(_eq1, _a1)), _b1})
           end
         end
@@ -824,7 +824,7 @@ setenv("define", {_stash = true, macro = function (name, x, ...)
   local _x145 = destash33(x, __r37)
   local __id31 = __r37
   local _body21 = cut(__id31, 0)
-  setenv(_name5, {_stash = true, variable = true})
+  setenv(_name5, {_stash = true, variable = true, symbol = _name5}).symbol = nil
   if some63(_body21) then
     return(join({"%local-function", _name5}, bind42(_x145, _body21)))
   else
@@ -837,7 +837,7 @@ setenv("define-global", {_stash = true, macro = function (name, x, ...)
   local _x152 = destash33(x, __r39)
   local __id33 = __r39
   local _body23 = cut(__id33, 0)
-  setenv(_name7, {_stash = true, toplevel = true, variable = true})
+  setenv(_name7, {_stash = true, toplevel = true, variable = true}).symbol = nil
   if some63(_body23) then
     return(join({"%global-function", _name7}, bind42(_x152, _body23)))
   else
@@ -912,7 +912,7 @@ setenv("apply", {_stash = true, macro = function (f, ...)
   local _f1 = destash33(f, __r57)
   local __id49 = __r57
   local _args9 = cut(__id49, 0)
-  if _35(_args9) > 1 then
+  if __35_(_args9) > 1 then
     return({{"do", "apply"}, _f1, {"join", join({"list"}, almost(_args9)), last(_args9)}})
   else
     return(join({{"do", "apply"}, _f1}, _args9))
@@ -945,7 +945,7 @@ setenv("each", {_stash = true, macro = function (x, t, ...)
     _e8 = {_i3, _x291}
   else
     local _e9
-    if _35(_x291) > 1 then
+    if __35_(_x291) > 1 then
       _e9 = _x291
     else
       _e9 = {_i3, hd(_x291)}
@@ -1143,7 +1143,7 @@ local function run_file(path)
   return(compiler.run(system["read-file"](path)))
 end
 local function script_file63(path)
-  return(not( "-" == char(path, 0) or ".js" == clip(path, _35(path) - 3) or ".lua" == clip(path, _35(path) - 4)))
+  return(not( "-" == char(path, 0) or ".js" == clip(path, __35_(path) - 3) or ".lua" == clip(path, __35_(path) - 4)))
 end
 local function usage()
   print("usage: lumen [<file> <arguments> | options <object files>]")
@@ -1171,7 +1171,7 @@ local function main()
       local _expr = nil
       local _argv = system.argv
       local _i = 0
-      while _i < _35(_argv) do
+      while _i < __35_(_argv) do
         local _a = _argv[_i + 1]
         if _a == "-c" or _a == "-o" or _a == "-t" or _a == "-e" then
           if _i == edge(_argv) then
@@ -1204,7 +1204,7 @@ local function main()
       end
       local __x4 = _pre
       local __i1 = 0
-      while __i1 < _35(__x4) do
+      while __i1 < __35_(__x4) do
         local _file = __x4[__i1 + 1]
         run_file(_file)
         __i1 = __i1 + 1

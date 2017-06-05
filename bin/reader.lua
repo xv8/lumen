@@ -1,7 +1,7 @@
 local delimiters = {["("] = true, [")"] = true, [";"] = true, ["\n"] = true}
 local whitespace = {[" "] = true, ["\t"] = true, ["\n"] = true}
 local function stream(str, more)
-  return({pos = 0, string = str, len = _35(str), more = more})
+  return({pos = 0, string = str, len = __35_(str), more = more})
 end
 local function peek_char(s)
   local __id = s
@@ -69,10 +69,10 @@ function read_string(str, more)
   end
 end
 local function key63(atom)
-  return(string63(atom) and _35(atom) > 1 and char(atom, edge(atom)) == ":")
+  return(string63(atom) and __35_(atom) > 1 and char(atom, edge(atom)) == ":")
 end
 local function flag63(atom)
-  return(string63(atom) and _35(atom) > 1 and char(atom, 0) == ":")
+  return(string63(atom) and __35_(atom) > 1 and char(atom, 0) == ":")
 end
 local function expected(s, c)
   local __id1 = s

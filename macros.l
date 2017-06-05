@@ -96,13 +96,13 @@
   `(set (get read-table ,char) (fn (,s) ,@body)))
 
 (define-macro define (name x rest: body)
-  (setenv name :variable)
+  (wipe (get (setenv name :variable symbol: name) 'symbol))
   (if (some? body)
       `(%local-function ,name ,@(bind* x body))
     `(%local ,name ,x)))
 
 (define-macro define-global (name x rest: body)
-  (setenv name :toplevel :variable)
+  (wipe (get (setenv name :toplevel :variable) 'symbol))
   (if (some? body)
       `(%global-function ,name ,@(bind* x body))
     `(set ,name ,x)))

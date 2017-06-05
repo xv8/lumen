@@ -22,20 +22,20 @@ either = function (x, y) {
 has63 = function (l, k) {
   return(l.hasOwnProperty(k));
 };
-_35 = function (x) {
+__35_ = function (x) {
   return(x.length || 0);
 };
 none63 = function (x) {
-  return(_35(x) === 0);
+  return(__35_(x) === 0);
 };
 some63 = function (x) {
-  return(_35(x) > 0);
+  return(__35_(x) > 0);
 };
 one63 = function (x) {
-  return(_35(x) === 1);
+  return(__35_(x) === 1);
 };
 two63 = function (x) {
-  return(_35(x) === 2);
+  return(__35_(x) === 2);
 };
 hd = function (l) {
   return(l[0]);
@@ -63,12 +63,12 @@ atom63 = function (x) {
 };
 nan = 0 / 0;
 inf = 1 / 0;
-_inf = - inf;
+__inf_ = - inf;
 nan63 = function (n) {
   return(!( n === n));
 };
 inf63 = function (n) {
-  return(n === inf || n === _inf);
+  return(n === inf || n === __inf_);
 };
 clip = function (s, from, upto) {
   return(s.substring(from, upto));
@@ -83,7 +83,7 @@ cut = function (x, from, upto) {
     _e = from;
   }
   var _i = _e;
-  var _n = _35(x);
+  var _n = __35_(x);
   var _e1;
   if (nil63(upto) || upto > _n) {
     _e1 = _n;
@@ -133,7 +133,7 @@ keys = function (x) {
   return(_t);
 };
 edge = function (x) {
-  return(_35(x) - 1);
+  return(__35_(x) - 1);
 };
 inner = function (x) {
   return(clip(x, 1, edge(x)));
@@ -191,10 +191,10 @@ join = function () {
   var _r37 = [];
   var __x1 = _ls;
   var __i4 = 0;
-  while (__i4 < _35(__x1)) {
+  while (__i4 < __35_(__x1)) {
     var _l11 = __x1[__i4];
     if (_l11) {
-      var _n3 = _35(_r37);
+      var _n3 = __35_(_r37);
       var __o2 = _l11;
       var _k4 = undefined;
       for (_k4 in __o2) {
@@ -237,7 +237,7 @@ find = function (f, t) {
 first = function (f, l) {
   var __x3 = l;
   var __i7 = 0;
-  while (__i7 < _35(__x3)) {
+  while (__i7 < __35_(__x3)) {
     var _x4 = __x3[__i7];
     var _y1 = f(_x4);
     if (_y1) {
@@ -254,7 +254,7 @@ in63 = function (x, t) {
 pair = function (l) {
   var _l12 = [];
   var _i8 = 0;
-  while (_i8 < _35(l)) {
+  while (_i8 < __35_(l)) {
     add(_l12, [l[_i8], l[_i8 + 1]]);
     _i8 = _i8 + 1;
     _i8 = _i8 + 1;
@@ -278,7 +278,7 @@ map = function (f, x) {
   var _t1 = [];
   var __x6 = x;
   var __i9 = 0;
-  while (__i9 < _35(__x6)) {
+  while (__i9 < __35_(__x6)) {
     var _v3 = __x6[__i9];
     var _y2 = f(_v3);
     if (is63(_y2)) {
@@ -430,7 +430,7 @@ split = function (s, sep) {
     return([]);
   } else {
     var _l3 = [];
-    var _n12 = _35(sep);
+    var _n12 = __35_(sep);
     while (true) {
       var _i17 = search(s, sep);
       if (nil63(_i17)) {
@@ -450,31 +450,31 @@ cat = function () {
     return(a + b);
   }, _xs), ""));
 };
-_43 = function () {
+__43_ = function () {
   var _xs1 = unstash(Array.prototype.slice.call(arguments, 0));
   return(either(reduce(function (a, b) {
     return(a + b);
   }, _xs1), 0));
 };
-_45 = function () {
+__45_ = function () {
   var _xs2 = unstash(Array.prototype.slice.call(arguments, 0));
   return(either(reduce(function (b, a) {
     return(a - b);
   }, reverse(_xs2)), 0));
 };
-_42 = function () {
+__42_ = function () {
   var _xs3 = unstash(Array.prototype.slice.call(arguments, 0));
   return(either(reduce(function (a, b) {
     return(a * b);
   }, _xs3), 1));
 };
-_47 = function () {
+__47_ = function () {
   var _xs4 = unstash(Array.prototype.slice.call(arguments, 0));
   return(either(reduce(function (b, a) {
     return(a / b);
   }, reverse(_xs4)), 1));
 };
-_37 = function () {
+__37_ = function () {
   var _xs5 = unstash(Array.prototype.slice.call(arguments, 0));
   return(either(reduce(function (b, a) {
     return(a % b);
@@ -492,31 +492,31 @@ var pairwise = function (f, xs) {
   }
   return(true);
 };
-_60 = function () {
+__60_ = function () {
   var _xs6 = unstash(Array.prototype.slice.call(arguments, 0));
   return(pairwise(function (a, b) {
     return(a < b);
   }, _xs6));
 };
-_62 = function () {
+__62_ = function () {
   var _xs7 = unstash(Array.prototype.slice.call(arguments, 0));
   return(pairwise(function (a, b) {
     return(a > b);
   }, _xs7));
 };
-_61 = function () {
+__61_ = function () {
   var _xs8 = unstash(Array.prototype.slice.call(arguments, 0));
   return(pairwise(function (a, b) {
     return(a === b);
   }, _xs8));
 };
-_6061 = function () {
+__6061_ = function () {
   var _xs9 = unstash(Array.prototype.slice.call(arguments, 0));
   return(pairwise(function (a, b) {
     return(a <= b);
   }, _xs9));
 };
-_6261 = function () {
+__6261_ = function () {
   var _xs10 = unstash(Array.prototype.slice.call(arguments, 0));
   return(pairwise(function (a, b) {
     return(a >= b);
@@ -532,7 +532,7 @@ number_code63 = function (n) {
   return(n > 47 && n < 58);
 };
 numeric63 = function (s) {
-  var _n14 = _35(s);
+  var _n14 = __35_(s);
   var _i19 = 0;
   while (_i19 < _n14) {
     if (! number_code63(code(s, _i19))) {
@@ -548,7 +548,7 @@ var tostring = function (x) {
 escape = function (s) {
   var _s1 = "\"";
   var _i20 = 0;
-  while (_i20 < _35(s)) {
+  while (_i20 < __35_(s)) {
     var _c = char(s, _i20);
     var _e13;
     if (_c === "\n") {
@@ -584,7 +584,7 @@ str = function (x, stack) {
       if (x === inf) {
         return("inf");
       } else {
-        if (x === _inf) {
+        if (x === __inf_) {
           return("-inf");
         } else {
           if (boolean63(x)) {
@@ -812,7 +812,7 @@ setenv("case", {_stash: true, macro: function (expr) {
         if (one63(_a1)) {
           return([_eq1(hd(_a1)), _b1]);
         } else {
-          if (_35(_a1) > 1) {
+          if (__35_(_a1) > 1) {
             return([join(["or"], map(_eq1, _a1)), _b1]);
           }
         }
@@ -933,7 +933,7 @@ setenv("define", {_stash: true, macro: function (name, x) {
   var _x131 = destash33(x, __r37);
   var __id31 = __r37;
   var _body21 = cut(__id31, 0);
-  setenv(_name5, {_stash: true, variable: true});
+  delete setenv(_name5, {_stash: true, variable: true, symbol: _name5}).symbol;
   if (some63(_body21)) {
     return(join(["%local-function", _name5], bind42(_x131, _body21)));
   } else {
@@ -946,7 +946,7 @@ setenv("define-global", {_stash: true, macro: function (name, x) {
   var _x137 = destash33(x, __r39);
   var __id33 = __r39;
   var _body23 = cut(__id33, 0);
-  setenv(_name7, {_stash: true, toplevel: true, variable: true});
+  delete setenv(_name7, {_stash: true, toplevel: true, variable: true}).symbol;
   if (some63(_body23)) {
     return(join(["%global-function", _name7], bind42(_x137, _body23)));
   } else {
@@ -1021,7 +1021,7 @@ setenv("apply", {_stash: true, macro: function (f) {
   var _f1 = destash33(f, __r57);
   var __id49 = __r57;
   var _args9 = cut(__id49, 0);
-  if (_35(_args9) > 1) {
+  if (__35_(_args9) > 1) {
     return([["do", "apply"], _f1, ["join", join(["list"], almost(_args9)), last(_args9)]]);
   } else {
     return(join([["do", "apply"], _f1], _args9));
@@ -1054,7 +1054,7 @@ setenv("each", {_stash: true, macro: function (x, t) {
     _e9 = [_i3, _x268];
   } else {
     var _e10;
-    if (_35(_x268) > 1) {
+    if (__35_(_x268) > 1) {
       _e10 = _x268;
     } else {
       _e10 = [_i3, hd(_x268)];
@@ -1240,7 +1240,7 @@ var run_file = function (path) {
   return(compiler.run(system["read-file"](path)));
 };
 var script_file63 = function (path) {
-  return(!( "-" === char(path, 0) || ".js" === clip(path, _35(path) - 3) || ".lua" === clip(path, _35(path) - 4)));
+  return(!( "-" === char(path, 0) || ".js" === clip(path, __35_(path) - 3) || ".lua" === clip(path, __35_(path) - 4)));
 };
 var usage = function () {
   print("usage: lumen [<file> <arguments> | options <object files>]");
@@ -1268,7 +1268,7 @@ var main = function () {
       var _expr = undefined;
       var _argv = system.argv;
       var _i = 0;
-      while (_i < _35(_argv)) {
+      while (_i < __35_(_argv)) {
         var _a = _argv[_i];
         if (_a === "-c" || _a === "-o" || _a === "-t" || _a === "-e") {
           if (_i === edge(_argv)) {
@@ -1301,7 +1301,7 @@ var main = function () {
       }
       var __x2 = _pre;
       var __i1 = 0;
-      while (__i1 < _35(__x2)) {
+      while (__i1 < __35_(__x2)) {
         var _file = __x2[__i1];
         run_file(_file);
         __i1 = __i1 + 1;

@@ -25,7 +25,9 @@
   (and (special? k) (getenv k 'stmt)))
 
 (define symbol-expansion (k)
-  (getenv k 'symbol))
+  (let s (getenv k 'symbol)
+    (unless (= s k)
+      s)))
 
 (define symbol? (k)
   (is? (symbol-expansion k)))
@@ -222,8 +224,7 @@
       (cat! s "  "))))
 
 (define reserved
-  (set-of "=" "==" "+" "-" "%" "*" "/" "<" ">" "<=" ">="
-          ;; js
+  (set-of ;; js
           "break" "case" "catch" "continue" "debugger"
           "default" "delete" "do" "else" "finally" "for"
           "function" "if" "in" "instanceof" "new" "return"
@@ -313,20 +314,23 @@
         (cat! s1 (if (= c "\n") "\\n" c))))))
 
 (define id (id)
-  (let id1 (if (number-code? (code id 0)) "_" "")
-    (for i (# id)
-      (let (c (char id i)
-            n (code c)
-            c1 (if (and (= c "-")
-                        (not (= id "-")))
-                   "_"
-                   (valid-code? n) c
-                   (= i 0) (cat "_" n)
-                 n))
-        (cat! id1 c1)))
-    (if (reserved? id1)
-        (cat "_" id1)
-        id1)))
+  (with id1 ""
+    (let end (edge id)
+      (for i (# id)
+        (let (c (char id i)
+              n (code c)
+              c1 (if (and (= c "-")
+                          (not (= i end)))
+                     "_"
+                     (valid-code? n) c
+                     (= i 0) (cat "_" n)
+                   n))
+          (cat! id1 c1))))
+    (let n (code id 0)
+      (when (or (reserved? id1)
+                (number-code? n)
+                (not (valid-code? n)))
+        (set id1 (cat "_" id1 "_"))))))
 
 (define compile-atom (x)
   (if (and (= x "nil") (= target 'lua)) x
