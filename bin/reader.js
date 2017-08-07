@@ -79,7 +79,7 @@ var expected = function (s, c) {
   var __more = ____id1.more;
   var __pos1 = ____id1.pos;
   var __id2 = __more;
-  var __e;
+  var __e = undefined;
   if (__id2) {
     __e = __id2;
   } else {
@@ -97,7 +97,7 @@ var wrap = function (s, x) {
   }
 };
 var hex_prefix63 = function (str) {
-  var __e1;
+  var __e1 = undefined;
   if (code(str, 0) === 45) {
     __e1 = 1;
   } else {
@@ -105,7 +105,7 @@ var hex_prefix63 = function (str) {
   }
   var __i = __e1;
   var __id3 = code(str, __i) === 48;
-  var __e2;
+  var __e2 = undefined;
   if (__id3) {
     __i = __i + 1;
     var __n = code(str, __i);

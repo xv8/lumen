@@ -79,7 +79,7 @@ local function expected(s, c)
   local __more = ____id1.more
   local __pos1 = ____id1.pos
   local __id2 = __more
-  local __e
+  local __e = nil
   if __id2 then
     __e = __id2
   else
@@ -97,7 +97,7 @@ local function wrap(s, x)
   end
 end
 local function hex_prefix63(str)
-  local __e1
+  local __e1 = nil
   if code(str, 0) == 45 then
     __e1 = 1
   else
@@ -105,7 +105,7 @@ local function hex_prefix63(str)
   end
   local __i = __e1
   local __id3 = code(str, __i) == 48
-  local __e2
+  local __e2 = nil
   if __id3 then
     __i = __i + 1
     local __n = code(str, __i)
