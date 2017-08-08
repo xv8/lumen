@@ -4,7 +4,7 @@ local function stream(str, more)
   return {pos = 0, string = str, len = _35(str), more = more}
 end
 local function peek_char(s)
-  local ____id = s
+  local ____id = s or {}
   local __pos = ____id.pos
   local __len = ____id.len
   local __string = ____id.string
@@ -75,7 +75,7 @@ local function flag63(atom)
   return string63(atom) and _35(atom) > 1 and char(atom, 0) == ":"
 end
 local function expected(s, c)
-  local ____id1 = s
+  local ____id1 = s or {}
   local __more = ____id1.more
   local __pos1 = ____id1.pos
   local __id2 = __more

@@ -68,7 +68,7 @@
 (define-global bind (lh rh)
   (if (atom? lh) `(,lh ,rh)
     (let-unique (id)
-      (with bs (list id rh)
+      (with bs (list id `(or ,rh (obj)))
         (each (k v) lh
           (let x (if (= k 'rest)
                      `(cut ,id ,(# lh))

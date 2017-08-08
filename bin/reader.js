@@ -4,7 +4,7 @@ var stream = function (str, more) {
   return {pos: 0, string: str, len: _35(str), more: more};
 };
 var peek_char = function (s) {
-  var ____id = s;
+  var ____id = s || {};
   var __pos = ____id.pos;
   var __len = ____id.len;
   var __string = ____id.string;
@@ -75,7 +75,7 @@ var flag63 = function (atom) {
   return string63(atom) && _35(atom) > 1 && char(atom, 0) === ":";
 };
 var expected = function (s, c) {
-  var ____id1 = s;
+  var ____id1 = s || {};
   var __more = ____id1.more;
   var __pos1 = ____id1.pos;
   var __id2 = __more;
