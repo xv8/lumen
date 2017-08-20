@@ -227,22 +227,22 @@
                   (set s (clip s (+ i n)))))))
         (add l s)))))
 
-(define-global cat xs
+(define-global #'cat xs
   (either (reduce (fn (a b) (cat a b)) xs) ""))
 
-(define-global + xs
+(define-global #'+ xs
   (either (reduce (fn (a b) (+ a b)) xs) 0))
 
-(define-global - xs
+(define-global #'- xs
   (either (reduce (fn (b a) (- a b)) (reverse xs)) 0))
 
-(define-global * xs
+(define-global #'* xs
   (either (reduce (fn (a b) (* a b)) xs) 1))
 
-(define-global / xs
+(define-global #'/ xs
   (either (reduce (fn (b a) (/ a b)) (reverse xs)) 1))
 
-(define-global % xs
+(define-global #'% xs
   (either (reduce (fn (b a) (% a b)) (reverse xs)) 0))
 
 (define pairwise (f xs)
@@ -253,11 +253,11 @@
         (return false))))
   (return true))
 
-(define-global < xs (pairwise (fn (a b) (< a b)) xs))
-(define-global > xs (pairwise (fn (a b) (> a b)) xs))
-(define-global = xs (pairwise (fn (a b) (= a b)) xs))
-(define-global <= xs (pairwise (fn (a b) (<= a b)) xs))
-(define-global >= xs (pairwise (fn (a b) (>= a b)) xs))
+(define-global #'< xs (pairwise (fn (a b) (< a b)) xs))
+(define-global #'> xs (pairwise (fn (a b) (> a b)) xs))
+(define-global #'= xs (pairwise (fn (a b) (= a b)) xs))
+(define-global #'<= xs (pairwise (fn (a b) (<= a b)) xs))
+(define-global #'>= xs (pairwise (fn (a b) (>= a b)) xs))
 
 (define-global number (s)
   (target

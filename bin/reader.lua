@@ -1,13 +1,13 @@
-local delimiters = {["("] = true, [")"] = true, [";"] = true, ["\r"] = true, ["\n"] = true}
-local whitespace = {[" "] = true, ["\t"] = true, ["\r"] = true, ["\n"] = true}
+local delimiters = {["\n"] = true, [";"] = true, ["\r"] = true, ["("] = true, [")"] = true}
+local whitespace = {["\t"] = true, [" "] = true, ["\n"] = true, ["\r"] = true}
 local function stream(str, more)
-  return {pos = 0, string = str, len = _35(str), more = more}
+  return {more = more, string = str, pos = 0, len = _35(str)}
 end
 local function peek_char(s)
   local ____id = s
-  local __pos = ____id.pos
   local __len = ____id.len
   local __string = ____id.string
+  local __pos = ____id.pos
   if __pos < __len then
     return char(__string, __pos)
   end
@@ -127,7 +127,7 @@ end
 local function real63(x)
   return number63(x) and not nan63(x) and not inf63(x)
 end
-read_table[""] = function (s)
+local function read_atom(s)
   local __str = ""
   while true do
     local __c3 = peek_char(s)
@@ -137,34 +137,38 @@ read_table[""] = function (s)
       break
     end
   end
-  if __str == "true" then
+  return __str
+end
+read_table[""] = function (s)
+  local __str1 = read_atom(s)
+  if __str1 == "true" then
     return true
   else
-    if __str == "false" then
+    if __str1 == "false" then
       return false
     else
-      local __n1 = maybe_number(__str)
+      local __n1 = maybe_number(__str1)
       if real63(__n1) then
         return __n1
       else
-        return __str
+        return __str1
       end
     end
   end
 end
 read_table["("] = function (s)
   read_char(s)
-  local __r16 = nil
+  local __r17 = nil
   local __l1 = {}
-  while nil63(__r16) do
+  while nil63(__r17) do
     skip_non_code(s)
     local __c4 = peek_char(s)
     if __c4 == ")" then
       read_char(s)
-      __r16 = __l1
+      __r17 = __l1
     else
       if nil63(__c4) then
-        __r16 = expected(s, ")")
+        __r17 = expected(s, ")")
       else
         local __x2 = read(s)
         if key63(__x2) then
@@ -181,53 +185,62 @@ read_table["("] = function (s)
       end
     end
   end
-  return __r16
+  return __r17
 end
 read_table[")"] = function (s)
   error("Unexpected ) at " .. s.pos)
 end
 read_table["\""] = function (s)
   read_char(s)
-  local __r19 = nil
-  local __str1 = "\""
-  while nil63(__r19) do
+  local __r20 = nil
+  local __str2 = "\""
+  while nil63(__r20) do
     local __c5 = peek_char(s)
     if __c5 == "\"" then
-      __r19 = __str1 .. read_char(s)
+      __r20 = __str2 .. read_char(s)
     else
       if nil63(__c5) then
-        __r19 = expected(s, "\"")
+        __r20 = expected(s, "\"")
       else
         if __c5 == "\\" then
-          __str1 = __str1 .. read_char(s)
+          __str2 = __str2 .. read_char(s)
         end
-        __str1 = __str1 .. read_char(s)
-      end
-    end
-  end
-  return __r19
-end
-read_table["|"] = function (s)
-  read_char(s)
-  local __r21 = nil
-  local __str2 = "|"
-  while nil63(__r21) do
-    local __c6 = peek_char(s)
-    if __c6 == "|" then
-      __r21 = __str2 .. read_char(s)
-    else
-      if nil63(__c6) then
-        __r21 = expected(s, "|")
-      else
         __str2 = __str2 .. read_char(s)
       end
     end
   end
-  return __r21
+  return __r20
+end
+read_table["|"] = function (s)
+  read_char(s)
+  local __r22 = nil
+  local __str3 = "|"
+  while nil63(__r22) do
+    local __c6 = peek_char(s)
+    if __c6 == "|" then
+      __r22 = __str3 .. read_char(s)
+    else
+      if nil63(__c6) then
+        __r22 = expected(s, "|")
+      else
+        __str3 = __str3 .. read_char(s)
+      end
+    end
+  end
+  return __r22
 end
 read_table["'"] = function (s)
   read_char(s)
   return wrap(s, "quote")
+end
+read_table["#"] = function (s)
+  read_char(s)
+  if peek_char(s) == "'" then
+    read_char(s)
+    return wrap(s, "sharp-quote")
+  else
+    return "#" .. read_atom(s)
+  end
 end
 read_table["`"] = function (s)
   read_char(s)
@@ -242,4 +255,4 @@ read_table[","] = function (s)
     return wrap(s, "unquote")
   end
 end
-return {stream = stream, read = read, ["read-all"] = read_all, ["read-string"] = read_string, ["read-table"] = read_table}
+return {stream = stream, ["read-table"] = read_table, read = read, ["read-string"] = read_string, ["read-all"] = read_all}

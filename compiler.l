@@ -1,4 +1,5 @@
 (define reader (require 'reader))
+(define infix?)
 
 (define getenv (k p)
   (when (string? k)
@@ -19,10 +20,12 @@
   (is? (getenv k 'special)))
 
 (define special-form? (form)
-  (and (not (atom? form)) (special? (hd form))))
+  ((not (atom? form))
+   and (special? (hd form))))
 
 (define statement? (k)
-  (and (special? k) (getenv k 'stmt)))
+  ((special? k)
+   and (getenv k 'stmt)))
 
 (define symbol-expansion (k)
   (getenv k 'symbol))
@@ -44,6 +47,11 @@
       (atom? form) form
     `(list ,@(map quoted form))))
 
+(define-global unquoted (x)
+  (if ((obj? x) and ((hd x) == 'sharp-quote))
+      (at x 1)
+    x))
+
 (define literal (s)
   (if (string-literal? s) s (quoted s)))
 
@@ -58,9 +66,9 @@
     args))
 
 (define bias (k)
-  (when (and (number? k)
-             (not (= target (language))))
-    (if (= target 'js)
+  (when ((number? k)
+         and (target != (language)))
+    (if (target == 'js)
         (dec k)
       (inc k)))
   k)
@@ -138,15 +146,56 @@
 (define-global expand1 ((name rest: body))
   (apply (macro-function name) body))
 
+(define-global infix-syntax? (form)
+  (and (infix? (at form 1))
+       (> (# form) 2)))
+
+(define-global expand-infix-syntax (form)
+  (let form `(,(at form 1) ,@(map hd (pair form)))
+    ; (print (str form))
+    (macroexpand form)))
+
+(define-global body-syntax? (form)
+  (and (= (hd form) 'do)
+       (> (# form) 4)))
+       ; (infix? (at form 2))))
+
+(define-global expand-body-syntax ((x rest: body))
+  (let l '(do)
+    (while (some? body)
+      (let ((a op b) body)
+        (if (or (not (infix? op))
+                (< (# body) 3))
+            (do (add l (macroexpand a))
+                (set body (tl body)))
+          (do (when (= op "=")
+                (set op (if ((not (atom? a)) or (variable? a)) 'set '%local)))
+              ; (print (str `(,op ,a ,b)))
+              (add l (macroexpand `(,op ,a ,b)))
+              (set body (cut body 3))))))
+    `(,@l ,@(map macroexpand body))))
+                   
+        ; (if (not (atom? form)) (add l form)
+            
+
+
+  ; (macroexpand
+    ; `(do ,@(map (fn ((a op b))
+                  ; `(,(if (= op "=") (if (variable? a) 'set '%local) op) ,a ,b))
+                ; (pair (tl form) 3)))))
+
 (define-global macroexpand (form)
   (if (symbol? form)
       (macroexpand (symbol-expansion form))
       (atom? form) form
     (let x (hd form)
       (if (= x '%local) (expand-local form)
+          (= x 'sharp-quote) form
           (= x '%function) (expand-function form)
           (= x '%global-function) (expand-definition form)
           (= x '%local-function) (expand-definition form)
+          (infix-syntax? form) (expand-infix-syntax form)
+          (body-syntax? form) (expand-body-syntax form)
           (macro? x) (expand-macro form)
         (map macroexpand form)))))
 
@@ -282,6 +331,8 @@
     (:+ :-)
     (:< :> :<= :>=)
     (=: (js: === lua: ==))
+    (==: (js: === lua: ==))
+    (!=: (js: !== lua: ~=))
     (and: (js: && lua: and))
     (or: (js: ,"||" lua: or))))
 
@@ -304,7 +355,7 @@
                 (is? x) (get x target))))
         infix))
 
-(define infix? (x)
+(define-global infix? (x)
   (is? (getop x)))
 
 (define-global infix-operator? (x)
@@ -492,9 +543,9 @@
         c (lower c pre))
     (add hoist
       (if (none? pre)
-          `(while ,c
+          `(%while ,c
             ,(lower-body body))
-        `(while true
+        `(%while true
            (do ,@pre
                (%if (not ,c) (break))
                ,(lower-body body)))))))
@@ -556,6 +607,7 @@
           (= x '%if) (lower-if args hoist stmt? tail?)
           (= x '%try) (lower-try args hoist tail?)
           (= x 'while) (lower-while args hoist)
+          (= x '%while) (lower-while args hoist)
           (= x '%for) (lower-for args hoist)
           (= x '%function) (lower-function args)
           (or (= x '%local-function)
@@ -621,6 +673,14 @@
       (cat s "\n"))))
 
 (define-special while (cond form) :stmt :tr
+  (let (cond (compile cond)
+        body (with-indent (compile form :stmt))
+        ind (indentation))
+    (if (= target 'js)
+        (cat ind "while (" cond ") {\n" body ind "}\n")
+      (cat ind "while " cond " do\n" body ind "end\n"))))
+
+(define-special %while (cond form) :stmt :tr
   (let (cond (compile cond)
         body (with-indent (compile form :stmt))
         ind (indentation))
@@ -732,7 +792,10 @@
     (cat s "}")))
 
 (define-special %literal args
-  (apply cat (map compile args)))
+  (apply #'cat (map compile args)))
+
+(define-special sharp-quote (x)
+  (compile x))
 
 (export run
         eval

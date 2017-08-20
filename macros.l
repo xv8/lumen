@@ -96,16 +96,18 @@
   `(set (get read-table ,char) (fn (,s) ,@body)))
 
 (define-macro define (name x rest: body)
-  (setenv name :variable)
-  (if (some? body)
-      `(%local-function ,name ,@(bind* x body))
-    `(%local ,name ,x)))
+  (let name (unquoted name)
+    (setenv name :variable)
+    (if (some? body)
+        `(%local-function ,name ,@(bind* x body))
+      `(%local ,name ,x))))
 
 (define-macro define-global (name x rest: body)
-  (setenv name :toplevel :variable)
-  (if (some? body)
-      `(%global-function ,name ,@(bind* x body))
-    `(set ,name ,x)))
+  (let name (unquoted name)
+    (setenv name :toplevel :variable)
+    (if (some? body)
+        `(%global-function ,name ,@(bind* x body))
+      `(set ,name ,x))))
 
 (define-macro with-frame body
   (let-unique (x)
@@ -169,11 +171,14 @@
       `(let (,o ,t ,k nil)
          (%for ,o ,k
            (let (,v (get ,o ,k))
-             ,@(if (= target 'lua) body
-                   `((let ,k (if (numeric? ,k)
-                                 (parseInt ,k)
-                               ,k)
-                       ,@body)))))))))
+             (do ,@(if (= target 'lua) body
+                       `((let ,k (if (numeric? ,k)
+                                     (parseInt ,k)
+                                   ,k)
+                           ,@body))))))))))
+
+(define-macro while (cond rest: body)
+  `(%while ,cond (do ,@body)))
 
 (define-macro for (i to rest: body)
   `(let ,i 0
