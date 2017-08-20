@@ -1,6 +1,6 @@
-(define reader (require 'reader))
-(define compiler (require 'compiler))
-(define system (require 'system))
+reader = (require 'reader)
+compiler = (require 'compiler)
+system = (require 'system)
 
 (define eval-print (form)
   (let ((ok v) (guard ((get compiler 'eval) form)))
@@ -14,41 +14,43 @@
   (eval-print ((get reader 'read-string) s)))
 
 (define repl ()
-  (let buf ""
-    (define rep1 (s)
-      (cat! buf s)
-      (let (more ()
-            form ((get reader 'read-string) buf more))
-          (unless (= form more)
-            (eval-print form)
-            (set buf "")
-            ((get system 'write) "> ")))))
+  buf = ""
+  (define rep1 (s)
+    (cat! buf s)
+    more = ()
+    buf1 = (cat "(do " buf ")")
+    form = ((get reader 'read-string) buf1 more)
+    (unless (form == more)
+      (eval-print form)
+      buf = ""
+      ((get system 'write) "> ")))
   ((get system 'write) "> ")
   (target
-    js: (let in (get process 'stdin)
+    js: (do
+          in = (get process 'stdin)
           ((get in 'setEncoding) 'utf8)
           ((get in 'on) 'data rep1))
     lua: (while true
-           (let s ((get io 'read))
-             (if s (rep1 (cat s "\n")) (break))))))
+           s = ((get io 'read))
+           (if s (rep1 (cat s "\n")) (break)))))
 
 (define-global compile-file (path)
-  (let (s ((get reader 'stream) ((get system 'read-file) path))
-        body ((get reader 'read-all) s)
-        form ((get compiler 'expand) `(do ,@body)))
-    ((get compiler 'compile) form :stmt)))
+  s = ((get reader 'stream) ((get system 'read-file) path))
+  body = ((get reader 'read-all) s)
+  form = ((get compiler 'expand) `(do ,@body))
+  ((get compiler 'compile) form :stmt))
 
 (define-global load (path)
-  (let previous target
-    (set target (language))
-    (let code (compile-file path)
-      (set target previous)
-      ((get compiler 'run) code))))
+  previous = target
+  target = (language)
+  code = (compile-file path)
+  target = previous
+  ((get compiler 'run) code))
 
 (define script-file? (path)
-  (not (or (= "-" (char path 0))
-           (= ".js" (clip path (- (# path) 3)))
-           (= ".lua" (clip path (- (# path) 4))))))
+  (not (or ("-" == (char path 0))
+           (".js" == (clip path ((# path) - 3)))
+           (".lua" == (clip path ((# path) - 4))))))
 
 (define run-file (path)
   (if (script-file? path)
@@ -67,37 +69,52 @@
   (print " -e <expr>\tExpression to evaluate"))
 
 (define main ()
-  (let arg (hd (get system 'argv))
-    (if (and arg (script-file? arg))
-        (load arg)
-        (or (= arg "-h")
-            (= arg "--help"))
-        (usage)
-      (let (pre ()
-            input nil
-            output nil
-            target1 nil
-            expr nil
-            argv (get system 'argv))
-        (for i (# argv)
-          (let a (at argv i)
-            (if (or (= a "-c") (= a "-o") (= a "-t") (= a "-e"))
-                (if (= i (edge argv))
-                    (print (cat "missing argument for " a))
-                  (do (inc i)
-                      (let val (at argv i)
-                        (if (= a "-c") (set input val)
-                            (= a "-o") (set output val)
-                            (= a "-t") (set target1 val)
-                            (= a "-e") (set expr val)))))
-                (not (= "-" (char a 0))) (add pre a))))
-        (step file pre
-          (run-file file))
-        (if (nil? input) (if expr (rep expr) (repl))
-          (do (if target1 (set target target1))
-              (let code (compile-file input)
-                (if (or (nil? output) (= output "-"))
-                    (print code)
-                  ((get system 'write-file) output code)))))))))
+  arg = (hd (get system 'argv))
+
+  (when (arg and (script-file? arg))
+    (return (load arg)))
+
+  (when ((arg == "-h") or
+         (arg == "--help"))
+    (return (usage)))
+
+  pre = ()
+  input = nil
+  output = nil
+  target1 = nil
+  expr = nil
+  argv = (get system 'argv)
+
+  (for i (# argv)
+    a = (at argv i)
+    arg? = ((a == "-c") or (a == "-o") or (a == "-t") or (a == "-e"))
+    (when arg?
+      (when (i == (edge argv))
+        (print (cat "missing argument for " a))
+        (break))
+      (inc i)
+      val = (at argv i)
+      (if (a == "-c") (set input val)
+          (a == "-o") (set output val)
+          (a == "-t") (set target1 val)
+          (a == "-e") (set expr val)))
+    (unless arg?
+      (when ((char a 0) != "-")
+        (add pre a))))
+
+  (step file pre
+    (run-file file))
+
+  (when (nil? input)
+    (if expr (rep expr) (repl))
+    (return))
+
+  (when target1
+    (set target target1))
+
+  code = (compile-file input)
+  (if ((nil? output) or (output == "-"))
+      (print code)
+    ((get system 'write-file) output code)))
 
 (main)

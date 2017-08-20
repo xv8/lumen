@@ -152,13 +152,11 @@
 
 (define-global expand-infix-syntax (form)
   (let form `(,(at form 1) ,@(map hd (pair form)))
-    ; (print (str form))
     (macroexpand form)))
 
 (define-global body-syntax? (form)
   (and (= (hd form) 'do)
-       (> (# form) 4)))
-       ; (infix? (at form 2))))
+       (>= (# form) 4)))
 
 (define-global expand-body-syntax ((x rest: body))
   (let l '(do)
@@ -169,20 +167,14 @@
             (do (add l (macroexpand a))
                 (set body (tl body)))
           (do (when (= op "=")
-                (set op (if ((not (atom? a)) or (variable? a)) 'set '%local)))
-              ; (print (str `(,op ,a ,b)))
+                (set op (if (or (not (atom? a))
+                                (variable? a)
+                                (symbol? a))
+                            'set
+                          '%local)))
               (add l (macroexpand `(,op ,a ,b)))
               (set body (cut body 3))))))
     `(,@l ,@(map macroexpand body))))
-                   
-        ; (if (not (atom? form)) (add l form)
-            
-
-
-  ; (macroexpand
-    ; `(do ,@(map (fn ((a op b))
-                  ; `(,(if (= op "=") (if (variable? a) 'set '%local) op) ,a ,b))
-                ; (pair (tl form) 3)))))
 
 (define-global macroexpand (form)
   (if (symbol? form)
