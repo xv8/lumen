@@ -39,15 +39,15 @@
 (define-global atom? (x)
   ((nil? x) or (string? x) or (number? x) or (boolean? x)))
 
-(define-global nan (/ 0 0))
-(define-global inf (/ 1 0))
+(define-global nan (0 / 0))
+(define-global inf (1 / 0))
 (define-global -inf (- inf))
 
 (define-global nan? (n)
-  (!= n n))
+  (n != n))
 
 (define-global inf? (n)
-  (= n inf) or (= n -inf))
+  (n == inf) or (n == -inf))
 
 (define-global clip (s from upto)
   (target js: ((get s 'substring) from upto)
