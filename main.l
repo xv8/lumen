@@ -1,6 +1,6 @@
-(define reader (require (target js: "./reader" lua: 'reader)))
-(define compiler (require (target js: "./compiler" lua: 'compiler)))
-(define system (require (target js: "./system" lua: 'system)))
+(define reader (require 'reader))
+(define compiler (require 'compiler))
+(define system (require 'system))
 
 (define eval-print (form)
   (let ((ok v) (guard ((get compiler 'eval) form)))
@@ -28,9 +28,11 @@
     js: (let in (get process 'stdin)
           ((get in 'setEncoding) 'utf8)
           ((get in 'on) 'data rep1))
-    lua: (while true
-           (let s ((get io 'read))
-             (if s (rep1 (cat s "\n")) (break))))))
+    lua: (if process
+             ((get (get process 'stdin) 'on) (get process 'stdin) 'data rep1)
+           (while true
+             (let s ((get io 'read))
+               (if s (rep1 (cat s "\n")) (break)))))))
 
 (define-global compile-file (path)
   (let (s ((get reader 'stream) ((get system 'read-file) path))
@@ -99,9 +101,6 @@
                 (if (or (nil? output) (= output "-"))
                     (print code)
                   ((get system 'write-file) output code)))))))))
-
-(when (target js: (= (get require 'main) module) lua: true)
-  (main))
 
 (export reader
         compiler

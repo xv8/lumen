@@ -1,3 +1,4 @@
+(define-global _G (target lua: (or _G _ENV) js: (if (not (= (typeof "global") "undefined")) global window)))
 (define-global environment (list (obj)))
 (define-global target (language))
 

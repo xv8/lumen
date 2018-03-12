@@ -68,6 +68,7 @@ read_string = function (str, more) {
     return __x;
   }
 };
+_G.read_string = read_string;
 var key63 = function (atom) {
   return string63(atom) && _35(atom) > 1 && char(atom, edge(atom)) === ":";
 };

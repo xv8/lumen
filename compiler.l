@@ -433,7 +433,8 @@
   (or (and (not (atom? form))
            (not (infix? (hd form)))
            (not (literal? form))
-           (not (= 'get (hd form))))
+           (not (= 'get (hd form)))
+           (not (= '%statement (hd form))))
       (id-literal? form)))
 
 (define lower-do (args hoist stmt? tail?)
@@ -567,8 +568,7 @@
 (define-global expand (form)
   (lower (macroexpand form)))
 
-(target js: (set (get global 'require) |require|))
-(target js: (define run |eval|))
+(target js: (define run (code) ((or 0 |eval|) code)))
 
 (target lua: (define load1 (or |loadstring| |load|)))
 (target lua:
@@ -730,7 +730,22 @@
     (cat s "}")))
 
 (define-special %literal args
-  (apply cat (map compile args)))
+  (with s ""
+    (step x args
+      (if (string-literal? x)
+          (cat! s (eval x))
+        (cat! s (compile x))))))
+
+(define-special %statement args :stmt :tr
+  (with s (indentation)
+    (step x args
+      (if (string-literal? x)
+          (cat! s (eval x))
+        (cat! s (compile x))))
+    (cat! s "\n")))
+
+(define-special %indentation ()
+  (indentation))
 
 (export run
         eval

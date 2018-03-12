@@ -1,0 +1,32 @@
+{
+  "name": "lumen-language",
+  "version": "0.1.0",
+  "description": "A Lisp for Lua and JavaScript",
+  "main": "index.js",
+  "bin": {
+    "lumen": "bin/lumen",
+    "ljs": "index.js"
+  },
+  "scripts": {
+    "test": "make test",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shawwn/lumen.git"
+  },
+  "keywords": [
+    "lumen",
+    "lisp",
+    "js",
+    "javascript",
+    "lua",
+    "compiler"
+  ],
+  "author": "Scott Bell <scott@sctsm.com>",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/shawwn/lumen/issues"
+  },
+  "homepage": "https://github.com/shawwn/lumen#readme"
+}

@@ -1,3 +1,6 @@
+local uv = pcall(function ()
+  return require("uv")
+end) and require("uv")
 local function call_with_file(f, path, mode)
   local h,e = io.open(path, mode)
   if not h then
@@ -22,9 +25,9 @@ local function file_exists63(path)
   local __id = is63(__f)
   local __e
   if __id then
-    local __r6 = is63(__f.read(__f, 0)) or 0 == __f.seek(__f, "end")
+    local __r7 = is63(__f.read(__f, 0)) or 0 == __f.seek(__f, "end")
     __f.close(__f)
-    __e = __r6
+    __e = __r7
   else
     __e = __id
   end
@@ -35,9 +38,9 @@ local function directory_exists63(path)
   local __id1 = is63(__f1)
   local __e1
   if __id1 then
-    local __r8 = not __f1.read(__f1, 0) and not( 0 == __f1.seek(__f1, "end"))
+    local __r9 = not __f1.read(__f1, 0) and not( 0 == __f1.seek(__f1, "end"))
     __f1.close(__f1)
-    __e1 = __r8
+    __e1 = __r9
   else
     __e1 = __id1
   end
@@ -54,12 +57,27 @@ local function get_environment_variable(name)
   return os.getenv(name)
 end
 local function write(x)
-  return io.write(x)
+  if uv then
+    return uv.write(process.stdout.handle, x)
+  else
+    return io.write(x)
+  end
 end
 local function exit(code)
   return os.exit(code)
 end
-local argv = arg
+local __id2 = arg
+local __e3
+if __id2 then
+  __e3 = __id2
+else
+  local __e4
+  if args then
+    __e4 = cut(args, 1)
+  end
+  __e3 = __e4
+end
+local argv = __e3
 local function reload(module)
   package.loaded[module] = nil
   return require(module)

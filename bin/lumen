@@ -8,7 +8,8 @@ do
     cd "$(dirname "${bin}")"
     bin="${x}"
 done
-cd "$(dirname "${bin}")"
+cd "$(dirname "${bin}")" || exit 1
+cd .. || exit 1
 home="$(pwd)"
 cd "${dir}"
 
@@ -30,11 +31,9 @@ fi
 
 case $host in
     node*)
-        code=lumen.js
-        export NODE_PATH="$NODE_PATH:${home}:${dir}/lib:${dir}/node_modules";;
+        code=index.js;;
     *)
-        code=lumen.lua
-        export LUA_PATH="$LUA_PATH;${home}/?.lua;${dir}/lib/?.lua;;";;
+        code=init.lua;;
 esac
 
 exec ${host} "${home}/${code}" "$@"

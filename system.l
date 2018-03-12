@@ -1,5 +1,6 @@
 (target js: (define fs (require 'fs)))
 (target js: (define child_process (require 'child_process)))
+(target lua: (define uv (and (pcall (fn () (require "uv"))) (require "uv"))))
 
 (target lua:
   (define call-with-file (f path mode)
@@ -59,14 +60,16 @@
 (define write (x)
   (target js: (let out (get process 'stdout)
                 ((get out 'write) x))
-          lua: ((get io 'write) x)))
+          lua: (if uv
+                   ((get uv 'write) (get (get process 'stdout) 'handle) x)
+                 ((get io 'write) x))))
 
 (define exit (code)
   (target js: ((get process 'exit) code)
           lua: ((get os 'exit) code)))
 
 (define argv
-  (target js: (cut (get process 'argv) 2) lua: arg))
+  (target js: (cut (get process 'argv) 2) lua: (or arg (if args (cut args 1)))))
 
 (define reload (module)
   (wipe (target

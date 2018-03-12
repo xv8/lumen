@@ -104,8 +104,10 @@
 (define-macro define-global (name x rest: body)
   (setenv name :toplevel :variable)
   (if (some? body)
-      `(%global-function ,name ,@(bind* x body))
-    `(set ,name ,x)))
+      `(do (%global-function ,name ,@(bind* x body))
+           (%set (get _G ',(compile name)) ,name))
+    `(do (%set ,name ,x)
+         (%set (get _G ',(compile name)) ,name))))
 
 (define-macro with-frame body
   (let-unique (x)

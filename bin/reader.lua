@@ -68,6 +68,7 @@ function read_string(str, more)
     return __x
   end
 end
+_G.read_string = read_string
 local function key63(atom)
   return string63(atom) and _35(atom) > 1 and char(atom, edge(atom)) == ":"
 end
