@@ -245,6 +245,6 @@ read_table[","] = function (s) {
 };
 exports.stream = stream;
 exports.read = read;
-exports["read-all"] = read_all;
-exports["read-string"] = read_string;
-exports["read-table"] = read_table;
+exports.read_all = read_all;
+exports.read_string = read_string;
+exports.read_table = read_table;

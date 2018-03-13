@@ -1,6 +1,6 @@
   return {
     name = "lumen",
-    version = "0.1.0",
+    version = "0.1.2",
     description = "A Lisp for Lua and JavaScript",
     tags = { "lua", "js", "javascript", "compiler", "lisp" },
     license = "BSD-2-Clause",
@@ -8,10 +8,6 @@
     homepage = "https://github.com/shawwn/lumen",
     dependencies = {},
     files = {
-      "bin/reader.lua",
-      "bin/compiler.lua",
-      "bin/system.lua",
-      "bin/lumen.lua",
       "**.lua",
       "!test*"
     }

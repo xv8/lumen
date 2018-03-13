@@ -11,13 +11,13 @@
 
 (define read-char (s)
   (let c (peek-char s)
-    (if c (do (inc (get s 'pos)) c))))
+    (if c (do (inc (. s 'pos)) c))))
 
 (define skip-non-code (s)
   (while true
     (let c (peek-char s)
       (if (nil? c) (break)
-          (get whitespace c) (read-char s)
+          (. whitespace c) (read-char s)
           (= c ";")
           (do (while (and c (not (= c "\n")))
                 (set c (read-char s)))
@@ -31,8 +31,8 @@
   (skip-non-code s)
   (let c (peek-char s)
     (if (is? c)
-        ((or (get read-table c)
-             (get read-table ""))
+        ((or (. read-table c)
+             (. read-table '""))
          s)
       eof)))
 
@@ -63,7 +63,7 @@
 
 (define wrap (s x)
   (let y (read s)
-    (if (= y (get s 'more)) y
+    (if (= y (. s 'more)) y
       (list x y))))
 
 (define hex-prefix? (str)
@@ -85,8 +85,8 @@
   (let (str "")
     (while true
       (let c (peek-char s)
-        (if (and c (and (not (get whitespace c))
-                        (not (get delimiters c))))
+        (if (and c (and (not (. whitespace c))
+                        (not (. delimiters c))))
             (cat! str (read-char s))
           (break))))
   (if (= str "true") true
@@ -107,12 +107,12 @@
               (if (key? x)
                   (let (k (clip x 0 (edge x))
                         v (read s))
-                    (set (get l k) v))
+                    (set (. l k) v))
                   (flag? x) (set (get l (clip x 1)) true)
                 (add l x)))))))))
 
 (define-reader (")" s)
-  (error (cat "Unexpected ) at " (get s 'pos))))
+  (error (cat "Unexpected ) at " (. s 'pos))))
 
 (define-reader ("\"" s)
   (read-char s)

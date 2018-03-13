@@ -9,11 +9,9 @@
               (pair args))))
 
 (define-macro at (l i)
-  (if (and (= target 'lua) (number? i))
-      (inc i)
-      (= target 'lua)
-      (set i `(+ ,i 1)))
-  `(get ,l ,i))
+  (if (nil? i)
+      `(%at ,l)
+    `(. ,l (%at ,i))))
 
 (define-macro wipe (place)
   (if (= target 'lua)
@@ -25,7 +23,7 @@
     (let (l () forms ())
       (each (k v) body
         (if (number? k)
-            (set (get l k) v)
+            (set (. l k) v)
           (add forms `(set (get ,x ',k) ,v))))
       (if (some? forms)
           `(let ,x (%array ,@l) ,@forms ,x)
@@ -103,11 +101,10 @@
 
 (define-macro define-global (name x rest: body)
   (setenv name :toplevel :variable)
-  (if (some? body)
-      `(do (%global-function ,name ,@(bind* x body))
-           (%set (get _G ',(compile name)) ,name))
-    `(do (%set ,name ,x)
-         (%set (get _G ',(compile name)) ,name))))
+  `(do ,(if (some? body)
+            `(%global-function ,name ,@(bind* x body))
+          `(set ,name ,x))
+       (set (. _G ',name) ,name)))
 
 (define-macro with-frame body
   (let-unique (x)
@@ -158,7 +155,7 @@
              (fn () ,expr)
              (fn (m)
                (if (obj? m) m
-                 (obj stack: ((get debug 'traceback))
+                 (obj stack: (. debug (traceback))
                       message: (if (string? m) (clip m (+ (search m ": ") 2))
                                    (nil? m) ""
                                  (str m)))))))))
@@ -170,7 +167,7 @@
                       (list i (hd x)))))
       `(let (,o ,t ,k nil)
          (%for ,o ,k
-           (let (,v (get ,o ,k))
+           (let (,v (. ,o ,k))
              ,@(if (= target 'lua) body
                    `((let ,k (if (numeric? ,k)
                                  (parseInt ,k)
@@ -193,13 +190,13 @@
 (define-macro set-of xs
   (let l ()
     (each x xs
-      (set (get l x) true))
+      (set (. l x) true))
     `(obj ,@l)))
 
 (define-macro language () `',target)
 
 (define-macro target clauses
-  (get clauses target))
+  (. clauses target))
 
 (define-macro join! (a rest: bs)
   `(set ,a (join ,a ,@bs)))
@@ -220,14 +217,11 @@
            (dec indent-level)))))
 
 (define-macro export names
-  (if (= target 'js)
-      `(do ,@(map (fn (k)
-                    `(set (get exports ',k) ,k))
-                  names))
-    (let x (obj)
-      (each k names
-        (set (get x k) k))
-      `(return (%object ,@(mapo (fn (x) x) x))))))
+  `(do (target lua: (%local exports (or exports (obj))))
+      ,@(map (fn (k)
+               `(set (. exports ',k) ,k))
+             names)
+      (target lua: (return exports))))
 
 (define-macro when-compiling body
   (eval `(do ,@body)))

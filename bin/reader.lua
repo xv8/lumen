@@ -243,4 +243,10 @@ read_table[","] = function (s)
     return wrap(s, "unquote")
   end
 end
-return {stream = stream, read = read, ["read-all"] = read_all, ["read-string"] = read_string, ["read-table"] = read_table}
+local exports = exports or {}
+exports.stream = stream
+exports.read = read
+exports.read_all = read_all
+exports.read_string = read_string
+exports.read_table = read_table
+return exports

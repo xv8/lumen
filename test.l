@@ -34,7 +34,7 @@
   (print (cat " " passed " passed, " failed " failed")))
 
 (define-test reader
-  (let read (get reader 'read-string)
+  (let read (. reader 'read-string)
     (test= nil (read ""))
     (test= "nil" (read "nil"))
     (test= 17 (read "17"))
@@ -64,7 +64,7 @@
     (test= "0." (read "0."))))
 
 (define-test read-more
-  (let read (get reader 'read-string)
+  (let read (. reader 'read-string)
     (test= 17 (read "17" true))
     (let more ()
       (test= more (read "(open" more))
@@ -379,7 +379,7 @@ c"
     (test= nil a)))
 
 (define-test wipe
-  (let x '(:a :b :c)
+  (let x '(:a :b :c :d)
     (wipe (get x 'a))
     (test= nil (get x 'a))
     (test= true (get x 'b))
@@ -388,6 +388,9 @@ c"
     (test= true (get x 'b))
     (wipe (get x 'b))
     (test= nil (get x 'b))
+    (test= true (. x 'd))
+    (wipe (. x 'd))
+    (test= nil (. x 'd))
     (test= () x)))
 
 (define-test do
@@ -508,6 +511,9 @@ c"
     (let k 'foo
       (test= 'bar (get t k)))
     (test= 'bar (get t (cat "f" "oo"))))
+  (let t (obj)
+    (set (. t 'foo) 'bar)
+    (test= 'bar (. t 'foo)))
   (let (t1 (obj) t2 (obj))
     (set (get (or nil t1 t2) 'foo) 'bar)
     (test= 'bar (get t1 'foo))
@@ -1030,7 +1036,7 @@ c"
   (test= 116 (apply + 1 5 '(100 10))))
 
 (define-test eval
-  (let eval (get compiler 'eval)
+  (let eval (. compiler 'eval)
     (test= 4 (eval '(+ 2 2)))
     (test= 5 (eval '(let a 3 (+ 2 a))))
     (test= 9 (eval '(do (define x 7) (+ x 2))))
@@ -1088,5 +1094,9 @@ c"
     (define g () nil)
     (f 1 'x g)
     (test= (list 'x g) l)))
+
+(define-test methods
+  (test= 'foo (. reader (read-string "foo")))
+  (test= "f" (: "foo" (target js: (substr 0 1) lua: (sub 1 1)))))
 
 (run)

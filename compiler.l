@@ -2,9 +2,9 @@
   (when (string? k)
     (let i (edge environment)
       (while (>= i 0)
-        (let b (get (at environment i) k)
+        (let b (. environment (at i) k)
           (if (is? b)
-              (return (if p (get b p) b))
+              (return (if p (. b p) b))
             (dec i)))))))
 
 (define macro-function (k)
@@ -70,18 +70,20 @@
         (each (k v) lh
           (let x (if (= k 'rest)
                      `(cut ,id ,(# lh))
-                   `(get ,id ',(bias k)))
+                     (number? k)
+                     `(get ,id ,(bias k))
+                   `(. ,id ',k))
             (when (is? k)
               (let k (if (= v true) k v)
                 (join! bs (bind k x))))))))))
 
 (define-macro arguments% (from)
-  `((get (get (get Array 'prototype) 'slice) 'call) arguments ,from))
+  `(. Array 'prototype 'slice (call arguments ,from)))
 
 (define-global bind* (args body)
   (let args1 ()
     (define rest ()
-      (set (get args1 'rest) true)
+      (set (. args1 'rest) true)
       (if (= target 'js)
           `(unstash (arguments% ,(# args1)))
         '(unstash (list |...|))))
@@ -156,7 +158,7 @@
                    ;; don't splice, just expand
                    (quasiexpand (at v 1))
                  (quasiexpand v depth))
-          (set (get (last xs) k) v))))
+          (set (. (last xs) k) v))))
     ;; collect sibling lists
     (step x form
       (if (quasisplice? x depth)
@@ -252,18 +254,20 @@
 (let (names (obj))
   (define-global unique (x)
     (let x (id x)
-      (if (get names x)
-          (let i (get names x)
-            (inc (get names x))
+      (if (. names x)
+          (let i (. names x)
+            (inc (. names x))
             (unique (cat x i)))
-        (do (set (get names x) 1)
+        (do (set (. names x) 1)
             (cat "__" x))))))
 
 (define-global key (k)
-  (let i (inner k)
-    (if (valid-id? i) i
-        (= target 'js) k
-      (cat "[" k "]"))))
+  (if (string-literal? k)
+      (let i (inner k)
+        (if (valid-id? i) i
+            (= target 'js) k
+          (cat "[" k "]")))
+    (cat "[" k "]")))
 
 (define-global mapo (f t)
   (with o ()
@@ -297,9 +301,9 @@
 
 (define getop (op)
   (find (fn (level)
-          (let x (get level op)
+          (let x (. level op)
             (if (= x true) op
-                (is? x) (get x target))))
+                (is? x) (. x target))))
         infix))
 
 (define infix? (x)
@@ -350,15 +354,44 @@
 (define parenthesize-call? (x)
   (or (and (not (atom? x))
            (= (hd x) '%function))
+      (and (= target 'lua)
+           (or (string-literal? x)
+               (literal? x)))
       (> (precedence x) 0)))
 
+(define unescape (str)
+  (if (string-literal? str) (eval str)
+      (atom? str) `(%get ,str)
+    str))
+
+(define access (x sep y)
+  (if (= (char y 0) "[")
+      (cat x y)
+      (string-literal? y)
+      (cat x "[" y "]")
+    (cat x (or sep "") y)))
+
+(define parse-access (sep f1 args)
+  (let args1 (if sep
+                 (reduce (fn (x y)
+                           (access x sep y))
+                         (map compile (map unescape args)))
+                (compile-args (stash* args)))
+    (if sep (access f1 sep args1)
+      (cat f1 args1))))
+
+(define dispatch (form)
+  (if (= (hd form) ":")
+      (if (= target 'lua) ":" ".")
+      (= (hd form) ".") "."))
+
 (define compile-call (form)
-  (let (f (hd form)
-        f1 (compile f)
-        args (compile-args (stash* (tl form))))
-    (if (parenthesize-call? f)
-        (cat "(" f1 ")" args)
-      (cat f1 args))))
+  (let (sep (dispatch form)
+        (f rest: args) (if sep (tl form) form)
+        f1 (if (parenthesize-call? f)
+               (cat "(" (compile f) ")")
+             (compile f)))
+    (parse-access sep f1 args)))
 
 (define op-delims (parent child :right)
   (if ((if right >= >)
@@ -381,7 +414,7 @@
 (define-global compile-function (args body :name :prefix)
   (let (id (if name (compile name) "")
         args1 (if (and (= target 'lua)
-                       (get args 'rest))
+                       (. args 'rest))
                   `(,@args |...|)
                 args)
         args (compile-args args1)
@@ -424,10 +457,10 @@
 (define lower-body (body tail?)
   (lower-statement `(do ,@body) tail?))
 
-(define literal? (form)
-  (or (atom? form)
-      (= (hd form) '%array)
-      (= (hd form) '%object)))
+(define-global literal? (form)
+  (and (not (atom? form))
+       (or (= (hd form) '%array)
+           (= (hd form) '%object))))
 
 (define standalone? (form)
   (or (and (not (atom? form))
@@ -706,6 +739,17 @@
              (valid-id? (inner k)))
         (cat t1 "." (inner k))
       (cat t1 "[" k1 "]"))))
+
+(define-special %get (t)
+  (cat "[" (compile t) "]"))
+
+(define-special %at (t)
+  (let t1 (if (and (= target 'lua) (number? t))
+              (inc t)
+              (= target 'lua)
+              `(+ ,t 1)
+            t)
+    (compile `(%get ,t1))))
 
 (define-special %array forms
   (let (open (if (= target 'lua) "{" "[")
