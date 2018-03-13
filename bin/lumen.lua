@@ -4,6 +4,8 @@ environment = {{}}
 _G.environment = environment
 target = "lua"
 _G.target = target
+namespace = "lumen"
+_G.namespace = namespace
 function nil63(x)
   return x == nil
 end
@@ -12,6 +14,38 @@ function is63(x)
   return not nil63(x)
 end
 _G.is63 = is63
+function obj63(x)
+  return is63(x) and type(x) == "table"
+end
+_G.obj63 = obj63
+function tagged63(x)
+  return obj63(x) and x._stash
+end
+_G.tagged63 = tagged63
+function kind(x)
+  if tagged63(x) then
+    return x._stash
+  else
+    return type(x)
+  end
+end
+_G.kind = kind
+function is_a63(x, tag)
+  return kind(x) == tag
+end
+_G.is_a63 = is_a63
+function annotate(tag, x, prop)
+  if is_a63(x, tag) then
+    return x
+  else
+    if props then
+      return {_value = x, ["%props"] = prop}
+    else
+      return {_value = x}
+    end
+  end
+end
+_G.annotate = annotate
 function no(x)
   return nil63(x) or x == false
 end
@@ -72,10 +106,6 @@ function function63(x)
   return type(x) == "function"
 end
 _G.function63 = function63
-function obj63(x)
-  return is63(x) and type(x) == "table"
-end
-_G.obj63 = obj63
 function atom63(x)
   return nil63(x) or string63(x) or number63(x) or boolean63(x)
 end
@@ -217,13 +247,13 @@ end
 _G.reduce = reduce
 function join(...)
   local __ls = unstash({...})
-  local __r36 = {}
+  local __r40 = {}
   local ____x2 = __ls
   local ____i4 = 0
   while ____i4 < _35(____x2) do
     local __l11 = ____x2[____i4 + 1]
     if __l11 then
-      local __n3 = _35(__r36)
+      local __n3 = _35(__r40)
       local ____o2 = __l11
       local __k2 = nil
       for __k2 in next, ____o2 do
@@ -231,12 +261,12 @@ function join(...)
         if number63(__k2) then
           __k2 = __k2 + __n3
         end
-        __r36[__k2] = __v2
+        __r40[__k2] = __v2
       end
     end
     ____i4 = ____i4 + 1
   end
-  return __r36
+  return __r40
 end
 _G.join = join
 function find(f, t)
@@ -359,12 +389,16 @@ function stash(args)
   return args
 end
 _G.stash = stash
+function stash63(l)
+  return obj63(l) and l._stash == true
+end
+_G.stash63 = stash63
 function unstash(args)
   if none63(args) then
     return {}
   else
     local __l2 = last(args)
-    if obj63(__l2) and __l2._stash then
+    if stash63(__l2) then
       local __args1 = almost(args)
       local ____o8 = __l2
       local __k6 = nil
@@ -382,7 +416,7 @@ function unstash(args)
 end
 _G.unstash = unstash
 function destash33(l, args1)
-  if obj63(l) and l._stash then
+  if stash63(l) then
     local ____o9 = l
     local __k7 = nil
     for __k7 in next, ____o9 do
@@ -658,17 +692,17 @@ function apply(f, args)
 end
 _G.apply = apply
 function call(f, ...)
-  local ____r71 = unstash({...})
-  local __f = destash33(f, ____r71)
-  local ____id = ____r71
+  local ____r76 = unstash({...})
+  local __f = destash33(f, ____r76)
+  local ____id = ____r76
   local __args11 = cut(____id, 0)
   return apply(__f, __args11)
 end
 _G.call = call
 function setenv(k, ...)
-  local ____r72 = unstash({...})
-  local __k9 = destash33(k, ____r72)
-  local ____id1 = ____r72
+  local ____r77 = unstash({...})
+  local __k9 = destash33(k, ____r77)
+  local ____id1 = ____r77
   local __keys = cut(____id1, 0)
   if string63(__k9) then
     local __e8

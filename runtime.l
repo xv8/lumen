@@ -1,6 +1,7 @@
 (define-global _G (target lua: (or _G _ENV) js: (if (not (= (typeof "global") "undefined")) global window)))
 (define-global environment (list (obj)))
 (define-global target (language))
+(define-global namespace "lumen")
 
 (define-global nil? (x)
   (target
@@ -8,6 +9,28 @@
     lua: (= x nil)))
 
 (define-global is? (x) (not (nil? x)))
+
+(target js: (define-global type (x) (typeof x)))
+
+(define-global obj? (x)
+  (and (is? x)
+       (= (type x) (target lua: 'table js: 'object))))
+
+(define-global tagged? (x)
+  (and (obj? x) (. x '_stash)))
+
+(define-global kind (x)
+  (if (tagged? x) (. x '_stash) (type x)))
+
+(define-global is-a? (x tag)
+  (= (kind x) tag))
+
+(define-global annotate (tag x prop)
+  (if (is-a? x tag)
+      x
+      props
+      (obj _stash: tag _value: x %props: prop)
+    (obj _stash: tag _value: x)))
 
 (define-global no (x) (or (nil? x) (= x false)))
 (define-global yes (x) (not (no x)))
@@ -27,16 +50,10 @@
 
 (define-global hd (l) (at l 0))
 
-(target js: (define-global type (x) (typeof x)))
-
 (define-global string? (x) (= (type x) 'string))
 (define-global number? (x) (= (type x) 'number))
 (define-global boolean? (x) (= (type x) 'boolean))
 (define-global function? (x) (= (type x) 'function))
-
-(define-global obj? (x)
-  (and (is? x)
-       (= (type x) (target lua: 'table js: 'object))))
 
 (define-global atom? (x)
   (or (nil? x) (string? x) (number? x) (boolean? x)))
@@ -192,10 +209,13 @@
       (add args p)))
   args)
 
+(define-global stash? (l)
+  (and (obj? l) (= (. l '_stash) true)))
+
 (define-global unstash (args)
   (if (none? args) ()
     (let l (last args)
-      (if (and (obj? l) (. l '_stash))
+      (if (stash? l)
           (with args1 (almost args)
             (each (k v) l
               (unless (= k '_stash)
@@ -203,7 +223,7 @@
         args))))
 
 (define-global destash! (l args1)
-  (if (and (obj? l) (. l '_stash))
+  (if (stash? l)
       (each (k v) l
         (unless (= k '_stash)
           (set (. args1 k) v)))
