@@ -173,11 +173,7 @@ read_table["("] = function (s) {
           var __v = read(s);
           __l1[__k] = __v;
         } else {
-          if (flag63(__x2)) {
-            __l1[clip(__x2, 1)] = true;
-          } else {
-            add(__l1, __x2);
-          }
+          add(__l1, __x2);
         }
       }
     }
