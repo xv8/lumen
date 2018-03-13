@@ -1,4 +1,4 @@
-(define delimiters (set-of "(" ")" ";" "\r" "\n"))
+(define delimiters (set-of "(" ")" "[" "]" "{" "}" ";" "\r" "\n"))
 (define whitespace (set-of " " "\t" "\r" "\n"))
 
 (define stream (str more)
@@ -81,6 +81,53 @@
 (define real? (x)
   (and (number? x) (not (nan? x)) (not (inf? x))))
 
+(define-global obarray (obj))
+
+(define-global make-symbol (name)
+  (if (= name "nil") nil
+    (target js: (Symbol name)
+            lua: (annotate 'symbol name))))
+
+(define-global intern (name ob)
+  (if (= name "nil") nil
+    (let (ob (or ob obarray)
+          str (untag! name 'string))
+      (if (has? ob str)
+          (get ob str)
+        (with s (make-symbol name)
+          (set (get ob str) s))))))
+
+(define-global intern-soft (name ob)
+  (if (= name "nil") nil
+    (let (ob (or ob obarray)
+          str (untag! name 'string))
+      (if (has? ob name)
+          (get ob name)
+        false))))
+
+(define-global symbol-name (x)
+  (if (nil? x) "nil"
+    (let s (untag! x 'symbol)
+      (target
+        lua: s
+        js: (let s1 (. s (toString))
+              (clip s1 7 (edge s1)))))))
+
+(define-global keyword? (x)
+  (and (is-a? x 'symbol)
+       (= (char (symbol-name x) 0) ":")))
+
+(define-global string->symbol (x)
+  (intern x))
+
+(define-global symbol->string (x)
+  (symbol-name x))
+
+(define-global coerce (x y)
+  (if (is-a? x y) x
+    (let f (get _G (compile (cat (kind x) "->" y)))
+      (if f (f x) (error (cat "Canot coerce " (str (list x y))))))))
+
 (define-reader ("" s) ; atom
   (let (str "")
     (while true
@@ -91,6 +138,7 @@
           (break))))
   (if (= str "true") true
       (= str "false") false
+      (flag? str) (intern str)
     (let n (maybe-number str)
       (if (real? n) n str)))))
 
@@ -112,6 +160,37 @@
 
 (define-reader (")" s)
   (error (cat "Unexpected ) at " (. s 'pos))))
+
+(define-reader ("[" s)
+  (read-char s)
+  (with r nil
+    (let l `(#%brackets)
+      (while (nil? r)
+        (skip-non-code s)
+        (let c (peek-char s)
+          (if (= c "]") (do (read-char s) (set r l))
+              (nil? c) (set r (expected s "]"))
+            (add l (read s))))))))
+
+(define-reader ("]" s)
+  (error (cat "Unexpected ] at " (. s 'pos))))
+
+(define-macro #%braces args
+  `(%object ,@args))
+
+(define-reader ("{" s)
+  (read-char s)
+  (with r nil
+    (let l `(#%braces)
+      (while (nil? r)
+        (skip-non-code s)
+        (let c (peek-char s)
+          (if (= c "}") (do (read-char s) (set r l))
+              (nil? c) (set r (expected s "}"))
+            (add l (read s))))))))
+
+(define-reader ("}" s)
+  (error (cat "Unexpected } at " (. s 'pos))))
 
 (define-reader ("\"" s)
   (read-char s)

@@ -1018,7 +1018,7 @@ c"
 
 (define-test str
   (define f (x) x)
-  (let (l () l2 ())
+  (let (l (obj) l2 (obj))
     (set (get l f) true)
     (set (get l2 (target js: (str l) lua: l)) true)
     (let k (target js: f lua: 'function)

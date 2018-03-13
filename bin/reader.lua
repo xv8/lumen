@@ -1,4 +1,4 @@
-local delimiters = {["("] = true, [")"] = true, [";"] = true, ["\r"] = true, ["\n"] = true}
+local delimiters = {["("] = true, [")"] = true, ["["] = true, ["]"] = true, ["{"] = true, ["}"] = true, [";"] = true, ["\r"] = true, ["\n"] = true}
 local whitespace = {[" "] = true, ["\t"] = true, ["\r"] = true, ["\n"] = true}
 local function stream(str, more)
   return {pos = 0, string = str, len = _35(str), more = more}
@@ -128,99 +128,227 @@ end
 local function real63(x)
   return number63(x) and not nan63(x) and not inf63(x)
 end
+obarray = {}
+_G.obarray = obarray
+function make_symbol(name)
+  if name == "nil" then
+    return nil
+  else
+    return annotate("symbol", name)
+  end
+end
+_G.make_symbol = make_symbol
+function intern(name, ob)
+  if name == "nil" then
+    return nil
+  else
+    local __ob = ob or obarray
+    local __str = untag33(name, "string")
+    if has63(__ob, __str) then
+      return __ob[__str]
+    else
+      local __s = make_symbol(name)
+      __ob[__str] = __s
+      return __s
+    end
+  end
+end
+_G.intern = intern
+function intern_soft(name, ob)
+  if name == "nil" then
+    return nil
+  else
+    local __ob1 = ob or obarray
+    local __str1 = untag33(name, "string")
+    if has63(__ob1, name) then
+      return __ob1[name]
+    else
+      return false
+    end
+  end
+end
+_G.intern_soft = intern_soft
+function symbol_name(x)
+  if nil63(x) then
+    return "nil"
+  else
+    local __s1 = untag33(x, "symbol")
+    return __s1
+  end
+end
+_G.symbol_name = symbol_name
+function keyword63(x)
+  return is_a63(x, "symbol") and char(symbol_name(x), 0) == ":"
+end
+_G.keyword63 = keyword63
+function string_62symbol(x)
+  return intern(x)
+end
+_G.string_62symbol = string_62symbol
+function symbol_62string(x)
+  return symbol_name(x)
+end
+_G.symbol_62string = symbol_62string
+function coerce(x, y)
+  if is_a63(x, y) then
+    return x
+  else
+    local __f = _G[compile(kind(x) .. "->" .. y)]
+    if __f then
+      return __f(x)
+    else
+      error("Canot coerce " .. str({x, y}))
+    end
+  end
+end
+_G.coerce = coerce
 read_table[""] = function (s)
-  local __str = ""
+  local __str2 = ""
   while true do
     local __c3 = peek_char(s)
     if __c3 and (not whitespace[__c3] and not delimiters[__c3]) then
-      __str = __str .. read_char(s)
+      __str2 = __str2 .. read_char(s)
     else
       break
     end
   end
-  if __str == "true" then
+  if __str2 == "true" then
     return true
   else
-    if __str == "false" then
+    if __str2 == "false" then
       return false
     else
-      local __n1 = maybe_number(__str)
-      if real63(__n1) then
-        return __n1
+      if flag63(__str2) then
+        return intern(__str2)
       else
-        return __str
+        local __n1 = maybe_number(__str2)
+        if real63(__n1) then
+          return __n1
+        else
+          return __str2
+        end
       end
     end
   end
 end
 read_table["("] = function (s)
   read_char(s)
-  local __r16 = nil
+  local __r24 = nil
   local __l1 = {}
-  while nil63(__r16) do
+  while nil63(__r24) do
     skip_non_code(s)
     local __c4 = peek_char(s)
     if __c4 == ")" then
       read_char(s)
-      __r16 = __l1
+      __r24 = __l1
     else
       if nil63(__c4) then
-        __r16 = expected(s, ")")
+        __r24 = expected(s, ")")
       else
-        local __x2 = read(s)
-        if key63(__x2) then
-          local __k = clip(__x2, 0, edge(__x2))
+        local __x3 = read(s)
+        if key63(__x3) then
+          local __k = clip(__x3, 0, edge(__x3))
           local __v = read(s)
           __l1[__k] = __v
         else
-          add(__l1, __x2)
+          add(__l1, __x3)
         end
       end
     end
   end
-  return __r16
+  return __r24
 end
 read_table[")"] = function (s)
   error("Unexpected ) at " .. s.pos)
 end
-read_table["\""] = function (s)
+read_table["["] = function (s)
   read_char(s)
-  local __r19 = nil
-  local __str1 = "\""
-  while nil63(__r19) do
+  local __r27 = nil
+  local __l2 = {"#%brackets"}
+  while nil63(__r27) do
+    skip_non_code(s)
     local __c5 = peek_char(s)
-    if __c5 == "\"" then
-      __r19 = __str1 .. read_char(s)
+    if __c5 == "]" then
+      read_char(s)
+      __r27 = __l2
     else
       if nil63(__c5) then
-        __r19 = expected(s, "\"")
+        __r27 = expected(s, "]")
       else
-        if __c5 == "\\" then
-          __str1 = __str1 .. read_char(s)
-        end
-        __str1 = __str1 .. read_char(s)
+        add(__l2, read(s))
       end
     end
   end
-  return __r19
+  return __r27
+end
+read_table["]"] = function (s)
+  error("Unexpected ] at " .. s.pos)
+end
+setenv("#%braces", {_stash = true, macro = function (...)
+  local __args1 = unstash({...})
+  return join({"%object"}, __args1)
+end})
+read_table["{"] = function (s)
+  read_char(s)
+  local __r30 = nil
+  local __l3 = {"#%braces"}
+  while nil63(__r30) do
+    skip_non_code(s)
+    local __c6 = peek_char(s)
+    if __c6 == "}" then
+      read_char(s)
+      __r30 = __l3
+    else
+      if nil63(__c6) then
+        __r30 = expected(s, "}")
+      else
+        add(__l3, read(s))
+      end
+    end
+  end
+  return __r30
+end
+read_table["}"] = function (s)
+  error("Unexpected } at " .. s.pos)
+end
+read_table["\""] = function (s)
+  read_char(s)
+  local __r33 = nil
+  local __str3 = "\""
+  while nil63(__r33) do
+    local __c7 = peek_char(s)
+    if __c7 == "\"" then
+      __r33 = __str3 .. read_char(s)
+    else
+      if nil63(__c7) then
+        __r33 = expected(s, "\"")
+      else
+        if __c7 == "\\" then
+          __str3 = __str3 .. read_char(s)
+        end
+        __str3 = __str3 .. read_char(s)
+      end
+    end
+  end
+  return __r33
 end
 read_table["|"] = function (s)
   read_char(s)
-  local __r21 = nil
-  local __str2 = "|"
-  while nil63(__r21) do
-    local __c6 = peek_char(s)
-    if __c6 == "|" then
-      __r21 = __str2 .. read_char(s)
+  local __r35 = nil
+  local __str4 = "|"
+  while nil63(__r35) do
+    local __c8 = peek_char(s)
+    if __c8 == "|" then
+      __r35 = __str4 .. read_char(s)
     else
-      if nil63(__c6) then
-        __r21 = expected(s, "|")
+      if nil63(__c8) then
+        __r35 = expected(s, "|")
       else
-        __str2 = __str2 .. read_char(s)
+        __str4 = __str4 .. read_char(s)
       end
     end
   end
-  return __r21
+  return __r35
 end
 read_table["'"] = function (s)
   read_char(s)

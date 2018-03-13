@@ -1,4 +1,4 @@
-var delimiters = {"(": true, ")": true, ";": true, "\r": true, "\n": true};
+var delimiters = {"(": true, ")": true, "[": true, "]": true, "{": true, "}": true, ";": true, "\r": true, "\n": true};
 var whitespace = {" ": true, "\t": true, "\r": true, "\n": true};
 var stream = function (str, more) {
   return {pos: 0, string: str, len: _35(str), more: more};
@@ -128,99 +128,228 @@ var maybe_number = function (str) {
 var real63 = function (x) {
   return number63(x) && ! nan63(x) && ! inf63(x);
 };
+obarray = {};
+_G.obarray = obarray;
+make_symbol = function (name) {
+  if (name === "nil") {
+    return undefined;
+  } else {
+    return Symbol(name);
+  }
+};
+_G.make_symbol = make_symbol;
+intern = function (name, ob) {
+  if (name === "nil") {
+    return undefined;
+  } else {
+    var __ob = ob || obarray;
+    var __str = untag33(name, "string");
+    if (has63(__ob, __str)) {
+      return __ob[__str];
+    } else {
+      var __s = make_symbol(name);
+      __ob[__str] = __s;
+      return __s;
+    }
+  }
+};
+_G.intern = intern;
+intern_soft = function (name, ob) {
+  if (name === "nil") {
+    return undefined;
+  } else {
+    var __ob1 = ob || obarray;
+    var __str1 = untag33(name, "string");
+    if (has63(__ob1, name)) {
+      return __ob1[name];
+    } else {
+      return false;
+    }
+  }
+};
+_G.intern_soft = intern_soft;
+symbol_name = function (x) {
+  if (nil63(x)) {
+    return "nil";
+  } else {
+    var __s1 = untag33(x, "symbol");
+    var __s11 = __s1.toString();
+    return clip(__s11, 7, edge(__s11));
+  }
+};
+_G.symbol_name = symbol_name;
+keyword63 = function (x) {
+  return is_a63(x, "symbol") && char(symbol_name(x), 0) === ":";
+};
+_G.keyword63 = keyword63;
+string_62symbol = function (x) {
+  return intern(x);
+};
+_G.string_62symbol = string_62symbol;
+symbol_62string = function (x) {
+  return symbol_name(x);
+};
+_G.symbol_62string = symbol_62string;
+coerce = function (x, y) {
+  if (is_a63(x, y)) {
+    return x;
+  } else {
+    var __f = _G[compile(kind(x) + "->" + y)];
+    if (__f) {
+      return __f(x);
+    } else {
+      throw new Error("Canot coerce " + str([x, y]));
+    }
+  }
+};
+_G.coerce = coerce;
 read_table[""] = function (s) {
-  var __str = "";
+  var __str2 = "";
   while (true) {
     var __c3 = peek_char(s);
     if (__c3 && (! whitespace[__c3] && ! delimiters[__c3])) {
-      __str = __str + read_char(s);
+      __str2 = __str2 + read_char(s);
     } else {
       break;
     }
   }
-  if (__str === "true") {
+  if (__str2 === "true") {
     return true;
   } else {
-    if (__str === "false") {
+    if (__str2 === "false") {
       return false;
     } else {
-      var __n1 = maybe_number(__str);
-      if (real63(__n1)) {
-        return __n1;
+      if (flag63(__str2)) {
+        return intern(__str2);
       } else {
-        return __str;
+        var __n1 = maybe_number(__str2);
+        if (real63(__n1)) {
+          return __n1;
+        } else {
+          return __str2;
+        }
       }
     }
   }
 };
 read_table["("] = function (s) {
   read_char(s);
-  var __r16 = undefined;
+  var __r24 = undefined;
   var __l1 = [];
-  while (nil63(__r16)) {
+  while (nil63(__r24)) {
     skip_non_code(s);
     var __c4 = peek_char(s);
     if (__c4 === ")") {
       read_char(s);
-      __r16 = __l1;
+      __r24 = __l1;
     } else {
       if (nil63(__c4)) {
-        __r16 = expected(s, ")");
+        __r24 = expected(s, ")");
       } else {
-        var __x2 = read(s);
-        if (key63(__x2)) {
-          var __k = clip(__x2, 0, edge(__x2));
+        var __x3 = read(s);
+        if (key63(__x3)) {
+          var __k = clip(__x3, 0, edge(__x3));
           var __v = read(s);
           __l1[__k] = __v;
         } else {
-          add(__l1, __x2);
+          add(__l1, __x3);
         }
       }
     }
   }
-  return __r16;
+  return __r24;
 };
 read_table[")"] = function (s) {
   throw new Error("Unexpected ) at " + s.pos);
 };
-read_table["\""] = function (s) {
+read_table["["] = function (s) {
   read_char(s);
-  var __r19 = undefined;
-  var __str1 = "\"";
-  while (nil63(__r19)) {
+  var __r27 = undefined;
+  var __l2 = ["#%brackets"];
+  while (nil63(__r27)) {
+    skip_non_code(s);
     var __c5 = peek_char(s);
-    if (__c5 === "\"") {
-      __r19 = __str1 + read_char(s);
+    if (__c5 === "]") {
+      read_char(s);
+      __r27 = __l2;
     } else {
       if (nil63(__c5)) {
-        __r19 = expected(s, "\"");
+        __r27 = expected(s, "]");
       } else {
-        if (__c5 === "\\") {
-          __str1 = __str1 + read_char(s);
-        }
-        __str1 = __str1 + read_char(s);
+        add(__l2, read(s));
       }
     }
   }
-  return __r19;
+  return __r27;
+};
+read_table["]"] = function (s) {
+  throw new Error("Unexpected ] at " + s.pos);
+};
+setenv("#%braces", {_stash: true, macro: function () {
+  var __args1 = unstash(Array.prototype.slice.call(arguments, 0));
+  return join(["%object"], __args1);
+}});
+read_table["{"] = function (s) {
+  read_char(s);
+  var __r30 = undefined;
+  var __l3 = ["#%braces"];
+  while (nil63(__r30)) {
+    skip_non_code(s);
+    var __c6 = peek_char(s);
+    if (__c6 === "}") {
+      read_char(s);
+      __r30 = __l3;
+    } else {
+      if (nil63(__c6)) {
+        __r30 = expected(s, "}");
+      } else {
+        add(__l3, read(s));
+      }
+    }
+  }
+  return __r30;
+};
+read_table["}"] = function (s) {
+  throw new Error("Unexpected } at " + s.pos);
+};
+read_table["\""] = function (s) {
+  read_char(s);
+  var __r33 = undefined;
+  var __str3 = "\"";
+  while (nil63(__r33)) {
+    var __c7 = peek_char(s);
+    if (__c7 === "\"") {
+      __r33 = __str3 + read_char(s);
+    } else {
+      if (nil63(__c7)) {
+        __r33 = expected(s, "\"");
+      } else {
+        if (__c7 === "\\") {
+          __str3 = __str3 + read_char(s);
+        }
+        __str3 = __str3 + read_char(s);
+      }
+    }
+  }
+  return __r33;
 };
 read_table["|"] = function (s) {
   read_char(s);
-  var __r21 = undefined;
-  var __str2 = "|";
-  while (nil63(__r21)) {
-    var __c6 = peek_char(s);
-    if (__c6 === "|") {
-      __r21 = __str2 + read_char(s);
+  var __r35 = undefined;
+  var __str4 = "|";
+  while (nil63(__r35)) {
+    var __c8 = peek_char(s);
+    if (__c8 === "|") {
+      __r35 = __str4 + read_char(s);
     } else {
-      if (nil63(__c6)) {
-        __r21 = expected(s, "|");
+      if (nil63(__c8)) {
+        __r35 = expected(s, "|");
       } else {
-        __str2 = __str2 + read_char(s);
+        __str4 = __str4 + read_char(s);
       }
     }
   }
-  return __r21;
+  return __r35;
 };
 read_table["'"] = function (s) {
   read_char(s);

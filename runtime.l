@@ -10,6 +10,10 @@
 
 (define-global is? (x) (not (nil? x)))
 
+(define-global has? (l k)
+  (target js: (. l (hasOwnProperty k))
+          lua: (is? (. l k))))
+
 (target js: (define-global type (x) (typeof x)))
 
 (define-global obj? (x)
@@ -20,25 +24,40 @@
   (and (obj? x) (. x '_stash)))
 
 (define-global kind (x)
-  (if (tagged? x) (. x '_stash) (type x)))
+  (if (tagged? x) (. x '_stash (at 0)) (type x)))
+
+(define-global untag (x)
+  (if (tagged? x) (. x '_stash (at 1)) x))
+
+(define-global fatal (message args)
+  (if (and args (some? args))
+      (error (cat message ": " (str args)))
+    (error message)))
+
+(define-global untag! (x tag)
+  (unless (is-a? x tag)
+    (fatal "Bad tag" (list x tag)))
+  (untag x))
+
+(define-global untag? (x tag)
+  (if (is-a? x tag) (untag x) false))
 
 (define-global is-a? (x tag)
   (= (kind x) tag))
 
-(define-global annotate (tag x prop)
-  (if (is-a? x tag)
-      x
-      props
-      (obj _stash: tag _value: x %props: prop)
-    (obj _stash: tag _value: x)))
+(define-global tagged (tag x)
+  (%object '_stash (list tag x)))
+
+(define-global annotate (tag x)
+  (if (is-a? x tag) x (tagged tag x)))
+
+(define-global is (x y)
+  (and (= (kind x) (kind y))
+       (= (untag x) (untag y))))
 
 (define-global no (x) (or (nil? x) (= x false)))
 (define-global yes (x) (not (no x)))
 (define-global either (x y) (if (is? x) x y))
-
-(define-global has? (l k)
-  (target js: (. l (hasOwnProperty k))
-          lua: (is? (. l k))))
 
 (define-global # (x)
   (target js: (or (. x 'length) 0) lua: |#x|))
@@ -56,7 +75,7 @@
 (define-global function? (x) (= (type x) 'function))
 
 (define-global atom? (x)
-  (or (nil? x) (string? x) (number? x) (boolean? x)))
+  (or (nil? x) (string? x) (number? x) (boolean? x) (is-a? x 'symbol)))
 
 (define-global nan (/ 0 0))
 (define-global inf (/ 1 0))
@@ -149,6 +168,21 @@
             (if (number? k) (inc k n))
             (set (. r k) v)))))))
 
+(define-global assoc! (l rest: kvs)
+  (step (k v) (pair kvs)
+    (set (get l k) v))
+  l)
+
+(define-global assoc (l rest: kvs)
+  (with r (obj)
+    (each-kv
+      (fn (v k)
+        (target lua: (if (number? k) (inc k)))
+        (set (get r k) v))
+      (or l (obj)))
+    (step (k v) (pair kvs)
+      (set (get r k) v))))
+
 (define-global find (f t)
   (each x t
     (let y (f x)
@@ -201,7 +235,7 @@
 
 (define-global stash (args)
   (when (keys? args)
-    (let p ()
+    (let p (obj)
       (each (k v) args
         (unless (number? k)
           (set (. p k) v)))
@@ -210,22 +244,22 @@
   args)
 
 (define-global stash? (l)
-  (and (obj? l) (= (. l '_stash) true)))
+  (and (obj? l) (= (get l '_stash) true)))
 
 (define-global unstash (args)
-  (if (none? args) ()
+  (if (none? args) args
     (let l (last args)
       (if (stash? l)
           (with args1 (almost args)
             (each (k v) l
-              (unless (= k '_stash)
+              (unless (and (= k '_stash) (= v true))
                 (set (. args1 k) v))))
         args))))
 
 (define-global destash! (l args1)
   (if (stash? l)
       (each (k v) l
-        (unless (= k '_stash)
+        (unless (and (= k '_stash) (= v true))
           (set (. args1 k) v)))
     l))
 
@@ -310,12 +344,28 @@
         (cat! s1 c1)))
     (cat s1 "\"")))
 
+(define-global each-kv (f l)
+  (target
+    js: (let ks ((get Reflect 'ownKeys) l)
+          (step k ks
+            (when (numeric? k)
+              (f (get l k) (parseInt k) l)))
+          (step k ks
+            (unless (numeric? k)
+              (f (get l k) k l))))
+    lua: (do (for i (# l)
+               (f (at l i) i l))
+             (each (k v) l
+               (unless (number? k)
+                 (f v k l))))))
+
 (define-global str (x stack)
   (if (nil? x) "nil"
       (nan? x) "nan"
       (= x inf) "inf"
       (= x -inf) "-inf"
       (boolean? x) (if x "true" "false")
+      (is-a? x 'symbol) (symbol-name x)
       (string? x) (escape x)
       (atom? x) (tostring x)
       (function? x) "function"
@@ -328,14 +378,18 @@
           xs () ks ()
           l (or stack ()))
       (add l x)
-      (each (k v) x
-        (if (number? k)
-            (set (. xs k) (str v l))
-          (do (target lua:
-                (unless (string? k)
-                  (set k (str k l))))
-              (add ks (cat k ":"))
-              (add ks (str v l)))))
+      (each-kv
+        (fn (v k)
+          (if (number? k)
+              (set (. xs k) (str v l))
+            (do (target
+                  lua: (unless (string? k)
+                         (set k (str k l)))
+                  js: (when (is-a? k 'symbol)
+                        (set k (str k l))))
+                (add ks (cat k ":"))
+                (add ks (str v l)))))
+        x)
       (drop l)
       (each v (join xs ks)
         (cat! s sp v)

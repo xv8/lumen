@@ -338,6 +338,7 @@
       (= x inf) "inf"
       (= x -inf) "-inf"
       (number? x) (cat x "")
+      (is-a? x 'symbol) (compile `(get obarray ,(escape (symbol-name x))))
     (error (cat "Cannot compile atom: " (str x)))))
 
 (define terminator (stmt?)
@@ -386,12 +387,14 @@
       (= (hd form) ".") "."))
 
 (define compile-call (form)
-  (let (sep (dispatch form)
-        (f rest: args) (if sep (tl form) form)
-        f1 (if (parenthesize-call? f)
-               (cat "(" (compile f) ")")
-             (compile f)))
-    (parse-access sep f1 args)))
+  (if (keyword? (hd form))
+      (compile `(get ,(at form 1) ,(hd form)))
+    (let (sep (dispatch form)
+          (f rest: args) (if sep (tl form) form)
+          f1 (if (parenthesize-call? f)
+                 (cat "(" (compile f) ")")
+               (compile f)))
+      (parse-access sep f1 args))))
 
 (define op-delims (parent child right: right)
   (if ((if right >= >)
