@@ -123,7 +123,7 @@ bind = function (lh, rh) {
         if (number63(__k3)) {
           __e26 = ["get", __id, bias(__k3)];
         } else {
-          __e26 = [".", __id, ["quote", __k3]];
+          __e26 = ["get", __id, ["quote", __k3]];
         }
         __e25 = __e26;
       }

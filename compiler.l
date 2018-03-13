@@ -72,7 +72,7 @@
                      `(cut ,id ,(# lh))
                      (number? k)
                      `(get ,id ,(bias k))
-                   `(. ,id ',k))
+                   `(get ,id ',k))
             (when (is? k)
               (let k (if (= v true) k v)
                 (join! bs (bind k x))))))))))

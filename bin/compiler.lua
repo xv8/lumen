@@ -109,7 +109,7 @@ function bind(lh, rh)
         if number63(__k1) then
           __e24 = {"get", __id, bias(__k1)}
         else
-          __e24 = {".", __id, {"quote", __k1}}
+          __e24 = {"get", __id, {"quote", __k1}}
         end
         __e23 = __e24
       end
