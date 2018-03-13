@@ -38,7 +38,7 @@
   (let (s (. reader (stream (. system (read-file path))))
         body (. reader (read-all s))
         form (. compiler (expand `(do ,@body))))
-    (. compiler (compile form :stmt))))
+    (. compiler (compile form stmt: true))))
 
 (define-global load (path)
   (let previous target
