@@ -764,13 +764,9 @@
 (define-special %object forms
   (let (s "{" c ""
         sep (if (= target 'lua) " = " ": "))
-    (each (k v) (pair forms)
-      (when (number? k)
-        (let ((k v) v)
-          (unless (string? k)
-            (error (cat "Illegal key: " (str k))))
-          (cat! s c (key k) sep (compile v))
-          (set c ", "))))
+    (step (k v) (pair forms)
+      (cat! s c (key (compile k)) sep (compile v))
+      (set c ", "))
     (cat s "}")))
 
 (define-special %literal args
