@@ -1,4 +1,4 @@
-(define getenv (k p)
+(define-global getenv (k p)
   (when (string? k)
     (let i (edge environment)
       (while (>= i 0)
@@ -7,28 +7,28 @@
               (return (if p (get b p) b))
             (dec i)))))))
 
-(define macro-function (k)
+(define-global macro-function (k)
   (getenv k 'macro))
 
-(define macro? (k)
+(define-global macro? (k)
   (is? (macro-function k)))
 
-(define special? (k)
+(define-global special? (k)
   (is? (getenv k 'special)))
 
-(define special-form? (form)
+(define-global special-form? (form)
   (and (not (atom? form)) (special? (hd form))))
 
-(define statement? (k)
+(define-global statement? (k)
   (and (special? k) (getenv k 'stmt)))
 
-(define symbol-expansion (k)
+(define-global symbol-expansion (k)
   (getenv k 'symbol))
 
-(define symbol? (k)
+(define-global symbol? (k)
   (is? (symbol-expansion k)))
 
-(define variable? (k)
+(define-global variable? (k)
   (is? (getenv k 'variable)))
 
 (define-global bound? (x)
@@ -42,10 +42,10 @@
       (atom? form) form
     `(list ,@(map quoted form))))
 
-(define literal (s)
+(define-global literal (s)
   (if (string-literal? s) s (quoted s)))
 
-(define stash* (args)
+(define-global stash* (args)
   (if (keys? args)
       (let l '(%object "_stash" true)
         (each (k v) args
@@ -55,7 +55,7 @@
         (join args (list l)))
     args))
 
-(define bias (k)
+(define-global bias (k)
   (when (and (number? k)
              (not (= target (language))))
     (if (= target 'js)
@@ -104,33 +104,33 @@
             (join! bs (list (keys args) r))))
         (list args1 `(let ,bs ,@body))))))
 
-(define quoting? (depth)
+(define-global quoting? (depth)
   (number? depth))
 
-(define quasiquoting? (depth)
+(define-global quasiquoting? (depth)
   (and (quoting? depth) (> depth 0)))
 
-(define can-unquote? (depth)
+(define-global can-unquote? (depth)
   (and (quoting? depth) (= depth 1)))
 
-(define quasisplice? (x depth)
+(define-global quasisplice? (x depth)
   (and (can-unquote? depth)
        (not (atom? x))
        (= (hd x) 'unquote-splicing)))
 
-(define expand-local ((x name value))
+(define-global expand-local ((x name value))
   (setenv name variable: true)
   `(%local ,name ,(macroexpand value)))
 
-(define expand-function ((x args rest: body))
+(define-global expand-function ((x args rest: body))
   (with-bindings (args)
     `(%function ,args ,@(macroexpand body))))
 
-(define expand-definition ((x name args rest: body))
+(define-global expand-definition ((x name args rest: body))
   (with-bindings (args)
     `(,x ,name ,args ,@(macroexpand body))))
 
-(define expand-macro (form)
+(define-global expand-macro (form)
   (macroexpand (expand1 form)))
 
 (define-global expand1 ((name rest: body))
@@ -148,7 +148,7 @@
           (macro? x) (expand-macro form)
         (map macroexpand form)))))
 
-(define quasiquote-list (form depth)
+(define-global quasiquote-list (form depth)
   (let xs (list '(list))
     (each (k v) form
       (unless (number? k)
@@ -207,7 +207,7 @@
     (for i indent-level
       (cat! s "  "))))
 
-(define reserved
+(define-global reserved
   (set-of "=" "==" "+" "-" "%" "*" "/" "<" ">" "<=" ">="
           ;; js
           "break" "case" "catch" "class" "const" "continue"
@@ -224,13 +224,13 @@
 (define-global reserved? (x)
   (has? reserved x))
 
-(define valid-code? (n)
+(define-global valid-code? (n)
   (or (number-code? n)         ; 0-9
       (and (> n 64) (< n 91))  ; A-Z
       (and (> n 96) (< n 123)) ; a-z
       (= n 95)))               ; _
 
-(define id (id)
+(define-global id (id)
   (let id1 (if (number-code? (code id 0)) "_" "")
     (for i (# id)
       (let (c (char id i)
@@ -275,7 +275,7 @@
           (add o (literal k))
           (add o x))))))
 
-(define infix
+(define-global infix
   `((not: (js: ! lua: ,"not"))
     (*: true /: true %: true)
     (cat: (js: + lua: ..))
@@ -285,39 +285,39 @@
     (and: (js: && lua: and))
     (or: (js: ,"||" lua: or))))
 
-(define unary? (form)
+(define-global unary? (form)
   (and (two? form) (in? (hd form) '(not -))))
 
-(define index (k)
+(define-global index (k)
   (target js: k lua: (when (number? k) (- k 1))))
 
-(define precedence (form)
+(define-global precedence (form)
   (unless (or (atom? form) (unary? form))
     (each (k v) infix
       (if (get v (hd form)) (return (index k)))))
   0)
 
-(define getop (op)
+(define-global getop (op)
   (find (fn (level)
           (let x (get level op)
             (if (= x true) op
                 (is? x) (get x target))))
         infix))
 
-(define infix? (x)
+(define-global infix? (x)
   (is? (getop x)))
 
 (define-global infix-operator? (x)
   (and (obj? x) (infix? (hd x))))
 
-(define compile-args (args)
+(define-global compile-args (args)
   (let (s "(" c "")
     (step x args
       (cat! s c (compile x))
       (set c ", "))
     (cat s ")")))
 
-(define escape-newlines (s)
+(define-global escape-newlines (s)
   (with s1 ""
     (for i (# s)
       (let c (char s i)
@@ -325,7 +325,7 @@
                      (= c "\r") "\\r"
                    c))))))
 
-(define compile-atom (x)
+(define-global compile-atom (x)
   (if (and (= x "nil") (= target 'lua)) x
       (= x "nil") "undefined"
       (id-literal? x) (inner x)
@@ -338,23 +338,23 @@
       (number? x) (cat x "")
     (error (cat "Cannot compile atom: " (str x)))))
 
-(define terminator (stmt?)
+(define-global terminator (stmt?)
   (if (not stmt?) ""
       (= target 'js) ";\n"
     "\n"))
 
-(define compile-special (form stmt?)
+(define-global compile-special (form stmt?)
   (let ((x rest: args) form
         (special: special stmt: stmt tr: self-tr?) (getenv x)
         tr (terminator (and stmt? (not self-tr?))))
     (cat (apply special args) tr)))
 
-(define parenthesize-call? (x)
+(define-global parenthesize-call? (x)
   (or (and (not (atom? x))
            (= (hd x) '%function))
       (> (precedence x) 0)))
 
-(define compile-call (form)
+(define-global compile-call (form)
   (let (f (hd form)
         f1 (compile f)
         args (compile-args (stash* (tl form))))
@@ -362,14 +362,14 @@
         (cat "(" f1 ")" args)
       (cat f1 args))))
 
-(define op-delims (parent child right: right)
+(define-global op-delims (parent child right: right)
   (if ((if right >= >)
        (precedence child)
        (precedence parent))
       (list "(" ")")
     (list "" "")))
 
-(define compile-infix (form)
+(define-global compile-infix (form)
   (let ((op rest: (a b)) form
         (ao ac) (op-delims form a)
         (bo bc) (op-delims form b right: true)
@@ -396,7 +396,7 @@
         (cat "function " id args " {\n" body ind "}" tr)
       (cat p "function " id args "\n" body ind tr))))
 
-(define can-return? (form)
+(define-global can-return? (form)
   (and (is? form)
        (or (atom? form)
            (and (not (= (hd form) 'return))
@@ -413,7 +413,7 @@
                  (compile-call form)))
       (cat ind form tr))))
 
-(define lower-statement (form tail?)
+(define-global lower-statement (form tail?)
   (either
     (let (hoist () e (lower form hoist true tail?))
       (if (and (some? hoist) (is? e))
@@ -423,15 +423,15 @@
         (hd hoist)))
     '(do)))
 
-(define lower-body (body tail?)
+(define-global lower-body (body tail?)
   (lower-statement `(do ,@body) tail?))
 
-(define literal? (form)
+(define-global literal? (form)
   (or (atom? form)
       (= (hd form) '%array)
       (= (hd form) '%object)))
 
-(define standalone? (form)
+(define-global standalone? (form)
   (or (and (not (atom? form))
            (not (infix? (hd form)))
            (not (literal? form))
@@ -439,7 +439,7 @@
            (not (= '%statement (hd form))))
       (id-literal? form)))
 
-(define lower-do (args hoist stmt? tail?)
+(define-global lower-do (args hoist stmt? tail?)
   (step x (almost args)
     (let-when e (lower x hoist stmt?)
       (when (standalone? e)
@@ -449,13 +449,13 @@
         `(return ,e)
       e)))
 
-(define lower-set (args hoist stmt? tail?)
+(define-global lower-set (args hoist stmt? tail?)
   (let ((lh rh) args)
     (add hoist `(%set ,(lower lh hoist) ,(lower rh hoist)))
     (unless (and stmt? (not tail?))
       lh)))
 
-(define lower-if (args hoist stmt? tail?)
+(define-global lower-if (args hoist stmt? tail?)
   (let ((cond then else) args)
     (if stmt?
         (add hoist
@@ -471,7 +471,7 @@
                          (list (lower `(%set ,e ,else))))))
         e))))
 
-(define lower-short (x args hoist)
+(define-global lower-short (x args hoist)
   (let ((a b) args
         hoist1 ()
         b1 (lower b hoist1))
@@ -484,10 +484,10 @@
                  hoist))
       `(,x ,(lower a hoist) ,b1))))
 
-(define lower-try (args hoist tail?)
+(define-global lower-try (args hoist tail?)
   (add hoist `(%try ,(lower-body args tail?))))
 
-(define lower-while (args hoist)
+(define-global lower-while (args hoist)
   (let ((c rest: body) args
         pre ()
         c (lower c pre))
@@ -500,28 +500,28 @@
                (%if (not ,c) (break))
                ,(lower-body body)))))))
 
-(define lower-for (args hoist)
+(define-global lower-for (args hoist)
   (let ((t k rest: body) args)
     (add hoist
          `(%for ,(lower t hoist) ,k
             ,(lower-body body)))))
 
-(define lower-function (args)
+(define-global lower-function (args)
   (let ((a rest: body) args)
     `(%function ,a ,(lower-body body true))))
 
-(define lower-definition (kind args hoist)
+(define-global lower-definition (kind args hoist)
   (let ((name args rest: body) args)
     (add hoist `(,kind ,name ,args ,(lower-body body true)))))
 
-(define lower-call (form hoist)
+(define-global lower-call (form hoist)
   (let form (map (fn (x) (lower x hoist)) form)
     (if (some? form) form)))
 
-(define pairwise? (form)
+(define-global pairwise? (form)
   (in? (hd form) '(< <= = >= >)))
 
-(define lower-pairwise (form)
+(define-global lower-pairwise (form)
   (if (pairwise? form)
       (let (e () (x rest: args) form)
         (reduce (fn (a b)
@@ -530,10 +530,10 @@
         `(and ,@(reverse e)))
     form))
 
-(define lower-infix? (form)
+(define-global lower-infix? (form)
   (and (infix? (hd form)) (> (# form) 3)))
 
-(define lower-infix (form hoist)
+(define-global lower-infix (form hoist)
   (let (form (lower-pairwise form)
         (x rest: args) form)
     (lower (reduce (fn (a b)
@@ -541,7 +541,7 @@
                    (reverse args))
            hoist)))
 
-(define lower-special (form hoist)
+(define-global lower-special (form hoist)
   (let e (lower-call form hoist)
     (if e (add hoist e))))
 

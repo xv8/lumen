@@ -1,19 +1,19 @@
-(define delimiters (set-of "(" ")" ";" "\r" "\n"))
-(define whitespace (set-of " " "\t" "\r" "\n"))
+(define-global delimiters (set-of "(" ")" ";" "\r" "\n"))
+(define-global whitespace (set-of " " "\t" "\r" "\n"))
 
-(define stream (str more)
+(define-global stream (str more)
   (obj pos: 0 string: str len: (# str) more: more))
 
-(define peek-char (s)
+(define-global peek-char (s)
   (let ((pos: pos len: len string: string) s)
     (when (< pos len)
       (char string pos))))
 
-(define read-char (s)
+(define-global read-char (s)
   (let c (peek-char s)
     (if c (do (inc (get s 'pos)) c))))
 
-(define skip-non-code (s)
+(define-global skip-non-code (s)
   (while true
     (let c (peek-char s)
       (if (nil? c) (break)
@@ -24,10 +24,10 @@
               (skip-non-code s))
         (break)))))
 
-(define read-table (obj))
-(define eof (obj))
+(define-global read-table (obj))
+(define-global eof (obj))
 
-(define read (s)
+(define-global read (s)
   (skip-non-code s)
   (let c (peek-char s)
     (if (is? c)
@@ -36,7 +36,7 @@
          s)
       eof)))
 
-(define read-all (s)
+(define-global read-all (s)
   (with l ()
     (while true
       (let form (read s)
@@ -47,38 +47,38 @@
   (let x (read (stream str more))
     (unless (= x eof) x)))
 
-(define key? (atom)
+(define-global key? (atom)
   (and (string? atom)
        (> (# atom) 1)
        (= (char atom (edge atom)) ":")))
 
-(define flag? (atom)
+(define-global flag? (atom)
   (and (string? atom)
        (> (# atom) 1)
        (= (char atom 0) ":")))
 
-(define expected (s c)
+(define-global expected (s c)
   (let ((more: more pos: pos) s)
     (or more (error (cat "Expected " c " at " pos)))))
 
-(define wrap (s x)
+(define-global wrap (s x)
   (let y (read s)
     (if (= y (get s 'more)) y
       (list x y))))
 
-(define hex-prefix? (str)
+(define-global hex-prefix? (str)
   (let i (if (= (code str 0) 45) 1 0)  ; "-"
     (and (= (code str i) 48)           ; "0"
          (let n (code str (inc i))
            (or (= n 120) (= n 88)))))) ; "x" or "X"
 
-(define maybe-number (str)
+(define-global maybe-number (str)
   (if (hex-prefix? str)
       (target js: (parseInt str 16) lua: (tonumber str))
       (number-code? (code str (edge str)))
     (number str)))
 
-(define real? (x)
+(define-global real? (x)
   (and (number? x) (not (nan? x)) (not (inf? x))))
 
 (define-reader ("" s) ; atom

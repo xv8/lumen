@@ -1,8 +1,8 @@
 _G = _G or _ENV
 _G._G = _G
-environment = {{}}
+environment = _G.environment or {{}}
 _G.environment = environment
-target = "lua"
+target = _G.traget or "lua"
 _G.target = target
 function nil63(x)
   return x == nil
@@ -468,7 +468,7 @@ function _37(...)
   end, reverse(__xs5)), 0)
 end
 _G._37 = _37
-local function pairwise(f, xs)
+function pairwise(f, xs)
   local __i18 = 0
   while __i18 < edge(xs) do
     local __a = xs[__i18 + 1]
@@ -480,6 +480,7 @@ local function pairwise(f, xs)
   end
   return true
 end
+_G.pairwise = pairwise
 function _60(...)
   local __xs6 = unstash({...})
   return pairwise(function (a, b)
@@ -651,7 +652,8 @@ function str(x, stack)
   end
 end
 _G.str = str
-local values = unpack or table.unpack
+values = unpack or table.unpack
+_G.values = values
 function apply(f, args)
   local __args = stash(args)
   return f(values(__args))
@@ -690,7 +692,8 @@ function setenv(k, ...)
   end
 end
 _G.setenv = setenv
-local math = math
+math = math
+_G.math = math
 abs = math.abs
 _G.abs = abs
 acos = math.acos
@@ -1162,10 +1165,13 @@ setenv("when-compiling", {_stash = true, macro = function (...)
   local __body43 = unstash({...})
   return _eval(join({"do"}, __body43))
 end})
-local reader = require("reader")
-local compiler = require("compiler")
-local system = require("system")
-local function eval_print(form)
+reader = require("reader")
+_G.reader = reader
+compiler = require("compiler")
+_G.compiler = compiler
+system = require("system")
+_G.system = system
+function eval_print(form)
   local ____id = {xpcall(function ()
     return compiler["eval"](form)
   end, function (m)
@@ -1197,6 +1203,7 @@ local function eval_print(form)
     end
   end
 end
+_G.eval_print = eval_print
 local function rep(s)
   return eval_print(reader["read-string"](s))
 end
@@ -1241,17 +1248,19 @@ function _load(path)
   return compiler.run(__code)
 end
 _G._load = _load
-local function script_file63(path)
+function script_file63(path)
   return not( "-" == char(path, 0) or ".js" == clip(path, _35(path) - 3) or ".lua" == clip(path, _35(path) - 4))
 end
-local function run_file(path)
+_G.script_file63 = script_file63
+function run_file(path)
   if script_file63(path) then
     return _load(path)
   else
     return compiler.run(system["read-file"](path))
   end
 end
-local function usage()
+_G.run_file = run_file
+function usage()
   print("usage: lumen [<file> <arguments> | options <object files>]")
   print(" <file>\t\tProgram read from script file")
   print(" <arguments>\tPassed to program in system.argv")
@@ -1262,7 +1271,8 @@ local function usage()
   print(" -t <target>\tTarget language (default: lua)")
   return print(" -e <expr>\tExpression to evaluate")
 end
-local function main()
+_G.usage = usage
+function main()
   local __arg = hd(system.argv)
   if __arg and script_file63(__arg) then
     return _load(__arg)
@@ -1335,4 +1345,5 @@ local function main()
     end
   end
 end
+_G.main = main
 return {reader = reader, compiler = compiler, system = system, ["eval-print"] = eval_print, rep = rep, repl = repl, ["compile-file"] = compile_file, ["load"] = _load, ["script-file?"] = script_file63, ["run-file"] = run_file, usage = usage, main = main}

@@ -10,21 +10,21 @@
       (with x (f h)
         ((get h 'close) h)))))
 
-(define read-file (path)
+(define-global read-file (path)
   (target
     js: ((get fs 'readFileSync) path 'utf8)
     lua: (call-with-file
           (fn (f) ((get f 'read) f '*a))
           path)))
 
-(define write-file (path data)
+(define-global write-file (path data)
   (target
     js: ((get fs 'writeFileSync) path data 'utf8)
     lua: (call-with-file
           (fn (f) ((get f 'write) f data))
           path 'w)))
 
-(define file-exists? (path)
+(define-global file-exists? (path)
   (target
     js: (and ((get fs 'existsSync) path 'utf8)
              ((get ((get fs 'statSync) path) 'isFile)))
@@ -34,7 +34,7 @@
                             (= 0 ((get f 'seek) f 'end)))
                   ((get f 'close) f))))))
 
-(define directory-exists? (path)
+(define-global directory-exists? (path)
   (target
     js: (and ((get fs 'existsSync) path 'utf8)
              ((get ((get fs 'statSync) path) 'isDirectory)))
@@ -44,40 +44,40 @@
                              (not (= 0 ((get f 'seek) f 'end))))
                   ((get f 'close) f))))))
 
-(define path-separator
+(define-global path-separator
   (target
     js: (get (require 'path) 'sep)
     lua: (char (get (get _G 'package) 'config) 0)))
 
-(define path-join parts
+(define-global path-join parts
   (or (reduce (fn (x y) (cat x path-separator y)) parts) ""))
 
-(define get-environment-variable (name)
+(define-global get-environment-variable (name)
   (target
     js: (get (get process 'env) name)
     lua: ((get os 'getenv) name)))
 
-(define write (x)
+(define-global write (x)
   (target js: (let out (get process 'stdout)
                 ((get out 'write) x))
           lua: (if uv
                    ((get uv 'write) (get (get process 'stdout) 'handle) x)
                  ((get io 'write) x))))
 
-(define exit (code)
+(define-global exit (code)
   (target js: ((get process 'exit) code)
           lua: ((get os 'exit) code)))
 
-(define argv
+(define-global argv
   (target js: (cut (get process 'argv) 2) lua: (or arg (if args (cut args 1)))))
 
-(define reload (module)
+(define-global reload (module)
   (wipe (target
           lua: (get (get package 'loaded) module)
           js: (get (get require 'cache) ((get require 'resolve) module))))
   (require module))
 
-(define run (command)
+(define-global run (command)
   (target
     js: ((get ((get child_process 'execSync) command) 'toString))
     lua: (let f ((get io 'popen) command)

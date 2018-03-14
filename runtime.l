@@ -1,6 +1,6 @@
-(define-global _G (target lua: (or _G _ENV) js: (if (not (= (typeof "global") "undefined")) global window)))
-(define-global environment (list (obj)))
-(define-global target (language))
+(define-global _G (target lua: (or _G _ENV) js: this))
+(define-global environment (or (get _G 'environment) (list (obj))))
+(define-global target (or (get _G 'traget) (language)))
 
 (define-global nil? (x)
   (target
@@ -246,7 +246,7 @@
 (define-global % xs
   (either (reduce (fn (b a) (% a b)) (reverse xs)) 0))
 
-(define pairwise (f xs)
+(define-global pairwise (f xs)
   (for i (edge xs)
     (let (a (at xs i)
           b (at xs (+ i 1)))
@@ -276,7 +276,7 @@
         (return false))))
   (some? s))
 
-(target js: (define tostring (x) ((get x 'toString))))
+(target js: (define-global tostring (x) ((get x 'toString))))
 
 (define-global escape (s)
   (let s1 "\""
@@ -323,7 +323,7 @@
       (cat s  ")"))))
 
 (target lua:
-  (define values (or unpack (get table 'unpack))))
+  (define-global values (or unpack (get table 'unpack))))
 
 (define-global apply (f args)
   (let args (stash args)
@@ -347,7 +347,7 @@
   (define-global print (x)
     ((get console 'log) x)))
 
-(define math (target js: Math lua: math))
+(define-global math (target js: Math lua: math))
 
 (define-global abs (get math 'abs))
 (define-global acos (get math 'acos))

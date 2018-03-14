@@ -1,9 +1,12 @@
-local delimiters = {["("] = true, [")"] = true, [";"] = true, ["\r"] = true, ["\n"] = true}
-local whitespace = {[" "] = true, ["\t"] = true, ["\r"] = true, ["\n"] = true}
-local function stream(str, more)
+delimiters = {["("] = true, [")"] = true, [";"] = true, ["\r"] = true, ["\n"] = true}
+_G.delimiters = delimiters
+whitespace = {[" "] = true, ["\t"] = true, ["\r"] = true, ["\n"] = true}
+_G.whitespace = whitespace
+function stream(str, more)
   return {pos = 0, string = str, len = _35(str), more = more}
 end
-local function peek_char(s)
+_G.stream = stream
+function peek_char(s)
   local ____id = s
   local __pos = ____id.pos
   local __len = ____id.len
@@ -12,14 +15,16 @@ local function peek_char(s)
     return char(__string, __pos)
   end
 end
-local function read_char(s)
+_G.peek_char = peek_char
+function read_char(s)
   local __c = peek_char(s)
   if __c then
     s.pos = s.pos + 1
     return __c
   end
 end
-local function skip_non_code(s)
+_G.read_char = read_char
+function skip_non_code(s)
   while true do
     local __c1 = peek_char(s)
     if nil63(__c1) then
@@ -40,9 +45,12 @@ local function skip_non_code(s)
     end
   end
 end
-local read_table = {}
-local eof = {}
-local function read(s)
+_G.skip_non_code = skip_non_code
+read_table = {}
+_G.read_table = read_table
+eof = {}
+_G.eof = eof
+function read(s)
   skip_non_code(s)
   local __c2 = peek_char(s)
   if is63(__c2) then
@@ -51,7 +59,8 @@ local function read(s)
     return eof
   end
 end
-local function read_all(s)
+_G.read = read
+function read_all(s)
   local __l = {}
   while true do
     local __form = read(s)
@@ -62,6 +71,7 @@ local function read_all(s)
   end
   return __l
 end
+_G.read_all = read_all
 function read_string(str, more)
   local __x = read(stream(str, more))
   if not( __x == eof) then
@@ -69,13 +79,15 @@ function read_string(str, more)
   end
 end
 _G.read_string = read_string
-local function key63(atom)
+function key63(atom)
   return string63(atom) and _35(atom) > 1 and char(atom, edge(atom)) == ":"
 end
-local function flag63(atom)
+_G.key63 = key63
+function flag63(atom)
   return string63(atom) and _35(atom) > 1 and char(atom, 0) == ":"
 end
-local function expected(s, c)
+_G.flag63 = flag63
+function expected(s, c)
   local ____id1 = s
   local __more = ____id1.more
   local __pos1 = ____id1.pos
@@ -89,7 +101,8 @@ local function expected(s, c)
   end
   return __e
 end
-local function wrap(s, x)
+_G.expected = expected
+function wrap(s, x)
   local __y = read(s)
   if __y == s.more then
     return __y
@@ -97,7 +110,8 @@ local function wrap(s, x)
     return {x, __y}
   end
 end
-local function hex_prefix63(str)
+_G.wrap = wrap
+function hex_prefix63(str)
   local __e1
   if code(str, 0) == 45 then
     __e1 = 1
@@ -116,7 +130,8 @@ local function hex_prefix63(str)
   end
   return __e2
 end
-local function maybe_number(str)
+_G.hex_prefix63 = hex_prefix63
+function maybe_number(str)
   if hex_prefix63(str) then
     return tonumber(str)
   else
@@ -125,9 +140,11 @@ local function maybe_number(str)
     end
   end
 end
-local function real63(x)
+_G.maybe_number = maybe_number
+function real63(x)
   return number63(x) and not nan63(x) and not inf63(x)
 end
+_G.real63 = real63
 read_table[""] = function (s)
   local __str = ""
   while true do

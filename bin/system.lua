@@ -10,17 +10,19 @@ local function call_with_file(f, path, mode)
   h.close(h)
   return __x
 end
-local function read_file(path)
+function read_file(path)
   return call_with_file(function (f)
     return f.read(f, "*a")
   end, path)
 end
-local function write_file(path, data)
+_G.read_file = read_file
+function write_file(path, data)
   return call_with_file(function (f)
     return f.write(f, data)
   end, path, "w")
 end
-local function file_exists63(path)
+_G.write_file = write_file
+function file_exists63(path)
   local __f = io.open(path)
   local __id = is63(__f)
   local __e
@@ -33,7 +35,8 @@ local function file_exists63(path)
   end
   return __e
 end
-local function directory_exists63(path)
+_G.file_exists63 = file_exists63
+function directory_exists63(path)
   local __f1 = io.open(path)
   local __id1 = is63(__f1)
   local __e1
@@ -46,26 +49,32 @@ local function directory_exists63(path)
   end
   return __e1
 end
-local path_separator = char(_G.package.config, 0)
-local function path_join(...)
+_G.directory_exists63 = directory_exists63
+path_separator = char(_G.package.config, 0)
+_G.path_separator = path_separator
+function path_join(...)
   local __parts = unstash({...})
   return reduce(function (x, y)
     return x .. path_separator .. y
   end, __parts) or ""
 end
-local function get_environment_variable(name)
+_G.path_join = path_join
+function get_environment_variable(name)
   return os.getenv(name)
 end
-local function write(x)
+_G.get_environment_variable = get_environment_variable
+function write(x)
   if uv then
     return uv.write(process.stdout.handle, x)
   else
     return io.write(x)
   end
 end
-local function exit(code)
+_G.write = write
+function exit(code)
   return os.exit(code)
 end
+_G.exit = exit
 local __id2 = arg
 local __e3
 if __id2 then
@@ -77,15 +86,18 @@ else
   end
   __e3 = __e4
 end
-local argv = __e3
-local function reload(module)
+argv = __e3
+_G.argv = argv
+function reload(module)
   package.loaded[module] = nil
   return require(module)
 end
-local function run(command)
+_G.reload = reload
+function run(command)
   local __f2 = io.popen(command)
   local __x2 = __f2.read(__f2, "*all")
   __f2.close(__f2)
   return __x2
 end
+_G.run = run
 return {["read-file"] = read_file, ["write-file"] = write_file, ["file-exists?"] = file_exists63, ["directory-exists?"] = directory_exists63, ["path-separator"] = path_separator, ["path-join"] = path_join, ["get-environment-variable"] = get_environment_variable, write = write, exit = exit, argv = argv, reload = reload, run = run}

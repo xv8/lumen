@@ -1,8 +1,8 @@
-(define reader (require 'reader))
-(define compiler (require 'compiler))
-(define system (require 'system))
+(define-global reader (require 'reader))
+(define-global compiler (require 'compiler))
+(define-global system (require 'system))
 
-(define eval-print (form)
+(define-global eval-print (form)
   (let ((ok v) (guard ((get compiler 'eval) form)))
     (if (not ok)
         (target
@@ -47,17 +47,17 @@
       (set target previous)
       ((get compiler 'run) code))))
 
-(define script-file? (path)
+(define-global script-file? (path)
   (not (or (= "-" (char path 0))
            (= ".js" (clip path (- (# path) 3)))
            (= ".lua" (clip path (- (# path) 4))))))
 
-(define run-file (path)
+(define-global run-file (path)
   (if (script-file? path)
       (load path)
     ((get compiler 'run) ((get system 'read-file) path))))
 
-(define usage ()
+(define-global usage ()
   (print "usage: lumen [<file> <arguments> | options <object files>]")
   (print " <file>\t\tProgram read from script file")
   (print " <arguments>\tPassed to program in system.argv")
@@ -68,7 +68,7 @@
   (print " -t <target>\tTarget language (default: lua)")
   (print " -e <expr>\tExpression to evaluate"))
 
-(define main ()
+(define-global main ()
   (let arg (hd (get system 'argv))
     (if (and arg (script-file? arg))
         (load arg)

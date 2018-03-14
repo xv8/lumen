@@ -1,9 +1,12 @@
-var delimiters = {"(": true, ")": true, ";": true, "\r": true, "\n": true};
-var whitespace = {" ": true, "\t": true, "\r": true, "\n": true};
-var stream = function (str, more) {
+delimiters = {"(": true, ")": true, ";": true, "\r": true, "\n": true};
+_G.delimiters = delimiters;
+whitespace = {" ": true, "\t": true, "\r": true, "\n": true};
+_G.whitespace = whitespace;
+stream = function (str, more) {
   return {pos: 0, string: str, len: _35(str), more: more};
 };
-var peek_char = function (s) {
+_G.stream = stream;
+peek_char = function (s) {
   var ____id = s;
   var __pos = ____id.pos;
   var __len = ____id.len;
@@ -12,14 +15,16 @@ var peek_char = function (s) {
     return char(__string, __pos);
   }
 };
-var read_char = function (s) {
+_G.peek_char = peek_char;
+read_char = function (s) {
   var __c = peek_char(s);
   if (__c) {
     s.pos = s.pos + 1;
     return __c;
   }
 };
-var skip_non_code = function (s) {
+_G.read_char = read_char;
+skip_non_code = function (s) {
   while (true) {
     var __c1 = peek_char(s);
     if (nil63(__c1)) {
@@ -40,9 +45,12 @@ var skip_non_code = function (s) {
     }
   }
 };
-var read_table = {};
-var eof = {};
-var read = function (s) {
+_G.skip_non_code = skip_non_code;
+read_table = {};
+_G.read_table = read_table;
+eof = {};
+_G.eof = eof;
+read = function (s) {
   skip_non_code(s);
   var __c2 = peek_char(s);
   if (is63(__c2)) {
@@ -51,7 +59,8 @@ var read = function (s) {
     return eof;
   }
 };
-var read_all = function (s) {
+_G.read = read;
+read_all = function (s) {
   var __l = [];
   while (true) {
     var __form = read(s);
@@ -62,6 +71,7 @@ var read_all = function (s) {
   }
   return __l;
 };
+_G.read_all = read_all;
 read_string = function (str, more) {
   var __x = read(stream(str, more));
   if (!( __x === eof)) {
@@ -69,13 +79,15 @@ read_string = function (str, more) {
   }
 };
 _G.read_string = read_string;
-var key63 = function (atom) {
+key63 = function (atom) {
   return string63(atom) && _35(atom) > 1 && char(atom, edge(atom)) === ":";
 };
-var flag63 = function (atom) {
+_G.key63 = key63;
+flag63 = function (atom) {
   return string63(atom) && _35(atom) > 1 && char(atom, 0) === ":";
 };
-var expected = function (s, c) {
+_G.flag63 = flag63;
+expected = function (s, c) {
   var ____id1 = s;
   var __more = ____id1.more;
   var __pos1 = ____id1.pos;
@@ -89,7 +101,8 @@ var expected = function (s, c) {
   }
   return __e;
 };
-var wrap = function (s, x) {
+_G.expected = expected;
+wrap = function (s, x) {
   var __y = read(s);
   if (__y === s.more) {
     return __y;
@@ -97,7 +110,8 @@ var wrap = function (s, x) {
     return [x, __y];
   }
 };
-var hex_prefix63 = function (str) {
+_G.wrap = wrap;
+hex_prefix63 = function (str) {
   var __e1;
   if (code(str, 0) === 45) {
     __e1 = 1;
@@ -116,7 +130,8 @@ var hex_prefix63 = function (str) {
   }
   return __e2;
 };
-var maybe_number = function (str) {
+_G.hex_prefix63 = hex_prefix63;
+maybe_number = function (str) {
   if (hex_prefix63(str)) {
     return parseInt(str, 16);
   } else {
@@ -125,9 +140,11 @@ var maybe_number = function (str) {
     }
   }
 };
-var real63 = function (x) {
+_G.maybe_number = maybe_number;
+real63 = function (x) {
   return number63(x) && ! nan63(x) && ! inf63(x);
 };
+_G.real63 = real63;
 read_table[""] = function (s) {
   var __str = "";
   while (true) {
