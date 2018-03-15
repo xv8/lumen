@@ -18,10 +18,22 @@
     (= (str a) (str b))))
 
 (define-macro test= (a b)
-  (let-unique (x y)
-    `(let (,x ,a ,y ,b)
-       (test (equal? ,x ,y)
-             (cat "failed: expected " (str ,x) ", was " (str ,y))))))
+  `(let (x# ,a y# ,b)
+     (test (equal? x# y#)
+           (cat "test= failed: expected " (str x#) ", was " (str y#) "\n"
+                "> " ',(str a) "\n"
+                "" (str x#) "\n"
+                "> " ',(str b) "\n"
+                "" (str y#) "\n"))))
+
+(define-macro isnt= (a b)
+  `(let (x# ,a y# ,b)
+     (test (not (equal? x# y#))
+           (cat "isnt= failed: expected " (str x#) ", was " (str y#) "\n"
+                "> " ',(str a) "\n"
+                "" (str x#) "\n"
+                "> " ',(str b) "\n"
+                "" (str y#) "\n"))))
 
 (define-macro define-test (name rest: body)
   `(add tests (list ',name (fn () ,@body))))
@@ -326,7 +338,24 @@ c"
   (test= '(%array "quasiquote" (%array "x")) (macroexpand '``(x)))
   (test= '(%array "quasiquote" (%array "unquote" "a")) (macroexpand '``,a))
   (test= '(%array "quasiquote" (%array (%array "unquote" "x")))
-         (macroexpand '``(,x))))
+         (macroexpand '``(,x)))
+  (let (a `(x# x#)
+        b `(x# x#))
+    (test= (hd a) (last a)
+    (test= (hd b) (last b))
+    (isnt= (hd a) (hd b))
+    (isnt= (last a) (last b))))
+  (let (a `(x# `(x#)))
+    (isnt= (hd a) (hd (last (last a)))))
+  (let ((a (_ (b (_ (c  (_ (d  (_ (e)))) f)))))
+       `(a# ` (a# , (a#  ` (a#  , (a#)) a#))))
+    (test= b c)
+    (test= c f)
+    (test= d e)
+    (isnt= c d)
+    (step x (list b c d e f)
+      (isnt= a x))))
+
 
 (define-test calls
   (let (f (fn () 42)
@@ -596,9 +625,8 @@ c"
 
 (define-test guard
   (let-macro ((guard1 (x)
-                (let-unique (ok v)
-                  `(let ((,ok ,v) (guard ,x))
-                     (list ,ok (if ,ok ,v (get ,v 'message)))))))
+                `(let ((ok# v#) (guard ,x))
+                   (list ok# (if ok# v# (get v# 'message))))))
     (test= (list false "") (guard1 (error)))
     (test= (list false "") (guard1 (error nil)))
     (test= (list false "false") (guard1 (error false)))

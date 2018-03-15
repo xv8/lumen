@@ -97,6 +97,9 @@
 (define-global id-literal? (x)
   (and (string? x) (= (char x 0) "|")))
 
+(define-global scoped-id? (x)
+  (and (string? x) (> (# x) 1) (= (char x (edge x)) "#")))
+
 (define-global add (l x)
   (target js: (do ((get l 'push) x) nil)
           lua: ((get table 'insert) l x)))
@@ -335,12 +338,14 @@
 
 (define-global setenv (k rest: keys)
   (when (string? k)
-    (let (frame (if (get keys 'toplevel)
-                    (hd environment)
-                  (last environment))
+    (let (env (or (get keys 'environment) environment)
+          frame (if (get keys 'toplevel)
+                    (hd env)
+                  (last env))
           entry (or (get frame k) (obj)))
       (each (k v) keys
-        (set (get entry k) v))
+        (unless (= k 'environment)
+          (set (get entry k) v)))
       (set (get frame k) entry))))
 
 (target js:

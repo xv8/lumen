@@ -1,41 +1,44 @@
-(define-global getenv (k p)
+(define-global getenv (k p scoped? environment: env)
   (when (string? k)
-    (let i (edge environment)
+    (let (env (or env environment)
+          i (edge env))
       (while (>= i 0)
-        (let b (get (at environment i) k)
-          (if (is? b)
+        (let b (get (at env i) k)
+          (if (and scoped? (get b '_scope))
+              (break)
+              (is? b)
               (return (if p (get b p) b))
             (dec i)))))))
 
-(define-global macro-function (k)
-  (getenv k 'macro))
+(define-global macro-function (k env)
+  (getenv k 'macro environment: env))
 
-(define-global macro? (k)
-  (is? (macro-function k)))
+(define-global macro? (k env)
+  (is? (macro-function k env)))
 
-(define-global special? (k)
-  (is? (getenv k 'special)))
+(define-global special? (k env)
+  (is? (getenv k 'special environment: env)))
 
-(define-global special-form? (form)
-  (and (not (atom? form)) (special? (hd form))))
+(define-global special-form? (form env)
+  (and (not (atom? form)) (special? (hd form) env)))
 
-(define-global statement? (k)
-  (and (special? k) (getenv k 'stmt)))
+(define-global statement? (k env)
+  (and (special? k) (getenv k 'stmt environment: env)))
 
-(define-global symbol-expansion (k)
-  (getenv k 'symbol))
+(define-global symbol-expansion (k env)
+  (getenv k 'symbol environment: env))
 
-(define-global symbol? (k)
-  (is? (symbol-expansion k)))
+(define-global symbol? (k env)
+  (is? (symbol-expansion k env)))
 
-(define-global variable? (k)
-  (is? (getenv k 'variable)))
+(define-global variable? (k env)
+  (is? (getenv k 'variable environment: env)))
 
-(define-global bound? (x)
-  (or (macro? x)
-      (special? x)
-      (symbol? x)
-      (variable? x)))
+(define-global bound? (x env)
+  (or (macro? x env)
+      (special? x env)
+      (symbol? x env)
+      (variable? x env)))
 
 (define-global quoted (form)
   (if (string? form) (escape form)
@@ -118,52 +121,54 @@
        (not (atom? x))
        (= (hd x) 'unquote-splicing)))
 
-(define-global expand-local ((x name value))
-  (setenv name variable: true)
-  `(%local ,name ,(macroexpand value)))
+(define-global expand-local ((x name value) env)
+  (setenv name variable: true environment: env)
+  `(%local ,name ,(macroexpand value env)))
 
-(define-global expand-function ((x args rest: body))
-  (with-bindings (args)
-    `(%function ,args ,@(macroexpand body))))
+(define-global expand-function ((x args rest: body) env)
+  (with-bindings (args) environment: env
+    `(%function ,args ,@(macroexpand body env))))
 
-(define-global expand-definition ((x name args rest: body))
-  (with-bindings (args)
-    `(,x ,name ,args ,@(macroexpand body))))
+(define-global expand-definition ((x name args rest: body) env)
+  (with-bindings (args) environment: env
+    `(,x ,name ,args ,@(macroexpand body env))))
 
-(define-global expand-macro (form)
-  (macroexpand (expand1 form)))
+(define-global expand-macro (form env)
+  (macroexpand (expand1 form env) env))
 
-(define-global expand1 ((name rest: body))
-  (apply (macro-function name) body))
+(define-global expand1 ((name rest: body) env)
+  (apply (macro-function name env) body))
 
-(define-global macroexpand (form)
-  (if (symbol? form)
-      (macroexpand (symbol-expansion form))
+(define-global macroexpand (form env)
+  (if (symbol? form env)
+      (macroexpand (symbol-expansion form env) env)
       (atom? form) form
     (let x (hd form)
-      (if (= x '%local) (expand-local form)
-          (= x '%function) (expand-function form)
-          (= x '%global-function) (expand-definition form)
-          (= x '%local-function) (expand-definition form)
-          (macro? x) (expand-macro form)
-        (map macroexpand form)))))
+      (if (= x '%local) (expand-local form env)
+          (= x '%function) (expand-function form env)
+          (= x '%global-function) (expand-definition form env)
+          (= x '%local-function) (expand-definition form env)
+          (macro? x env) (expand-macro form env)
+        (map (fn (x) (macroexpand x env)) form)))))
 
-(define-global quasiquote-list (form depth)
+(define-global quasiquote-environment (list (obj)))
+
+(define-global quasiquote-list (form depth env)
   (let xs (list '(list))
     (each (k v) form
       (unless (number? k)
         (let v (if (quasisplice? v depth)
                    ;; don't splice, just expand
-                   (quasiexpand (at v 1))
-                 (quasiexpand v depth))
+                   (quasiexpand (at v 1) 0 env)
+                 (quasiexpand v depth env))
           (set (get (last xs) k) v))))
     ;; collect sibling lists
     (step x form
       (if (quasisplice? x depth)
-          (let x (quasiexpand (at x 1))
+          (let x (quasiexpand (at x 1) 0 env)
             (add xs x)
             (add xs '(list)))
-        (add (last xs) (quasiexpand x depth))))
+        (add (last xs) (quasiexpand x depth env))))
     (let pruned
         (keep (fn (x)
                 (or (> (# x) 1)
@@ -174,27 +179,51 @@
           (hd pruned)
         `(join ,@pruned)))))
 
-(define-global quasiexpand (form depth)
+(define-global resolve-id (form depth env)
+  (if (scoped-id? form)
+      (let id (cat form "_" (or depth 0))
+        (do (unless (get (or (get (last (or env environment)) form) (obj)) 'symbol)
+              (setenv form symbol: (unique form) environment: env))
+            (symbol-expansion form env)))
+              ; (let id1 (unique id)
+              ;   (setenv form symbol: id environment: env)
+              ;   (setenv id symbol: id1 environment: env)))
+            ; (symbol-expansion (symbol-expansion form env) env))
+            ; (let (tortoise (getenv form 'symbol true)
+            ;       hare (getenv tortoise 'symbol true))
+            ;   (while (not (= tortoise hare))
+            ;     (set tortoise (or (getenv tortoise 'symbol true) tortoise))
+            ;     (let hare1 (or (getenv hare 'symbol true) hare)
+            ;       (if (or (= hare1 hare) (nil? hare1))
+            ;           (break)
+            ;         (set hare hare1))))
+            ;   hare)))
+    form))
+
+(define-global quasiexpand (form depth env)
   (if (quasiquoting? depth)
-      (if (atom? form) (list 'quote form)
+      (if (atom? form)
+          (list 'quote (resolve-id form depth env))
           ;; unquote
           (and (can-unquote? depth)
                (= (hd form) 'unquote))
-          (quasiexpand (at form 1))
+          (quasiexpand (at form 1) 0 env)
           ;; decrease quasiquoting depth
           (or (= (hd form) 'unquote)
               (= (hd form) 'unquote-splicing))
-          (quasiquote-list form (- depth 1))
+          (without-frame _scope: true environment: quasiquote-environment
+            (quasiquote-list form (- depth 1) env))
           ;; increase quasiquoting depth
           (= (hd form) 'quasiquote)
-          (quasiquote-list form (+ depth 1))
-        (quasiquote-list form depth))
+          (with-frame _scope: true environment: quasiquote-environment
+            (quasiquote-list form (+ depth 1) env))
+        (quasiquote-list form depth env))
       (atom? form) form
       (= (hd form) 'quote) form
       (= (hd form) 'quasiquote)
       ;; start quasiquoting
-      (quasiexpand (at form 1) 1)
-    (map (fn (x) (quasiexpand x depth)) form)))
+      (quasiexpand (at form 1) 1 env)
+    (map (fn (x) (quasiexpand x depth env)) form)))
 
 (define-global expand-if ((a b rest: c))
   (if (is? b) `((%if ,a ,b ,@(expand-if c)))
@@ -567,8 +596,13 @@
           (statement? x) (lower-special form hoist)
         (lower-call form hoist)))))
 
-(define-global expand (form)
-  (lower (macroexpand form)))
+(define-global expand (form env)
+  (if env
+      (let prev environment
+        (set environment env)
+        (with x (expand form env)
+          (set environment prev)))
+    (lower (macroexpand form env))))
 
 (target js: (define run (code) ((or 0 |eval|) code)))
 
@@ -580,10 +614,10 @@
 
 (define-global %result)
 
-(define-global eval (form)
+(define-global eval (form env)
   (let previous target
     (set target (language))
-    (let code (compile (expand `(set %result ,form)))
+    (let code (compile (expand `(set %result ,form) env))
       (set target previous)
       (run code)
       %result)))

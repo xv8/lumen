@@ -2,7 +2,12 @@
   (quoted form))
 
 (define-macro quasiquote (form)
-  (quasiexpand form 1))
+  ; (with-frame _scope: true environment: quasiquote-environment
+  (let prev environment
+    (set environment quasiquote-environment)
+    (with-frame environment: quasiquote-environment
+      (with x (quasiexpand form 1)
+        (set environment prev)))))
 
 (define-macro set args
   `(do ,@(map (fn ((lh rh)) `(%set ,lh ,rh))
@@ -72,14 +77,13 @@
   `(let (,x ,v) ,@body ,x))
 
 (define-macro let-when (x v rest: body)
-  (let-unique (y)
-    `(let ,y ,v
-       (when (yes ,y)
-         (let (,x ,y)
-           ,@body)))))
+  `(let y# ,v
+     (when (yes y#)
+       (let (,x y#)
+         ,@body))))
 
 (define-macro define-macro (name args rest: body)
-  (let form `(setenv ',name macro: (fn ,args ,@body))
+  (let form `(setenv ',name macro: (fn ,args ,@body) ,@(keys body))
     (eval form)
     form))
 
@@ -88,20 +92,20 @@
     (eval form)
     form))
 
-(define-macro define-symbol (name expansion)
-  (setenv name symbol: expansion)
-  `(setenv ',name symbol: ',expansion))
+(define-macro define-symbol (name expansion environment: env)
+  (setenv name symbol: expansion environment: (if env (eval env)))
+  `(setenv ',name symbol: ',expansion environment: ,env))
 
 (define-macro define-reader ((char s) rest: body)
   `(set (get read-table ,char) (fn (,s) ,@body)))
 
-(define-macro define (name x rest: body)
-  (setenv name variable: true)
+(define-macro define (name x environment: env rest: body)
+  (setenv name variable: true environment: (if env (eval env)))
   (if (some? body)
       `(%local-function ,name ,@(bind* x body))
     `(%local ,name ,x)))
 
-(define-macro define-global (name x rest: body)
+(define-macro define-global (name x environment: env rest: body)
   (setenv name toplevel: true variable: true)
   (if (some? body)
       `(do (%global-function ,name ,@(bind* x body))
@@ -110,17 +114,30 @@
          (%set (get _G ',(compile name)) ,name))))
 
 (define-macro with-frame body
-  (let-unique (x)
-    `(do (add environment (obj))
-         (with ,x (do ,@body)
-           (drop environment)))))
+  (let env (or (get body 'environment) 'environment)
+    (wipe (get body 'environment))
+    (let (i (get body 'frame)
+          frame (if (is? i)
+                    `(at ,env ,i)
+                    `(obj ,@(keys body))))
+    `(do (add (or ,env environment) ,frame)
+         (with x# (do ,@body)
+           (drop (or ,env environment)))))))
 
-(define-macro with-bindings ((names) rest: body)
-  (let-unique (x)
-   `(with-frame
-      (each ,x ,names
-        (setenv ,x variable: true))
-      ,@body)))
+(define-macro without-frame body
+  (let env (or (get body 'environment) 'environment)
+    `(let e# (drop (or ,env environment))
+         (with x# (do ,@body)
+           (add (or ,env environment) e#)))))
+  ; `(with-frame frame: (when-compiling (- (edge environment) 1))
+  ;   ,@body))
+
+(define-macro with-bindings ((names) environment: env rest: body)
+  (let env (or env 'environment)
+    `(with-frame _scope: true environment: (or ,env environment)
+       (each x# ,names
+         (setenv x# variable: true environment: (or ,env environment)))
+       ,@body)))
 
 (define-macro let-macro (definitions rest: body)
   (with-frame
@@ -164,18 +181,18 @@
                                  (str m)))))))))
 
 (define-macro each (x t rest: body)
-  (let-unique (o n i)
-    (let ((k v) (if (atom? x) (list i x)
-                  (if (> (# x) 1) x
-                      (list i (hd x)))))
-      `(let (,o ,t ,k nil)
-         (%for ,o ,k
-           (let (,v (get ,o ,k))
-             ,@(if (= target 'lua) body
-                   `((let ,k (if (numeric? ,k)
-                                 (parseInt ,k)
-                               ,k)
-                       ,@body)))))))))
+  (let ((k v) (let i `i#
+                (if (atom? x) (list i x)
+                    (if (> (# x) 1) x
+                        (list i (hd x))))))
+    `(let (o# ,t ,k nil)
+       (%for o# ,k
+         (let (,v (get o# ,k))
+           ,@(if (= target 'lua) body
+                 `((let ,k (if (numeric? ,k)
+                               (parseInt ,k)
+                             ,k)
+                     ,@body))))))))
 
 (define-macro for (i to rest: body)
   `(let ,i 0
@@ -184,11 +201,10 @@
        (inc ,i))))
 
 (define-macro step (v t rest: body)
-  (let-unique (x i)
-    `(let (,x ,t)
-       (for ,i (# ,x)
-         (let (,v (at ,x ,i))
-           ,@body)))))
+  `(let (x# ,t)
+     (for i# (# x#)
+       (let (,v (at x# i#))
+         ,@body))))
 
 (define-macro set-of xs
   (let l ()
@@ -214,10 +230,9 @@
   `(set ,n (- ,n ,(if (nil? by) 1 by))))
 
 (define-macro with-indent (form)
-  (let-unique (x)
-    `(do (inc indent-level)
-         (with ,x ,form
-           (dec indent-level)))))
+  `(do (inc indent-level)
+       (with x# ,form
+         (dec indent-level))))
 
 (define-macro export names
   (if (= target 'js)
