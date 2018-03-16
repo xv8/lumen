@@ -1330,10 +1330,15 @@ var repl = function () {
   ___in.setEncoding("utf8");
   return ___in.on("data", rep1);
 };
-compile_file = function (path) {
+expand_file = function (path) {
   var __s = reader.stream(system["read-file"](path));
   var __body = reader["read-all"](__s);
-  var __form1 = compiler.expand(join(["do"], __body));
+  return compiler.expand(join(["do"], __body));
+};
+_G.expand_file = expand_file;
+compile_file = function (path) {
+  var __body1 = expand_file(path);
+  var __form1 = compiler.expand(join(["do"], __body1));
   return compiler.compile(__form1, {_stash: true, stmt: true});
 };
 _G.compile_file = compile_file;
@@ -1412,10 +1417,10 @@ var main = function () {
         }
         __i = __i + 1;
       }
-      var ____x2 = __pre;
+      var ____x3 = __pre;
       var ____i1 = 0;
-      while (____i1 < _35(____x2)) {
-        var __file = ____x2[____i1];
+      while (____i1 < _35(____x3)) {
+        var __file = ____x3[____i1];
         run_file(__file);
         ____i1 = ____i1 + 1;
       }

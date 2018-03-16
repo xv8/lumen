@@ -1221,10 +1221,15 @@ local function repl()
     end
   end
 end
-function compile_file(path)
+function expand_file(path)
   local __s1 = reader.stream(system["read-file"](path))
   local __body = reader["read-all"](__s1)
-  local __form1 = compiler.expand(join({"do"}, __body))
+  return compiler.expand(join({"do"}, __body))
+end
+_G.expand_file = expand_file
+function compile_file(path)
+  local __body1 = expand_file(path)
+  local __form1 = compiler.expand(join({"do"}, __body1))
   return compiler.compile(__form1, {_stash = true, stmt = true})
 end
 _G.compile_file = compile_file
@@ -1303,10 +1308,10 @@ local function main()
         end
         __i = __i + 1
       end
-      local ____x2 = __pre
+      local ____x3 = __pre
       local ____i1 = 0
-      while ____i1 < _35(____x2) do
-        local __file = ____x2[____i1 + 1]
+      while ____i1 < _35(____x3) do
+        local __file = ____x3[____i1 + 1]
         run_file(__file)
         ____i1 = ____i1 + 1
       end
