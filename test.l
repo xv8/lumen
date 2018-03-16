@@ -4,8 +4,8 @@
 (define failed 0)
 (define tests ())
 
-(define reader (require 'reader))
-(define compiler (require 'compiler))
+(define reader (get _G 'reader))
+(define compiler (get _G 'compiler))
 
 (define equal? (a b)
   (if (atom? a) (= a b)

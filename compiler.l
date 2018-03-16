@@ -1,8 +1,8 @@
 (define getenv (k p)
   (when (string? k)
-    (let i (edge environment)
+    (let i (edge (get _G 'environment))
       (while (>= i 0)
-        (let b (get (at environment i) k)
+        (let b (get (at (get _G 'environment) i) k)
           (if (is? b)
               (return (if p (get b p) b))
             (dec i)))))))
@@ -57,8 +57,8 @@
 
 (define bias (k)
   (when (and (number? k)
-             (not (= target (language))))
-    (if (= target 'js)
+             (not (= (get _G 'target) (language))))
+    (if (= (get _G 'target) 'js)
         (dec k)
       (inc k)))
   k)
@@ -82,7 +82,7 @@
   (let args1 ()
     (define rest ()
       (set (get args1 'rest) true)
-      (if (= target 'js)
+      (if (= (get _G 'target) 'js)
           `(unstash (arguments% ,(# args1)))
         '(unstash (list |...|))))
     (if (atom? args)
@@ -263,7 +263,7 @@
   (if (string-literal? k)
       (let i (inner k)
         (if (valid-id? i) i
-            (= target 'js) k
+            (= (get _G 'target) 'js) k
           (cat "[" k "]")))
     (cat "[" k "]")))
 
@@ -301,7 +301,7 @@
   (find (fn (level)
           (let x (get level op)
             (if (= x true) op
-                (is? x) (get x target))))
+                (is? x) (get x (get _G 'target)))))
         infix))
 
 (define infix? (x)
@@ -326,7 +326,7 @@
                    c))))))
 
 (define compile-atom (x)
-  (if (and (= x "nil") (= target 'lua)) x
+  (if (and (= x "nil") (= (get _G 'target) 'lua)) x
       (= x "nil") "undefined"
       (id-literal? x) (inner x)
       (string-literal? x) (escape-newlines x)
@@ -340,7 +340,7 @@
 
 (define terminator (stmt?)
   (if (not stmt?) ""
-      (= target 'js) ";\n"
+      (= (get _G 'target) 'js) ";\n"
     "\n"))
 
 (define compile-special (form stmt?)
@@ -382,7 +382,7 @@
 
 (define-global compile-function (args body :name :prefix)
   (let (id (if name (compile name) "")
-        args1 (if (and (= target 'lua)
+        args1 (if (and (= (get _G 'target) 'lua)
                        (get args 'rest))
                   `(,@args |...|)
                 args)
@@ -390,9 +390,9 @@
         body (with-indent (compile body :stmt))
         ind (indentation)
         p (if prefix (cat prefix " ") "")
-        tr (if (= target 'js) "" "end"))
+        tr (if (= (get _G 'target) 'js) "" "end"))
     (if name (cat! tr "\n"))
-    (if (= target 'js)
+    (if (= (get _G 'target) 'js)
         (cat "function " id args " {\n" body ind "}" tr)
       (cat p "function " id args "\n" body ind tr))))
 
@@ -570,7 +570,9 @@
 (define-global expand (form)
   (lower (macroexpand form)))
 
-(target js: (define run (code) ((or 0 |eval|) code)))
+(target js: (define vm (require 'vm)))
+(target js: (define sandbox ((get vm 'createContext) _G)))
+(target js: (define run (code) ((get vm 'runInContext) code sandbox)))
 
 (target lua: (define load1 (or |loadstring| |load|)))
 (target lua:
@@ -578,15 +580,13 @@
     (let |f,e| (load1 code)
       (if f (f) (error (cat e " in " code))))))
 
-(define-global %result)
-
 (define-global eval (form)
-  (let previous target
-    (set target (language))
-    (let code (compile (expand `(set %result ,form)))
-      (set target previous)
+  (let previous (get _G 'target)
+    (set (get _G 'target) (language))
+    (let code (compile (expand `(set (get _G '%result) ,form)))
+      (set (get _G 'target) previous)
       (run code)
-      %result)))
+      (get _G '%result))))
 
 (define-global immediate-call? (x)
   (and (obj? x) (obj? (hd x)) (= (hd (hd x)) '%function)))
@@ -594,7 +594,7 @@
 (define-special do forms :stmt :tr
   (with s ""
     (step x forms
-      (when (and (= target 'lua)
+      (when (and (= (get _G 'target) 'lua)
                  (immediate-call? x)
                  (= "\n" (char s (edge s))))
         (set s (cat (clip s 0 (edge s)) ";\n")))
@@ -610,13 +610,13 @@
         alt (if alt (with-indent (compile alt :stmt)))
         ind (indentation)
         s "")
-    (if (= target 'js)
+    (if (= (get _G 'target) 'js)
         (cat! s ind "if (" cond ") {\n" cons ind "}")
       (cat! s ind "if " cond " then\n" cons))
-    (if (and alt (= target 'js))
+    (if (and alt (= (get _G 'target) 'js))
         (cat! s " else {\n" alt ind "}")
         alt (cat! s ind "else\n" alt))
-    (if (= target 'lua)
+    (if (= (get _G 'target) 'lua)
         (cat s ind "end\n")
       (cat s "\n"))))
 
@@ -624,7 +624,7 @@
   (let (cond (compile cond)
         body (with-indent (compile form :stmt))
         ind (indentation))
-    (if (= target 'js)
+    (if (= (get _G 'target) 'js)
         (cat ind "while (" cond ") {\n" body ind "}\n")
       (cat ind "while " cond " do\n" body ind "end\n"))))
 
@@ -632,7 +632,7 @@
   (let (t (compile t)
         ind (indentation)
         body (with-indent (compile form :stmt)))
-    (if (= target 'lua)
+    (if (= (get _G 'target) 'lua)
         (cat ind "for " k " in next, " t " do\n" body ind "end\n")
       (cat ind "for (" k " in " t ") {\n" body ind "}\n"))))
 
@@ -655,13 +655,13 @@
   (compile-function args body))
 
 (define-special %global-function (name args body) :stmt :tr
-  (if (= target 'lua)
+  (if (= (get _G 'target) 'lua)
       (let x (compile-function args body name: name)
         (cat (indentation) x))
     (compile `(%set ,name (%function ,args ,body)) :stmt)))
 
 (define-special %local-function (name args body) :stmt :tr
-  (if (= target 'lua)
+  (if (= (get _G 'target) 'lua)
       (let x (compile-function args body name: name prefix: 'local)
         (cat (indentation) x))
     (compile `(%local ,name (%function ,args ,body)) :stmt)))
@@ -679,7 +679,7 @@
   (cat "typeof(" (compile x) ")"))
 
 (define-special error (x) :stmt
-  (let e (if (= target 'js)
+  (let e (if (= (get _G 'target) 'js)
              (cat "throw " (compile `(new (Error ,x))))
            (cat "error(" (compile x) ")"))
     (cat (indentation) e)))
@@ -688,7 +688,7 @@
   (let (id (compile name)
         value1 (compile value)
         rh (if (is? value) (cat " = " value1) "")
-        keyword (if (= target 'js) "var " "local ")
+        keyword (if (= (get _G 'target) 'js) "var " "local ")
         ind (indentation))
     (cat ind keyword id rh)))
 
@@ -700,7 +700,7 @@
 (define-special get (t k)
   (let (t1 (compile t)
         k1 (compile k))
-    (when (or (and (= target 'lua)
+    (when (or (and (= (get _G 'target) 'lua)
                    (= (char t1 0) "{"))
               (infix-operator? t))
       (set t1 (cat "(" t1 ")")))
@@ -710,8 +710,8 @@
       (cat t1 "[" k1 "]"))))
 
 (define-special %array forms
-  (let (open (if (= target 'lua) "{" "[")
-        close (if (= target 'lua) "}" "]")
+  (let (open (if (= (get _G 'target) 'lua) "{" "[")
+        close (if (= (get _G 'target) 'lua) "}" "]")
         s "" c "")
     (each (k v) forms
       (when (number? k)
@@ -721,7 +721,7 @@
 
 (define-special %object forms
   (let (s "{" c ""
-        sep (if (= target 'lua) " = " ": "))
+        sep (if (= (get _G 'target) 'lua) " = " ": "))
     (step (k v) (pair forms)
       (cat! s c (key (compile k)) sep (compile v))
       (set c ", "))

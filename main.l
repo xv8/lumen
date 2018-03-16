@@ -1,9 +1,6 @@
-(define reader (require 'reader))
-(define compiler (require 'compiler))
-(define system (require 'system))
 
 (define eval-print (form)
-  (let ((ok v) (guard ((get compiler 'eval) form)))
+  (let ((ok v) (guard ((get (get _G 'compiler) 'eval) form)))
     (if (not ok)
         (target
           js: (print (get v 'stack))
@@ -11,19 +8,19 @@
         (is? v) (print (str v)))))
 
 (define rep (s)
-  (eval-print ((get reader 'read-string) s)))
+  (eval-print ((get (get _G 'reader) 'read-string) s)))
 
 (define repl ()
   (let buf ""
     (define rep1 (s)
       (cat! buf s)
       (let (more ()
-            form ((get reader 'read-string) buf more))
+            form ((get (get _G 'reader) 'read-string) buf more))
           (unless (= form more)
             (eval-print form)
             (set buf "")
-            ((get system 'write) "> ")))))
-  ((get system 'write) "> ")
+            ((get (get _G 'system) 'write) "> ")))))
+  ((get (get _G 'system) 'write) "> ")
   (target
     js: (let in (get process 'stdin)
           ((get in 'setEncoding) 'utf8)
@@ -35,21 +32,21 @@
                (if s (rep1 (cat s "\n")) (break)))))))
 
 (define-global expand-file (path)
-  (let (s ((get reader 'stream) ((get system 'read-file) path))
-        body ((get reader 'read-all) s))
-    ((get compiler 'expand) `(do ,@body))))
+  (let (s ((get (get _G 'reader) 'stream) ((get (get _G 'system) 'read-file) path))
+        body ((get (get _G 'reader) 'read-all) s))
+    ((get (get _G 'compiler) 'expand) `(do ,@body))))
 
 (define-global compile-file (path)
   (let (body (expand-file path)
-        form ((get compiler 'expand) `(do ,@body)))
-    ((get compiler 'compile) form :stmt)))
+        form ((get (get _G 'compiler) 'expand) `(do ,@body)))
+    ((get (get _G 'compiler) 'compile) form :stmt)))
 
 (define-global load (path)
-  (let previous target
-    (set target (language))
+  (let previous (get _G 'target)
+    (set (get _G 'target) (language))
     (let code (compile-file path)
-      (set target previous)
-      ((get compiler 'run) code))))
+      (set (get _G 'target) previous)
+      ((get (get _G 'compiler) 'run) code))))
 
 (define script-file? (path)
   (not (or (= "-" (char path 0))
@@ -59,7 +56,7 @@
 (define run-file (path)
   (if (script-file? path)
       (load path)
-    ((get compiler 'run) ((get system 'read-file) path))))
+    ((get (get _G 'compiler) 'run) ((get (get _G 'system) 'read-file) path))))
 
 (define usage ()
   (print "usage: lumen [<file> <arguments> | options <object files>]")
@@ -73,7 +70,7 @@
   (print " -e <expr>\tExpression to evaluate"))
 
 (define main ()
-  (let arg (hd (get system 'argv))
+  (let arg (hd (get (get _G 'system) 'argv))
     (if (and arg (script-file? arg))
         (load arg)
         (or (= arg "-h")
@@ -84,7 +81,7 @@
             output nil
             target1 nil
             expr nil
-            argv (get system 'argv))
+            argv (get (get _G 'system) 'argv))
         (for i (# argv)
           (let a (at argv i)
             (if (or (= a "-c") (= a "-o") (= a "-t") (= a "-e"))
@@ -100,16 +97,13 @@
         (step file pre
           (run-file file))
         (if (nil? input) (if expr (rep expr) (repl))
-          (do (if target1 (set target target1))
+          (do (if target1 (set (get _G 'target) target1))
               (let code (compile-file input)
                 (if (or (nil? output) (= output "-"))
                     (print code)
-                  ((get system 'write-file) output code)))))))))
+                  ((get (get _G 'system) 'write-file) output code)))))))))
 
-(export reader
-        compiler
-        system
-        eval-print
+(export eval-print
         rep
         repl
         compile-file

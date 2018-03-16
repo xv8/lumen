@@ -77,7 +77,7 @@
           js: (get (get require 'cache) ((get require 'resolve) module))))
   (require module))
 
-(define run (command)
+(define shell (command)
   (target
     js: ((get ((get child_process 'execSync) command) 'toString))
     lua: (let f ((get io 'popen) command)
@@ -95,4 +95,4 @@
         exit
         argv
         reload
-        run)
+        shell)

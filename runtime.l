@@ -1,7 +1,3 @@
-(define-global _G (target lua: (or _G _ENV) js: (if (not (= (typeof "global") "undefined")) global window)))
-(define-global environment (list (obj)))
-(define-global target (language))
-
 (define-global nil? (x)
   (target
     js: (or (= x nil) (= x null))
@@ -336,8 +332,8 @@
 (define-global setenv (k rest: keys)
   (when (string? k)
     (let (frame (if (get keys 'toplevel)
-                    (hd environment)
-                  (last environment))
+                    (hd (get _G 'environment))
+                  (last (get _G 'environment)))
           entry (or (get frame k) (obj)))
       (each (k v) keys
         (set (get entry k) v))

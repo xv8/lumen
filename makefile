@@ -10,7 +10,8 @@ OBJS :=	obj/runtime.o	\
 	obj/macros.o	\
 	obj/main.o
 
-MODS := bin/lumen.x	\
+MODS := bin/lib.x	\
+	bin/lumen.x	\
 	bin/reader.x	\
 	bin/compiler.x	\
 	bin/system.x

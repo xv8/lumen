@@ -82,10 +82,10 @@ local function reload(module)
   package.loaded[module] = nil
   return require(module)
 end
-local function run(command)
+local function shell(command)
   local __f2 = io.popen(command)
   local __x2 = __f2.read(__f2, "*all")
   __f2.close(__f2)
   return __x2
 end
-return {["read-file"] = read_file, ["write-file"] = write_file, ["file-exists?"] = file_exists63, ["directory-exists?"] = directory_exists63, ["path-separator"] = path_separator, ["path-join"] = path_join, ["get-environment-variable"] = get_environment_variable, write = write, exit = exit, argv = argv, reload = reload, run = run}
+return {["read-file"] = read_file, ["write-file"] = write_file, ["file-exists?"] = file_exists63, ["directory-exists?"] = directory_exists63, ["path-separator"] = path_separator, ["path-join"] = path_join, ["get-environment-variable"] = get_environment_variable, write = write, exit = exit, argv = argv, reload = reload, shell = shell}

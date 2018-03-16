@@ -9,14 +9,14 @@
               (pair args))))
 
 (define-macro at (l i)
-  (if (and (= target 'lua) (number? i))
+  (if (and (= (get _G 'target) 'lua) (number? i))
       (inc i)
-      (= target 'lua)
+      (= (get _G 'target) 'lua)
       (set i `(+ ,i 1)))
   `(get ,l ,i))
 
 (define-macro wipe (place)
-  (if (= target 'lua)
+  (if (= (get _G 'target) 'lua)
       `(set ,place nil)
     `(%delete ,place)))
 
@@ -108,9 +108,9 @@
 
 (define-macro with-frame body
   (let-unique (x)
-    `(do (add environment (obj))
+    `(do (add (get _G 'environment) (obj))
          (with ,x (do ,@body)
-           (drop environment)))))
+           (drop (get _G 'environment))))))
 
 (define-macro with-bindings ((names) rest: body)
   (let-unique (x)
@@ -149,7 +149,7 @@
       `(%call apply ,f ,@args)))
 
 (define-macro guard (expr)
-  (if (= target 'js)
+  (if (= (get _G 'target) 'js)
       `((fn () (%try (list true ,expr))))
     `(list (xpcall
              (fn () ,expr)
@@ -168,7 +168,7 @@
       `(let (,o ,t ,k nil)
          (%for ,o ,k
            (let (,v (get ,o ,k))
-             ,@(if (= target 'lua) body
+             ,@(if (= (get _G 'target) 'lua) body
                    `((let ,k (if (numeric? ,k)
                                  (parseInt ,k)
                                ,k)
@@ -193,10 +193,10 @@
       (set (get l x) true))
     `(obj ,@l)))
 
-(define-macro language () `',target)
+(define-macro language () `',(get _G 'target))
 
 (define-macro target clauses
-  (get clauses target))
+  (get clauses (get _G 'target)))
 
 (define-macro join! (a rest: bs)
   `(set ,a (join ,a ,@bs)))
@@ -217,9 +217,10 @@
            (dec indent-level)))))
 
 (define-macro export names
-  (if (= target 'js)
+  (if (= (get _G 'target) 'js)
       `(do ,@(map (fn (k)
-                    `(set (get exports ',k) ,k))
+                    `(set (get exports ',k) ,k
+                          (get exports ',(compile k)) ,k))
                   names))
     (let x (obj)
       (each k names
