@@ -1,14 +1,15 @@
 {
   "name": "dax",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A Lisp for JavaScript",
   "main": "index.js",
   "bin": {
     "dax": "bin/cli.js"
   },
   "scripts": {
-    "clean": "git checkout *.js",
+    "clean": "git checkout lib.js",
     "build": "node . -c lib.l -o lib.js",
+    "rebuild": "npm run clean && npm run build",
     "test": "npm run build && node . test.l",
     "start": "node bin/cli.js"
   },

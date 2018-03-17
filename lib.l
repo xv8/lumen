@@ -1,3 +1,5 @@
+(define vm (require 'vm))
+
 (define create (_G)
   (set (get _G '_G) _G)
   (set (get _G 'environment) (list (obj)))

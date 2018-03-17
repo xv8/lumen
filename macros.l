@@ -1,3 +1,11 @@
+(define-macro void body
+  `(do ,@body (do)))
+
+(define-macro class (x rest: body)
+  (if (atom? x)
+      `(%class (,x) ,@body)
+    `(%class ,x ,@body)))
+
 (define-macro quote (form)
   (quoted form))
 
@@ -73,8 +81,7 @@
            ,@body)))))
 
 (define-macro %setenv (name rest: keys)
-  `(do (setenv ',name ,@keys)
-       (do)))
+  `(void (setenv ',name ,@keys)))
 
 (define-macro define-macro (name args rest: body)
   `(%setenv ,name macro: (fn ,args ,@body)))

@@ -116,6 +116,24 @@
   (with-bindings (args)
     `(%function ,args ,@(macroexpand body))))
 
+(define expand-table ((x rest: args))
+  (with expr `(,x ,@(keys args))
+    (step x args
+      (if (atom? x) (add expr `(,x ,(macroexpand x)))
+          (<= (# x) 2)
+          (let ((name v) x)
+            (add expr `(,(macroexpand name) ,(macroexpand v))))
+          (<= (# x) 3)
+          (let ((name args rest: body) x)
+            (with-bindings (args)
+              (add expr `(,(macroexpand name) ,args ,@(macroexpand body)))))
+        (let ((prefix name args rest: body) x)
+          (with-bindings (args)
+            (add expr `(,prefix ,(macroexpand name) ,args ,@(macroexpand body)))))))))
+
+(define expand-class ((x name rest: body))
+  `(,x ,name ,@(tl (expand-table `(%table ,@body)))))
+
 (define expand-definition ((x name args rest: body))
   (with-bindings (args)
     `(,x ,name ,args ,@(macroexpand body))))
@@ -133,6 +151,8 @@
     (let x (hd form)
       (if (= x '%local) (expand-local form)
           (= x '%function) (expand-function form)
+          (= x '%table) (expand-table form)
+          (= x '%class) (expand-class form)
           (= x '%global-function) (expand-definition form)
           (= x '%local-function) (expand-definition form)
           (macro? x) (expand-macro form)
@@ -245,8 +265,10 @@
             (cat "__" x))))))
 
 (define-global key (k)
-  (if (string-literal? k) k
-    (cat "[" k "]")))
+  (if (and (string? k)
+           (valid-id? k))
+      k
+  (cat "[" (compile k) "]")))
 
 (define-global mapo (f t)
   (with o ()
@@ -334,13 +356,12 @@
            (= (hd x) '%function))
       (> (precedence x) 0)))
 
-(define-global compile-call (form)
-  (let (f (hd form)
-        f1 (compile f)
-        args (compile-args (stash* (tl form))))
-    (if (parenthesize-call? f)
-        (cat "(" f1 ")" args)
-      (cat f1 args))))
+(define-global compile-call (f args parens?)
+  (let (f1 (compile f)
+        args1 (compile-args (stash* args)))
+    (if (or parens? (parenthesize-call? f))
+        (cat "(" f1 ")" args1)
+      (cat f1 args1))))
 
 (define op-delims (parent child :right)
   (if ((if right >= >)
@@ -360,15 +381,14 @@
         (cat op ao " " a ac)
       (cat ao a ac " " op " " bo b bc))))
 
-(define-global compile-function (args body :name :prefix)
-  (let (id (if name (compile name) "")
+(define-global compile-function (args body :name :prefix :tr)
+  (let (id (either name "")
         args (compile-args args)
         body (with-indent (compile body :stmt))
         ind (indentation)
         p (if prefix (cat prefix " ") "")
-        tr "")
-    (if name (cat! tr "\n"))
-    (cat "function " id args " {\n" body ind "}" tr)))
+        tr (either tr ""))
+    (cat p id args " {\n" body ind "}" tr)))
 
 (define can-return? (form)
   (and (is? form)
@@ -384,7 +404,7 @@
           ind (if stmt (indentation) "")
           form (if (atom? form) (compile-atom form)
                    (infix? (hd form)) (compile-infix form)
-                 (compile-call form)))
+                 (compile-call (hd form) (tl form))))
       (cat ind form tr))))
 
 (define lower-statement (form tail?)
@@ -403,7 +423,8 @@
 (define literal? (form)
   (or (atom? form)
       (= (hd form) '%array)
-      (= (hd form) '%object)))
+      (= (hd form) '%object)
+      (= (hd form) '%table)))
 
 (define standalone? (form)
   (or (and (not (atom? form))
@@ -480,6 +501,25 @@
          `(%for ,(lower t hoist) ,k
             ,(lower-body body)))))
 
+(define-global lower-table (args hoist stmt? tail?)
+  (with expr `(%table ,@(keys args))
+    (step x args
+      (if (atom? x) (add expr x)
+          (<= (# x) 2)
+          (let ((name v) x)
+            (add expr `(,(lower name hoist) ,(lower v hoist))))
+        (let ((prefix name args rest: body) x)
+          (if (some? body)
+              (add expr `(,prefix ,(lower name hoist) ,args ,(lower-body body true)))
+            (add expr `(,prefix ,(lower name hoist) ,(lower args hoist)))))))))
+
+(define-global lower-class ((x rest: body) hoist stmt? tail?)
+  (let (body (tl (lower-table body hoist))
+        (name parent) x
+        parent1 (lower parent hoist)
+        expr `(%class ,(list name parent1) ,@body))
+    expr))
+
 (define lower-function (args)
   (let ((a rest: body) args)
     `(%function ,a ,(lower-body body true))))
@@ -532,6 +572,8 @@
           (= x '%try) (lower-try args hoist tail?)
           (= x 'while) (lower-while args hoist)
           (= x '%for) (lower-for args hoist)
+          (= x '%table) (lower-table args hoist stmt? tail?)
+          (= x '%class) (lower-class args hoist stmt? tail?)
           (= x '%function) (lower-function args)
           (or (= x '%local-function)
               (= x '%global-function))
@@ -556,14 +598,14 @@
   ((get vm 'runInContext) code (or sandbox _G)))
 
 (define-global eval (form)
-  (let code (compile (expand `(%statement ,form)))
+  (let code (compile (expand form))
     (run code)))
 
 (define-global immediate-call? (x)
   (and (obj? x) (obj? (hd x)) (= (hd (hd x)) '%function)))
 
-(define-special %call form
-  (compile-call form))
+(define-special %call (f rest: args)
+  (compile-call f args))
 
 (define-special do forms :stmt :tr
   (with s ""
@@ -613,7 +655,7 @@
   (cat (indentation) "break"))
 
 (define-special %function (args body)
-  (compile-function args body))
+  (compile-function args body prefix: "function"))
 
 (define-special %global-function (name args body) :stmt :tr
   (compile `(%set ,name (%function ,args ,body)) :stmt))
@@ -627,8 +669,11 @@
            (cat "return " (compile x)))
     (cat (indentation) x)))
 
-(define-special new (x)
-  (cat "new " (compile x)))
+(define-special new ((name rest: args))
+  (cat "new " (compile-call name args true)))
+
+(define-special instanceof (a b)
+  (cat "(" (compile a) " instanceof " (compile b) ")"))
 
 (define-special typeof (x)
   (cat "typeof(" (compile x) ")"))
@@ -661,8 +706,7 @@
       (cat t1 "[" k1 "]"))))
 
 (define-special %array forms
-  (let (open "["
-        close "]"
+  (let (open "[" close "]"
         s "" c "")
     (each (k v) forms
       (when (number? k)
@@ -671,12 +715,36 @@
     (cat open s close)))
 
 (define-special %object forms
-  (let (s "{" c ""
-        sep ": ")
+  (let (s "{" c "" sep ": ")
     (step (k v) (pair forms)
-      (cat! s c (key (compile k)) sep (compile v))
+      (cat! s c (key k) sep (compile v))
       (set c ", "))
     (cat s "}")))
+
+(define-special %table forms
+  (let (s "{\n" c "" sep ": " comma (either (get forms 'comma) ", "))
+    (with-indent
+      (let ind (indentation)
+        (step x forms
+          (if (atom? x)
+              (cat! s c ind (key x) sep (compile x))
+              (<= (# x) 2)
+              (let ((name v) x)
+                (cat! s c ind (key name) sep (compile v)))
+            (let ((prefix name args rest: body) x
+                  prefix (if (= prefix "define") "" prefix)
+                  h (if (some? body)
+                        (compile-function args `(do ,@body) name: (key name) prefix: prefix)
+                      (cat (key name) sep (compile args))))
+              (cat! s c ind h)))
+          (set c (cat (inner comma) "\n")))))
+    (cat s "\n" (indentation) "}")))
+
+(define-special %class (name rest: body)
+  (let ((name parent) (if (atom? name) (list name) name)
+        name (if name `(,name " ") (list))
+        ext (if parent `("extends " ,parent " ") (list)))
+    (compile `(%literal "class " ,@name ,@ext (%table comma: "" ,@body)))))
 
 (define-special %literal args
   (with s ""
@@ -695,6 +763,9 @@
 
 (define-special %indentation ()
   (indentation))
+
+(define-special %spread (x)
+  (cat "..." (compile x)))
 
 (export context
         run
