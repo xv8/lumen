@@ -4,24 +4,25 @@
 (define failed 0)
 (define tests ())
 
-(define-macro test (x msg)
-  `(if (not ,x)
-       (do (set failed (+ failed 1))
-           (return ,msg))
-     (inc passed)))
-
 (define equal? (a b)
   (if (atom? a) (= a b)
     (= (str a) (str b))))
 
-(define-macro test= (a b)
-  (let-unique (x y)
-    `(let (,x ,a ,y ,b)
-       (test (equal? ,x ,y)
-             (cat "failed: expected " (str ,x) ", was " (str ,y))))))
+(when-compiling
+  (define-macro test (x msg)
+    `(if (not ,x)
+         (do (set failed (+ failed 1))
+             (return ,msg))
+       (inc passed)))
 
-(define-macro define-test (name rest: body)
-  `(add tests (list ',name (fn () ,@body))))
+  (define-macro test= (a b)
+    (let-unique (x y)
+      `(let (,x ,a ,y ,b)
+         (test (equal? ,x ,y)
+               (cat "failed: expected " (str ,x) ", was " (str ,y))))))
+
+  (define-macro define-test (name rest: body)
+    `(add tests (list ',name (fn () ,@body)))))
 
 (define-global run ()
   (each ((name f)) tests
@@ -772,7 +773,8 @@ c"
       (test= 20 b))))
 
 (define-test define-symbol
-  (define-symbol zzz 42)
+  (when-compiling
+    (define-symbol-macro zzz 42))
   (test= zzz 42))
 
 (define-test macros-and-symbols
