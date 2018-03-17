@@ -4,9 +4,6 @@
 (define failed 0)
 (define tests ())
 
-(define reader (require 'reader))
-(define compiler (require 'compiler))
-
 (define-macro test (x msg)
   `(if (not ,x)
        (do (set failed (+ failed 1))

@@ -1,8 +1,8 @@
 (define-global getenv (k p)
   (when (string? k)
-    (let i (edge environment)
+    (let i (edge (get _G 'environment))
       (while (>= i 0)
-        (let b (get (at environment i) k)
+        (let b (get (at (get _G 'environment) i) k)
           (if (is? b)
               (return (if p (get b p) b))
             (dec i)))))))
@@ -545,14 +545,20 @@
 (define-global expand (form)
   (lower (macroexpand form)))
 
-(define run (code) ((or 0 |eval|) code))
+(define vm (require 'vm))
 
-(define-global %result)
+(define context (ctx)
+  (with sandbox ((get vm 'createContext) ctx)
+    (set (get sandbox '_G) sandbox)))
+
+(context _G)
+
+(define run (code sandbox)
+  ((get vm 'runInContext) code (or sandbox _G)))
 
 (define-global eval (form)
   (let code (compile (expand `(set %result ,form)))
-    (run code)
-    %result))
+    (run code)))
 
 (define-global immediate-call? (x)
   (and (obj? x) (obj? (hd x)) (= (hd (hd x)) '%function)))
@@ -688,7 +694,8 @@
 (define-special %indentation ()
   (indentation))
 
-(export run
+(export context
+        run
         eval
         expand
         compile)

@@ -1,6 +1,6 @@
-(define reader (require 'reader))
-(define compiler (require 'compiler))
-(define system (require 'system))
+(define reader (get _G 'reader))
+(define compiler (get _G 'compiler))
+(define system (get _G 'system))
 
 (define eval-print (form)
   (let ((ok v) (guard ((get compiler 'eval) form)))
@@ -23,12 +23,17 @@
             ((get system 'write) "> ")))))
   ((get system 'write) "> ")
   (let in (get process 'stdin)
-    ((get in 'setEncoding) 'utf8)
+    ((get in 'removeAllListeners))
+    ; ((get in 'setEncoding) 'utf8)
     ((get in 'on) 'data rep1)))
 
-(define-global compile-file (path)
+(define-global expand-file (path)
   (let (s ((get reader 'stream) ((get system 'read-file) path))
-        body ((get reader 'read-all) s)
+        body ((get reader 'read-all) s))
+    ((get compiler 'expand) `(do ,@body))))
+
+(define-global compile-file (path)
+  (let (body (expand-file path)
         form ((get compiler 'expand) `(do ,@body)))
     ((get compiler 'compile) form :stmt)))
 

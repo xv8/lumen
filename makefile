@@ -7,11 +7,14 @@ MODS := macros.x	\
 	compiler.x	\
 	system.x
 
-all: $(MODS:.x=.js)
+all: lib.js
 
 clean:
 	@git checkout *.js
 	@rm -f obj/*
+
+lib.js : $(mods:.x=.l)
+	./index.js -c lib.l -o lib.js -t js
 
 %.js : %.l
 	./index.js -c $< -o $@ -t js

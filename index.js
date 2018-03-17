@@ -1,10 +1,7 @@
 #!/usr/bin/env node
-global.require = require
-process.env.NODE_PATH = process.env.NODE_PATH + require("path").delimiter + __dirname
-require("module").Module._initPaths();
-require("./runtime.js");
-require("./macros.js");
-dax = require("./main.js")
+_G = global
+_G.require = require
+dax = require("./lib.js").create(_G)
 module.exports = dax
 if (require.main === module)
   return dax.main();

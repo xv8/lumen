@@ -42,7 +42,7 @@
   (wipe (get (get require 'cache) ((get require 'resolve) module)))
   (require module))
 
-(define run (command)
+(define shell (command)
   ((get ((get child_process 'execSync) command) 'toString)))
 
 (export read-file
@@ -56,4 +56,4 @@
         exit
         argv
         reload
-        run)
+        shell)
