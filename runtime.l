@@ -32,7 +32,7 @@
        (= (type x) 'object)))
 
 (define-global atom? (x)
-  (or (nil? x) (string? x) (number? x) (boolean? x)))
+  (or (nil? x) (string? x) (number? x) (boolean? x) (= (type x) 'symbol)))
 
 (define-global nan (/ 0 0))
 (define-global inf (/ 1 0))
@@ -256,7 +256,7 @@
         (return false))))
   (some? s))
 
-(define tostring (x)
+(define-global tostring (x)
   ((get x 'toString)))
 
 (define-global escape (s)
@@ -271,18 +271,23 @@
         (cat! s1 c1)))
     (cat s1 "\"")))
 
+(define-global simple-id? (x)
+  (and (string? x)
+       (let ((ok v) (guard (read-string x)))
+         (and ok (= v x)))))
+
 (define-global str (x stack)
   (if (nil? x) "nil"
       (nan? x) "nan"
       (= x inf) "inf"
       (= x -inf) "-inf"
       (boolean? x) (if x "true" "false")
+      (string-literal? x) x
+      (simple-id? x) x
       (string? x) (escape x)
       (atom? x) (tostring x)
       (function? x) "function"
       (and stack (in? x stack)) "circular"
-      (= (type x) 'symbol)
-      (tostring x)
     (let (s "(" sp ""
           xs () ks ()
           l (or stack ()))
@@ -290,7 +295,7 @@
       (each (k v) x
         (if (number? k)
             (set (get xs k) (str v l))
-          (do (add ks (cat k ":"))
+          (do (add ks (cat (str k l) ":"))
               (add ks (str v l)))))
       (drop l)
       (each v (join xs ks)

@@ -25,7 +25,7 @@
 (define symbol-expansion (k)
   (getenv k 'symbol))
 
-(define symbol? (k)
+(define symbol-macro? (k)
   (is? (symbol-expansion k)))
 
 (define variable? (k)
@@ -34,7 +34,7 @@
 (define-global bound? (x)
   (or (macro? x)
       (special? x)
-      (symbol? x)
+      (symbol-macro? x)
       (variable? x)))
 
 (define-global quoted (form)
@@ -70,16 +70,13 @@
               (let k (if (= v true) k v)
                 (join! bs (bind k x))))))))))
 
-(define-macro arguments% (from)
-  `((get (get (get Array 'prototype) 'slice) 'call) arguments ,from))
-
 (define-global bind* (args body)
   (let args1 ()
-    (define rest ()
-      (set (get args1 'rest) true)
-      `(unstash (arguments% ,(# args1))))
+    (define rest (r)
+      (set (get args1 'rest) r)
+      `(unstash ,r))
     (if (atom? args)
-        (list args1 `(let ,(list args (rest)) ,@body))
+        (list args1 `(let ,(list args (rest args)) ,@body))
       (let bs ()
         (let-unique (r)
           (each (k v) args
@@ -89,7 +86,7 @@
                   (add args1 x)
                   (join! bs (list v x))))))
           (when (keys? args)
-            (join! bs (list r (rest)))
+            (join! bs (list r (rest r)))
             (let n (# args1)
               (for i n
                 (let v (at args1 i)
@@ -130,7 +127,7 @@
   (apply (macro-function name) body))
 
 (define-global macroexpand (form)
-  (if (symbol? form)
+  (if (symbol-macro? form)
       (macroexpand (symbol-expansion form))
       (atom? form) form
     (let x (hd form)
@@ -299,6 +296,8 @@
     (step x args
       (cat! s c (compile x))
       (set c ", "))
+    (when (get args 'rest)
+      (cat! s c "..." (compile (get args 'rest))))
     (cat s ")")))
 
 (define escape-newlines (s)
@@ -557,7 +556,7 @@
   ((get vm 'runInContext) code (or sandbox _G)))
 
 (define-global eval (form)
-  (let code (compile (expand `(set %result ,form)))
+  (let code (compile (expand `(%statement ,form)))
     (run code)))
 
 (define-global immediate-call? (x)
