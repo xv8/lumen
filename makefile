@@ -10,7 +10,7 @@ MODS := macros.x	\
 all: $(MODS:.x=.js)
 
 clean:
-	@git checkout bin/*.js
+	@git checkout *.js
 	@rm -f obj/*
 
 %.js : %.l

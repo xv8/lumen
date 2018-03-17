@@ -1,7 +1,7 @@
 var delimiters = {"(": true, ")": true, ";": true, "\r": true, "\n": true};
 var whitespace = {" ": true, "\t": true, "\r": true, "\n": true};
 var stream = function (str, more) {
-  return {pos: 0, string: str, len: _35(str), more: more};
+  return {"pos": 0, "string": str, "len": _35(str), "more": more};
 };
 var peek_char = function (s) {
   var ____id = s;
@@ -35,10 +35,7 @@ var skip_non_code = function (s) {
           skip_non_code(s);
         } else {
           break;
-        }
-      }
-    }
-  }
+        }      }    }  }
 };
 var read_table = {};
 var eof = {};
@@ -49,8 +46,7 @@ var read = function (s) {
     return (read_table[__c2] || read_table[""])(s);
   } else {
     return eof;
-  }
-};
+  }};
 var read_all = function (s) {
   var __l = [];
   while (true) {
@@ -86,8 +82,7 @@ var expected = function (s, c) {
   } else {
     throw new Error("Expected " + c + " at " + __pos1);
     __e = undefined;
-  }
-  return __e;
+  }  return __e;
 };
 var wrap = function (s, x) {
   var __y = read(s);
@@ -95,16 +90,14 @@ var wrap = function (s, x) {
     return __y;
   } else {
     return [x, __y];
-  }
-};
+  }};
 var hex_prefix63 = function (str) {
   var __e1;
   if (code(str, 0) === 45) {
     __e1 = 1;
   } else {
     __e1 = 0;
-  }
-  var __i = __e1;
+  }  var __i = __e1;
   var __id3 = code(str, __i) === 48;
   var __e2;
   if (__id3) {
@@ -113,8 +106,7 @@ var hex_prefix63 = function (str) {
     __e2 = __n === 120 || __n === 88;
   } else {
     __e2 = __id3;
-  }
-  return __e2;
+  }  return __e2;
 };
 var maybe_number = function (str) {
   if (hex_prefix63(str)) {
@@ -123,8 +115,7 @@ var maybe_number = function (str) {
     if (number_code63(code(str, edge(str)))) {
       return number(str);
     }
-  }
-};
+  }};
 var real63 = function (x) {
   return number63(x) && ! nan63(x) && ! inf63(x);
 };
@@ -136,8 +127,7 @@ read_table[""] = function (s) {
       __str = __str + read_char(s);
     } else {
       break;
-    }
-  }
+    }  }
   if (__str === "true") {
     return true;
   } else {
@@ -149,10 +139,7 @@ read_table[""] = function (s) {
         return __n1;
       } else {
         return __str;
-      }
-    }
-  }
-};
+      }    }  }};
 read_table["("] = function (s) {
   read_char(s);
   var __r16 = undefined;
@@ -177,11 +164,7 @@ read_table["("] = function (s) {
             __l1[clip(__x2, 1)] = true;
           } else {
             add(__l1, __x2);
-          }
-        }
-      }
-    }
-  }
+          }        }      }    }  }
   return __r16;
 };
 read_table[")"] = function (s) {
@@ -203,9 +186,7 @@ read_table["\""] = function (s) {
           __str1 = __str1 + read_char(s);
         }
         __str1 = __str1 + read_char(s);
-      }
-    }
-  }
+      }    }  }
   return __r19;
 };
 read_table["|"] = function (s) {
@@ -221,9 +202,7 @@ read_table["|"] = function (s) {
         __r21 = expected(s, "|");
       } else {
         __str2 = __str2 + read_char(s);
-      }
-    }
-  }
+      }    }  }
   return __r21;
 };
 read_table["'"] = function (s) {
@@ -241,8 +220,7 @@ read_table[","] = function (s) {
     return wrap(s, "unquote-splicing");
   } else {
     return wrap(s, "unquote");
-  }
-};
+  }};
 exports.stream = stream;
 exports.read = read;
 exports["read-all"] = read_all;

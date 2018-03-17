@@ -56,11 +56,6 @@
     args))
 
 (define bias (k)
-  (when (and (number? k)
-             (not (= target (language))))
-    (if (= target 'js)
-        (dec k)
-      (inc k)))
   k)
 
 (define-global bind (lh rh)
@@ -82,9 +77,7 @@
   (let args1 ()
     (define rest ()
       (set (get args1 'rest) true)
-      (if (= target 'js)
-          `(unstash (arguments% ,(# args1)))
-        '(unstash (list |...|))))
+      `(unstash (arguments% ,(# args1))))
     (if (atom? args)
         (list args1 `(let ,(list args (rest)) ,@body))
       (let bs ()
@@ -214,12 +207,7 @@
           "debugger" "default" "delete" "do" "else" "eval"
           "finally" "for" "function" "if" "import" "in"
           "instanceof" "let" "new" "return" "switch" "throw"
-          "try" "typeof" "var" "void" "with"
-          ;; lua
-          "and" "end" "in" "load" "repeat" "while" "break"
-          "false" "local" "return" "do" "for" "nil" "then"
-          "else" "function" "not" "true" "elseif" "if" "or"
-          "until"))
+          "try" "typeof" "var" "void" "with"))
 
 (define-global reserved? (x)
   (has? reserved x))
@@ -260,11 +248,7 @@
             (cat "__" x))))))
 
 (define-global key (k)
-  (if (string-literal? k)
-      (let i (inner k)
-        (if (valid-id? i) i
-            (= target 'js) k
-          (cat "[" k "]")))
+  (if (string-literal? k) k
     (cat "[" k "]")))
 
 (define-global mapo (f t)
@@ -276,20 +260,20 @@
           (add o x))))))
 
 (define infix
-  `((not: (js: ! lua: ,"not"))
+  `((not: (js: !))
     (:* :/ :%)
-    (cat: (js: + lua: ..))
+    (cat: (js: +))
     (:+ :-)
     (:< :> :<= :>=)
-    (=: (js: === lua: ==))
-    (and: (js: && lua: and))
-    (or: (js: ,"||" lua: or))))
+    (=: (js: ===))
+    (and: (js: &&))
+    (or: (js: ,"||"))))
 
 (define unary? (form)
   (and (two? form) (in? (hd form) '(not -))))
 
 (define index (k)
-  (target js: k lua: (when (number? k) (- k 1))))
+  k)
 
 (define precedence (form)
   (unless (or (atom? form) (unary? form))
@@ -301,7 +285,7 @@
   (find (fn (level)
           (let x (get level op)
             (if (= x true) op
-                (is? x) (get x target))))
+                (is? x) (get x 'js))))
         infix))
 
 (define infix? (x)
@@ -326,8 +310,7 @@
                    c))))))
 
 (define compile-atom (x)
-  (if (and (= x "nil") (= target 'lua)) x
-      (= x "nil") "undefined"
+  (if (= x "nil") "undefined"
       (id-literal? x) (inner x)
       (string-literal? x) (escape-newlines x)
       (string? x) (id x)
@@ -339,9 +322,7 @@
     (error (cat "Cannot compile atom: " (str x)))))
 
 (define terminator (stmt?)
-  (if (not stmt?) ""
-      (= target 'js) ";\n"
-    "\n"))
+  (if (not stmt?) "" ";\n"))
 
 (define compile-special (form stmt?)
   (let ((x rest: args) form
@@ -382,19 +363,13 @@
 
 (define-global compile-function (args body :name :prefix)
   (let (id (if name (compile name) "")
-        args1 (if (and (= target 'lua)
-                       (get args 'rest))
-                  `(,@args |...|)
-                args)
-        args (compile-args args1)
+        args (compile-args args)
         body (with-indent (compile body :stmt))
         ind (indentation)
         p (if prefix (cat prefix " ") "")
-        tr (if (= target 'js) "" "end"))
+        tr "")
     (if name (cat! tr "\n"))
-    (if (= target 'js)
-        (cat "function " id args " {\n" body ind "}" tr)
-      (cat p "function " id args "\n" body ind tr))))
+    (cat "function " id args " {\n" body ind "}" tr)))
 
 (define can-return? (form)
   (and (is? form)
@@ -570,23 +545,14 @@
 (define-global expand (form)
   (lower (macroexpand form)))
 
-(target js: (define run (code) ((or 0 |eval|) code)))
-
-(target lua: (define load1 (or |loadstring| |load|)))
-(target lua:
-  (define run (code)
-    (let |f,e| (load1 code)
-      (if f (f) (error (cat e " in " code))))))
+(define run (code) ((or 0 |eval|) code))
 
 (define-global %result)
 
 (define-global eval (form)
-  (let previous target
-    (set target (language))
-    (let code (compile (expand `(set %result ,form)))
-      (set target previous)
-      (run code)
-      %result)))
+  (let code (compile (expand `(set %result ,form)))
+    (run code)
+    %result))
 
 (define-global immediate-call? (x)
   (and (obj? x) (obj? (hd x)) (= (hd (hd x)) '%function)))
@@ -594,10 +560,6 @@
 (define-special do forms :stmt :tr
   (with s ""
     (step x forms
-      (when (and (= target 'lua)
-                 (immediate-call? x)
-                 (= "\n" (char s (edge s))))
-        (set s (cat (clip s 0 (edge s)) ";\n")))
       (cat! s (compile x :stmt))
       (unless (atom? x)
         (if (or (= (hd x) 'return)
@@ -610,31 +572,22 @@
         alt (if alt (with-indent (compile alt :stmt)))
         ind (indentation)
         s "")
-    (if (= target 'js)
-        (cat! s ind "if (" cond ") {\n" cons ind "}")
-      (cat! s ind "if " cond " then\n" cons))
-    (if (and alt (= target 'js))
+    (cat! s ind "if (" cond ") {\n" cons ind "}")
+    (if alt
         (cat! s " else {\n" alt ind "}")
-        alt (cat! s ind "else\n" alt))
-    (if (= target 'lua)
-        (cat s ind "end\n")
       (cat s "\n"))))
 
 (define-special while (cond form) :stmt :tr
   (let (cond (compile cond)
         body (with-indent (compile form :stmt))
         ind (indentation))
-    (if (= target 'js)
-        (cat ind "while (" cond ") {\n" body ind "}\n")
-      (cat ind "while " cond " do\n" body ind "end\n"))))
+    (cat ind "while (" cond ") {\n" body ind "}\n")))
 
 (define-special %for (t k form) :stmt :tr
   (let (t (compile t)
         ind (indentation)
         body (with-indent (compile form :stmt)))
-    (if (= target 'lua)
-        (cat ind "for " k " in next, " t " do\n" body ind "end\n")
-      (cat ind "for (" k " in " t ") {\n" body ind "}\n"))))
+    (cat ind "for (" k " in " t ") {\n" body ind "}\n")))
 
 (define-special %try (form) :stmt :tr
   (let-unique (e)
@@ -655,16 +608,10 @@
   (compile-function args body))
 
 (define-special %global-function (name args body) :stmt :tr
-  (if (= target 'lua)
-      (let x (compile-function args body name: name)
-        (cat (indentation) x))
-    (compile `(%set ,name (%function ,args ,body)) :stmt)))
+  (compile `(%set ,name (%function ,args ,body)) :stmt))
 
 (define-special %local-function (name args body) :stmt :tr
-  (if (= target 'lua)
-      (let x (compile-function args body name: name prefix: 'local)
-        (cat (indentation) x))
-    (compile `(%local ,name (%function ,args ,body)) :stmt)))
+  (compile `(%local ,name (%function ,args ,body)) :stmt))
 
 (define-special return (x) :stmt
   (let x (if (nil? x)
@@ -679,16 +626,14 @@
   (cat "typeof(" (compile x) ")"))
 
 (define-special error (x) :stmt
-  (let e (if (= target 'js)
-             (cat "throw " (compile `(new (Error ,x))))
-           (cat "error(" (compile x) ")"))
+  (let e (cat "throw " (compile `(new (Error ,x))))
     (cat (indentation) e)))
 
 (define-special %local (name value) :stmt
   (let (id (compile name)
         value1 (compile value)
         rh (if (is? value) (cat " = " value1) "")
-        keyword (if (= target 'js) "var " "local ")
+        keyword "var "
         ind (indentation))
     (cat ind keyword id rh)))
 
@@ -700,9 +645,7 @@
 (define-special get (t k)
   (let (t1 (compile t)
         k1 (compile k))
-    (when (or (and (= target 'lua)
-                   (= (char t1 0) "{"))
-              (infix-operator? t))
+    (when (infix-operator? t)
       (set t1 (cat "(" t1 ")")))
     (if (and (string-literal? k)
              (valid-id? (inner k)))
@@ -710,8 +653,8 @@
       (cat t1 "[" k1 "]"))))
 
 (define-special %array forms
-  (let (open (if (= target 'lua) "{" "[")
-        close (if (= target 'lua) "}" "]")
+  (let (open "["
+        close "]"
         s "" c "")
     (each (k v) forms
       (when (number? k)
@@ -721,7 +664,7 @@
 
 (define-special %object forms
   (let (s "{" c ""
-        sep (if (= target 'lua) " = " ": "))
+        sep ": ")
     (step (k v) (pair forms)
       (cat! s c (key (compile k)) sep (compile v))
       (set c ", "))

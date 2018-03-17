@@ -5,9 +5,7 @@
 (define eval-print (form)
   (let ((ok v) (guard ((get compiler 'eval) form)))
     (if (not ok)
-        (target
-          js: (print (get v 'stack))
-          lua: (print (cat "error: " (get v 'message) "\n" (get v 'stack))))
+        (print (get v 'stack))
         (is? v) (print (str v)))))
 
 (define rep (s)
@@ -24,15 +22,9 @@
             (set buf "")
             ((get system 'write) "> ")))))
   ((get system 'write) "> ")
-  (target
-    js: (let in (get process 'stdin)
-          ((get in 'setEncoding) 'utf8)
-          ((get in 'on) 'data rep1))
-    lua: (if process
-             ((get (get process 'stdin) 'on) (get process 'stdin) 'data rep1)
-           (while true
-             (let s ((get io 'read))
-               (if s (rep1 (cat s "\n")) (break)))))))
+  (let in (get process 'stdin)
+    ((get in 'setEncoding) 'utf8)
+    ((get in 'on) 'data rep1)))
 
 (define-global compile-file (path)
   (let (s ((get reader 'stream) ((get system 'read-file) path))
@@ -41,16 +33,12 @@
     ((get compiler 'compile) form :stmt)))
 
 (define-global load (path)
-  (let previous target
-    (set target (language))
-    (let code (compile-file path)
-      (set target previous)
-      ((get compiler 'run) code))))
+  (let code (compile-file path)
+    ((get compiler 'run) code)))
 
 (define script-file? (path)
   (not (or (= "-" (char path 0))
-           (= ".js" (clip path (- (# path) 3)))
-           (= ".lua" (clip path (- (# path) 4))))))
+           (= ".js" (clip path (- (# path) 3))))))
 
 (define run-file (path)
   (if (script-file? path)
@@ -65,7 +53,6 @@
   (print "options:")
   (print " -c <input>\tCompile input file")
   (print " -o <output>\tOutput file")
-  (print " -t <target>\tTarget language (default: lua)")
   (print " -e <expr>\tExpression to evaluate"))
 
 (define main ()
@@ -78,7 +65,6 @@
       (let (pre ()
             input nil
             output nil
-            target1 nil
             expr nil
             argv (get system 'argv))
         (for i (# argv)
@@ -90,14 +76,12 @@
                       (let val (at argv i)
                         (if (= a "-c") (set input val)
                             (= a "-o") (set output val)
-                            (= a "-t") (set target1 val)
                             (= a "-e") (set expr val)))))
                 (not (= "-" (char a 0))) (add pre a))))
         (step file pre
           (run-file file))
         (if (nil? input) (if expr (rep expr) (repl))
-          (do (if target1 (set target target1))
-              (let code (compile-file input)
+          (do (let code (compile-file input)
                 (if (or (nil? output) (= output "-"))
                     (print code)
                   ((get system 'write-file) output code)))))))))

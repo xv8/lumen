@@ -3,13 +3,10 @@ if (!( typeof("global") === "undefined")) {
   __e = global;
 } else {
   __e = window;
-}
-_G = __e;
+}_G = __e;
 _G._G = _G;
 environment = [{}];
 _G.environment = environment;
-target = "js";
-_G.target = target;
 nil63 = function (x) {
   return x === undefined || x === null;
 };
@@ -31,8 +28,7 @@ either = function (x, y) {
     return x;
   } else {
     return y;
-  }
-};
+  }};
 _G.either = either;
 has63 = function (l, k) {
   return l.hasOwnProperty(k);
@@ -116,16 +112,14 @@ cut = function (x, from, upto) {
     __e1 = 0;
   } else {
     __e1 = from;
-  }
-  var __i = __e1;
+  }  var __i = __e1;
   var __n = _35(x);
   var __e2;
   if (nil63(upto) || upto > __n) {
     __e2 = __n;
   } else {
     __e2 = upto;
-  }
-  var __upto = __e2;
+  }  var __upto = __e2;
   while (__i < __upto) {
     __l[__j] = x[__i];
     __i = __i + 1;
@@ -140,8 +134,7 @@ cut = function (x, from, upto) {
       __e3 = parseInt(__k);
     } else {
       __e3 = __k;
-    }
-    var __k1 = __e3;
+    }    var __k1 = __e3;
     if (! number63(__k1)) {
       __l[__k1] = __v;
     }
@@ -160,8 +153,7 @@ keys = function (x) {
       __e4 = parseInt(__k2);
     } else {
       __e4 = __k2;
-    }
-    var __k3 = __e4;
+    }    var __k3 = __e4;
     if (! number63(__k3)) {
       __t[__k3] = __v1;
     }
@@ -232,9 +224,7 @@ reduce = function (f, x) {
       return hd(x);
     } else {
       return f(hd(x), reduce(f, tl(x)));
-    }
-  }
-};
+    }  }};
 _G.reduce = reduce;
 join = function () {
   var __ls = unstash(Array.prototype.slice.call(arguments, 0));
@@ -254,8 +244,7 @@ join = function () {
           __e5 = parseInt(__k4);
         } else {
           __e5 = __k4;
-        }
-        var __k5 = __e5;
+        }        var __k5 = __e5;
         if (number63(__k5)) {
           __k5 = __k5 + __n3;
         }
@@ -277,8 +266,7 @@ find = function (f, t) {
       __e6 = parseInt(____i6);
     } else {
       __e6 = ____i6;
-    }
-    var ____i61 = __e6;
+    }    var ____i61 = __e6;
     var __y = f(__x2);
     if (__y) {
       return __y;
@@ -324,8 +312,7 @@ sort = function (l, f) {
         return -1;
       } else {
         return 1;
-      }
-    };
+      }    };
   }
   return l.sort(__e7);
 };
@@ -351,8 +338,7 @@ map = function (f, x) {
       __e8 = parseInt(__k6);
     } else {
       __e8 = __k6;
-    }
-    var __k7 = __e8;
+    }    var __k7 = __e8;
     if (! number63(__k7)) {
       var __y3 = f(__v4);
       if (is63(__y3)) {
@@ -381,8 +367,7 @@ keys63 = function (t) {
       __e9 = parseInt(__k8);
     } else {
       __e9 = __k8;
-    }
-    var __k9 = __e9;
+    }    var __k9 = __e9;
     if (! number63(__k9)) {
       return true;
     }
@@ -400,8 +385,7 @@ empty63 = function (t) {
       __e10 = parseInt(____i12);
     } else {
       __e10 = ____i12;
-    }
-    var ____i121 = __e10;
+    }    var ____i121 = __e10;
     return false;
   }
   return true;
@@ -419,8 +403,7 @@ stash = function (args) {
         __e11 = parseInt(__k10);
       } else {
         __e11 = __k10;
-      }
-      var __k11 = __e11;
+      }      var __k11 = __e11;
       if (! number63(__k11)) {
         __p[__k11] = __v6;
       }
@@ -447,8 +430,7 @@ unstash = function (args) {
           __e12 = parseInt(__k12);
         } else {
           __e12 = __k12;
-        }
-        var __k13 = __e12;
+        }        var __k13 = __e12;
         if (!( __k13 === "_stash")) {
           __args1[__k13] = __v7;
         }
@@ -456,9 +438,7 @@ unstash = function (args) {
       return __args1;
     } else {
       return args;
-    }
-  }
-};
+    }  }};
 _G.unstash = unstash;
 destash33 = function (l, args1) {
   if (obj63(l) && l._stash) {
@@ -471,16 +451,14 @@ destash33 = function (l, args1) {
         __e13 = parseInt(__k14);
       } else {
         __e13 = __k14;
-      }
-      var __k15 = __e13;
+      }      var __k15 = __e13;
       if (!( __k15 === "_stash")) {
         args1[__k15] = __v8;
       }
     }
   } else {
     return l;
-  }
-};
+  }};
 _G.destash33 = destash33;
 search = function (s, pattern, start) {
   var __i16 = s.indexOf(pattern, start);
@@ -502,12 +480,10 @@ split = function (s, sep) {
       } else {
         add(__l3, clip(s, 0, __i17));
         s = clip(s, __i17 + __n12);
-      }
-    }
+      }    }
     add(__l3, s);
     return __l3;
-  }
-};
+  }};
 _G.split = split;
 cat = function () {
   var __xs = unstash(Array.prototype.slice.call(arguments, 0));
@@ -646,14 +622,10 @@ escape = function (s) {
             __e17 = "\\\\";
           } else {
             __e17 = __c;
-          }
-          __e16 = __e17;
-        }
-        __e15 = __e16;
-      }
-      __e14 = __e15;
-    }
-    var __c1 = __e14;
+          }          __e16 = __e17;
+        }        __e15 = __e16;
+      }      __e14 = __e15;
+    }    var __c1 = __e14;
     __s1 = __s1 + __c1;
     __i20 = __i20 + 1;
   }
@@ -678,8 +650,7 @@ str = function (x, stack) {
               return "true";
             } else {
               return "false";
-            }
-          } else {
+            }          } else {
             if (string63(x)) {
               return escape(x);
             } else {
@@ -695,61 +666,44 @@ str = function (x, stack) {
                     if (type(x) === "symbol") {
                       return tostring(x);
                     } else {
-                      if (false) {
-                        return escape(tostring(x));
-                      } else {
-                        var __s = "(";
-                        var __sp = "";
-                        var __xs11 = [];
-                        var __ks = [];
-                        var __l4 = stack || [];
-                        add(__l4, x);
-                        var ____o10 = x;
-                        var __k16 = undefined;
-                        for (__k16 in ____o10) {
-                          var __v9 = ____o10[__k16];
-                          var __e18;
-                          if (numeric63(__k16)) {
-                            __e18 = parseInt(__k16);
-                          } else {
-                            __e18 = __k16;
-                          }
-                          var __k17 = __e18;
-                          if (number63(__k17)) {
-                            __xs11[__k17] = str(__v9, __l4);
-                          } else {
-                            add(__ks, __k17 + ":");
-                            add(__ks, str(__v9, __l4));
-                          }
-                        }
-                        drop(__l4);
-                        var ____o11 = join(__xs11, __ks);
-                        var ____i22 = undefined;
-                        for (____i22 in ____o11) {
-                          var __v10 = ____o11[____i22];
-                          var __e19;
-                          if (numeric63(____i22)) {
-                            __e19 = parseInt(____i22);
-                          } else {
-                            __e19 = ____i22;
-                          }
-                          var ____i221 = __e19;
-                          __s = __s + __sp + __v10;
-                          __sp = " ";
-                        }
-                        return __s + ")";
+                      var __s = "(";
+                      var __sp = "";
+                      var __xs11 = [];
+                      var __ks = [];
+                      var __l4 = stack || [];
+                      add(__l4, x);
+                      var ____o10 = x;
+                      var __k16 = undefined;
+                      for (__k16 in ____o10) {
+                        var __v9 = ____o10[__k16];
+                        var __e18;
+                        if (numeric63(__k16)) {
+                          __e18 = parseInt(__k16);
+                        } else {
+                          __e18 = __k16;
+                        }                        var __k17 = __e18;
+                        if (number63(__k17)) {
+                          __xs11[__k17] = str(__v9, __l4);
+                        } else {
+                          add(__ks, __k17 + ":");
+                          add(__ks, str(__v9, __l4));
+                        }                      }
+                      drop(__l4);
+                      var ____o11 = join(__xs11, __ks);
+                      var ____i22 = undefined;
+                      for (____i22 in ____o11) {
+                        var __v10 = ____o11[____i22];
+                        var __e19;
+                        if (numeric63(____i22)) {
+                          __e19 = parseInt(____i22);
+                        } else {
+                          __e19 = ____i22;
+                        }                        var ____i221 = __e19;
+                        __s = __s + __sp + __v10;
+                        __sp = " ";
                       }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-};
+                      return __s + ")";
+                    }                  }                }              }            }          }        }      }    }  }};
 _G.str = str;
 apply = function (f, args) {
   var __args = stash(args);
@@ -775,8 +729,7 @@ setenv = function (k) {
       __e20 = hd(environment);
     } else {
       __e20 = last(environment);
-    }
-    var __frame = __e20;
+    }    var __frame = __e20;
     var __entry = __frame[__k18] || {};
     var ____o12 = __keys;
     var __k19 = undefined;
@@ -787,8 +740,7 @@ setenv = function (k) {
         __e21 = parseInt(__k19);
       } else {
         __e21 = __k19;
-      }
-      var __k20 = __e21;
+      }      var __k20 = __e21;
       __entry[__k20] = __v11;
     }
     __frame[__k18] = __entry;
@@ -800,44 +752,43 @@ print = function (x) {
   return console.log(x);
 };
 _G.print = print;
-var math = Math;
-abs = math.abs;
+abs = Math.abs;
 _G.abs = abs;
-acos = math.acos;
+acos = Math.acos;
 _G.acos = acos;
-asin = math.asin;
+asin = Math.asin;
 _G.asin = asin;
-atan = math.atan;
+atan = Math.atan;
 _G.atan = atan;
-atan2 = math.atan2;
+atan2 = Math.atan2;
 _G.atan2 = atan2;
-ceil = math.ceil;
+ceil = Math.ceil;
 _G.ceil = ceil;
-cos = math.cos;
+cos = Math.cos;
 _G.cos = cos;
-floor = math.floor;
+floor = Math.floor;
 _G.floor = floor;
-log = math.log;
+log = Math.log;
 _G.log = log;
-log10 = math.log10;
+log10 = Math.log10;
 _G.log10 = log10;
-max = math.max;
+max = Math.max;
 _G.max = max;
-min = math.min;
+min = Math.min;
 _G.min = min;
-pow = math.pow;
+pow = Math.pow;
 _G.pow = pow;
-random = math.random;
+random = Math.random;
 _G.random = random;
-sin = math.sin;
+sin = Math.sin;
 _G.sin = sin;
-sinh = math.sinh;
+sinh = Math.sinh;
 _G.sinh = sinh;
-sqrt = math.sqrt;
+sqrt = Math.sqrt;
 _G.sqrt = sqrt;
-tan = math.tan;
+tan = Math.tan;
 _G.tan = tan;
-tanh = math.tanh;
+tanh = Math.tanh;
 _G.tanh = tanh;
-trunc = math.floor;
+trunc = Math.floor;
 _G.trunc = trunc;

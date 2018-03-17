@@ -9,16 +9,10 @@
               (pair args))))
 
 (define-macro at (l i)
-  (if (and (= target 'lua) (number? i))
-      (inc i)
-      (= target 'lua)
-      (set i `(+ ,i 1)))
   `(get ,l ,i))
 
 (define-macro wipe (place)
-  (if (= target 'lua)
-      `(set ,place nil)
-    `(%delete ,place)))
+  `(%delete ,place))
 
 (define-macro list body
   (let-unique (x)
@@ -152,16 +146,7 @@
       `(%call apply ,f ,@args)))
 
 (define-macro guard (expr)
-  (if (= target 'js)
-      `((fn () (%try (list true ,expr))))
-    `(list (xpcall
-             (fn () ,expr)
-             (fn (m)
-               (if (obj? m) m
-                 (obj stack: ((get debug 'traceback))
-                      message: (if (string? m) (clip m (+ (search m ": ") 2))
-                                   (nil? m) ""
-                                 (str m)))))))))
+  `((fn () (%try (list true ,expr)))))
 
 (define-macro each (x t rest: body)
   (let-unique (o n i)
@@ -171,11 +156,10 @@
       `(let (,o ,t ,k nil)
          (%for ,o ,k
            (let (,v (get ,o ,k))
-             ,@(if (= target 'lua) body
-                   `((let ,k (if (numeric? ,k)
-                                 (parseInt ,k)
-                               ,k)
-                       ,@body)))))))))
+             (let ,k (if (numeric? ,k)
+                         (parseInt ,k)
+                       ,k)
+               ,@body)))))))
 
 (define-macro for (i to rest: body)
   `(let ,i 0
@@ -196,11 +180,6 @@
       (set (get l x) true))
     `(obj ,@l)))
 
-(define-macro language () `',target)
-
-(define-macro target clauses
-  (get clauses target))
-
 (define-macro join! (a rest: bs)
   `(set ,a (join ,a ,@bs)))
 
@@ -220,14 +199,9 @@
            (dec indent-level)))))
 
 (define-macro export names
-  (if (= target 'js)
-      `(do ,@(map (fn (k)
-                    `(set (get exports ',k) ,k))
-                  names))
-    (let x (obj)
-      (each k names
-        (set (get x k) k))
-      `(return (%object ,@(mapo (fn (x) x) x))))))
+  `(do ,@(map (fn (k)
+                `(set (get exports ',k) ,k))
+              names)))
 
 (define-macro when-compiling body
   (eval `(do ,@body)))

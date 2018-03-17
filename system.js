@@ -22,6 +22,10 @@ var path_join = function () {
 var get_environment_variable = function (name) {
   return process.env[name];
 };
+var set_environment_variable = function (name, value) {
+  process.env[name] = value;
+  return process.env[name];
+};
 var write = function (x) {
   var __out = process.stdout;
   return __out.write(x);

@@ -1014,8 +1014,8 @@ c"
   (define f (x) x)
   (let (l () l2 ())
     (set (get l f) true)
-    (set (get l2 (target js: (str l) lua: l)) true)
-    (let k (target js: f lua: 'function)
+    (set (get l2 (str l)) true)
+    (let k f
       (test= (cat "(" k ": true)") (str l))
       (test= (cat "((" k ": true): true)") (str l2)))))
 
