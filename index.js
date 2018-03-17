@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 global.require = require
-process.env.NODE_PATH = process.env.NODE_PATH + require("path").delimiter + require("path").join(__dirname, "bin")
+process.env.NODE_PATH = process.env.NODE_PATH + require("path").delimiter + __dirname
 require("module").Module._initPaths();
-lumen = require("./bin/lumen.js")
-module.exports = lumen
+require("./runtime.js");
+require("./macros.js");
+dax = require("./main.js")
+module.exports = dax
 if (require.main === module)
-  return lumen.main();
+  return dax.main();

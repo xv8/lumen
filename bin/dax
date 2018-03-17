@@ -13,27 +13,15 @@ cd .. || exit 1
 home="$(pwd)"
 cd "${dir}"
 
-if [ ! -z "${LUMEN_HOST}" ]
+if [ ! -z "${DAX_HOST}" ]
 then
-    host="${LUMEN_HOST}"
-elif luajit -v > /dev/null 2>&1
-then
-    host=luajit
-elif lua -v > /dev/null 2>&1
-then
-    host=lua
+    host="${DAX_HOST}"
 elif node -v > /dev/null 2>&1
 then
     host=node
 else
     echo no host found
 fi
-
-case $host in
-    node*)
-        code=index.js;;
-    *)
-        code=init.lua;;
-esac
+code=index.js
 
 exec ${host} "${home}/${code}" "$@"

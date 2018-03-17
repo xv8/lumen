@@ -58,7 +58,7 @@
     ((get compiler 'run) ((get system 'read-file) path))))
 
 (define usage ()
-  (print "usage: lumen [<file> <arguments> | options <object files>]")
+  (print "usage: dax [<file> <arguments> | options <object files>]")
   (print " <file>\t\tProgram read from script file")
   (print " <arguments>\tPassed to program in system.argv")
   (print " <object files>\tLoaded before compiling <input>")

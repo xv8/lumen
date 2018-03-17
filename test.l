@@ -1,4 +1,4 @@
-#!/usr/bin/env bin/lumen
+#!/usr/bin/env ./index.js
 
 (define passed 0)
 (define failed 0)
