@@ -1,6 +1,6 @@
 {
   "name": "dax",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A Lisp for JavaScript",
   "main": "index.js",
   "bin": {
@@ -26,10 +26,13 @@
     "compiler"
   ],
   "author": "Shawn Presser <shawnpresser@gmail.com>",
-  "contributors": ["Scott Bell <scott@sctsm.com>"],
+  "contributors": [
+    "Scott Bell <scott@sctsm.com>"
+  ],
   "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/lyescript/dax/issues"
   },
-  "homepage": "https://github.com/lyescript/dax#readme"
+  "homepage": "https://github.com/lyescript/dax#readme",
+  "dependencies": {}
 }

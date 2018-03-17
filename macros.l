@@ -1,11 +1,6 @@
 (define-macro void body
   `(do ,@body (do)))
 
-(define-macro class (x rest: body)
-  (if (atom? x)
-      `(%class (,x) ,@body)
-    `(%class ,x ,@body)))
-
 (define-macro quote (form)
   (quoted form))
 
@@ -111,9 +106,9 @@
 
 (define-macro with-frame body
   (let-unique (x)
-    `(do (add environment (obj))
+    `(do (add (get _G 'environment) (obj))
          (with ,x (do ,@body)
-           (drop environment)))))
+           (drop (get _G 'environment))))))
 
 (define-macro with-bindings ((names) rest: body)
   (let-unique (x)
@@ -211,3 +206,22 @@
 
 (define-macro when-compiling body
   (eval `(do ,@body)))
+
+(define-macro class (x rest: body)
+  (if (atom? x)
+      `(%class (,x) ,@body)
+    `(%class ,x ,@body)))
+
+(define-macro . args
+    (if (none? args) `(get this 'constructor)
+        (one? args) `(. this ,(hd args) ,@(tl args))
+      (let ((name x rest: args) args)
+        (let (prop (if (atom? x) `',(compile x)
+                       (= 'quote (hd x)) `',(compile (at x 1))
+                      x)
+              expr `(get ,name ,prop))
+          (if (or (and (not (atom? x))
+                       (= 'quote (hd x)))
+                  (string-literal? x))
+              expr
+            `(,expr ,@args))))))

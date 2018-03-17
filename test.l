@@ -1,4 +1,4 @@
-#!/usr/bin/env ./index.js
+#!/usr/bin/env ./bin/cli.js
 
 (define passed 0)
 (define failed 0)

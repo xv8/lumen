@@ -24,13 +24,29 @@
   ((get system 'write) "> ")
   (let in (get process 'stdin)
     ((get in 'removeAllListeners))
-    ; ((get in 'setEncoding) 'utf8)
+    ((get in 'setEncoding) 'utf8)
     ((get in 'on) 'data rep1)))
 
-(define-global expand-file (path)
+(define-global pp-to-string (body)
+  (if (atom? body) (str body)
+      (empty? body) (str body)
+    (let s "("
+      (step x body
+        (cat! s (str x) "\n\n"))
+      (cat s ")"))))
+
+(define-global pp (body)
+  (print (pp-to-string body))
+  body)
+
+(define-global read-file (path)
   (let (s ((get reader 'stream) ((get system 'read-file) path))
         body ((get reader 'read-all) s))
-    ((get compiler 'expand) `(do ,@body))))
+    (if (one? body) (hd body) `(do ,@body))))
+
+(define-global expand-file (path)
+  (let body (read-file path)
+    ((get compiler 'expand) body)))
 
 (define-global compile-file (path)
   (let (body (expand-file path)
@@ -39,7 +55,10 @@
 
 (define-global load (path)
   (let code (compile-file path)
-    ((get compiler 'run) code)))
+    (let prev (or (get _G 'exports) (obj))
+      (with x (set (get _G 'exports) (obj))
+        ((get compiler 'run) code)
+        (set (get _G 'exports) prev)))))
 
 (define script-file? (path)
   (not (or (= "-" (char path 0))
@@ -57,6 +76,8 @@
   (print " <object files>\tLoaded before compiling <input>")
   (print "options:")
   (print " -c <input>\tCompile input file")
+  (print " -x <input>\tExpand input file")
+  (print " -a <input>\tRead input file")
   (print " -o <output>\tOutput file")
   (print " -e <expr>\tExpression to evaluate"))
 
@@ -68,25 +89,30 @@
             (= arg "--help"))
         (usage)
       (let (pre ()
+            op nil
             input nil
             output nil
             expr nil
             argv (get system 'argv))
         (for i (# argv)
           (let a (at argv i)
-            (if (or (= a "-c") (= a "-o") (= a "-t") (= a "-e"))
+            (if (or (= a "-c") (= a "-x") (= a "-a") (= a "-o") (= a "-t") (= a "-e"))
                 (if (= i (edge argv))
                     (print (cat "missing argument for " a))
                   (do (inc i)
                       (let val (at argv i)
-                        (if (= a "-c") (set input val)
+                        (if (= a "-c") (set input val op 'compile)
+                            (= a "-x") (set input val op 'expand)
+                            (= a "-a") (set input val op 'read)
                             (= a "-o") (set output val)
                             (= a "-e") (set expr val)))))
                 (not (= "-" (char a 0))) (add pre a))))
         (step file pre
           (run-file file))
         (if (nil? input) (if expr (rep expr) (repl))
-          (do (let code (compile-file input)
+          (do (let code (if (= op 'expand) (pp-to-string (expand-file input))
+                            (= op 'read) (pp-to-string (read-file input))
+                          (compile-file input))
                 (if (or (nil? output) (= output "-"))
                     (print code)
                   ((get system 'write-file) output code)))))))))

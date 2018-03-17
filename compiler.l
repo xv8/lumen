@@ -123,13 +123,11 @@
           (<= (# x) 2)
           (let ((name v) x)
             (add expr `(,(macroexpand name) ,(macroexpand v))))
-          (<= (# x) 3)
-          (let ((name args rest: body) x)
-            (with-bindings (args)
-              (add expr `(,(macroexpand name) ,args ,@(macroexpand body)))))
         (let ((prefix name args rest: body) x)
-          (with-bindings (args)
-            (add expr `(,prefix ,(macroexpand name) ,args ,@(macroexpand body)))))))))
+          (if (some? body)
+              (with-bindings (args)
+                (add expr `(,prefix ,(macroexpand name) ,args ,@(macroexpand body))))
+            (add expr `(,prefix ,(macroexpand name) ,(macroexpand args)))))))))
 
 (define expand-class ((x name rest: body))
   `(,x ,name ,@(tl (expand-table `(%table ,@body)))))
@@ -268,7 +266,10 @@
   (if (and (string? k)
            (valid-id? k))
       k
-  (cat "[" (compile k) "]")))
+      (or (string-literal? k)
+          (not (string? k)))
+      (cat "[" (compile k) "]")
+    (compile k)))
 
 (define-global mapo (f t)
   (with o ()
@@ -518,7 +519,9 @@
         (name parent) x
         parent1 (lower parent hoist)
         expr `(%class ,(list name parent1) ,@body))
-    expr))
+    (if (and stmt? (not tail?))
+        (add hoist `(%local ,name ,expr))
+      expr)))
 
 (define lower-function (args)
   (let ((a rest: body) args)
@@ -623,9 +626,8 @@
         ind (indentation)
         s "")
     (cat! s ind "if (" cond ") {\n" cons ind "}")
-    (if alt
-        (cat! s " else {\n" alt ind "}")
-      (cat s "\n"))))
+    (if alt (cat! s " else {\n" alt ind "}"))
+    (cat s "\n")))
 
 (define-special while (cond form) :stmt :tr
   (let (cond (compile cond)
