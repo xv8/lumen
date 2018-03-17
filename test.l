@@ -1102,4 +1102,28 @@ c"
            (list x y z qb))
     (test= '(z b c 42) l)))
 
+(define-test classes
+  (class Foo
+    (define constructor (x)
+      (set (get this '_x) x)
+      this)
+    (get x () (get this '_x))
+    (set x (val) (set (get this '_x) val)))
+  (let foo (new (Foo 1))
+    (test= 1 (get foo 'x))
+    (test= 2 (set (get foo 'x) 2))
+    (test= 2 (get foo 'x)))
+  (class (Bar Foo)
+    (define constructor (x y)
+      (super x)
+      (set (get this '_y) y)
+      this)
+    (get y () (get this '_y))
+    (set y (val) (get this '_y)))
+  (let bar (new (Bar 1 2))
+    (test= 1 (get bar 'x))
+    (test= 2 (get bar 'y))
+    (test= 2 (set (get bar 'y) 3))
+    (test= 2 (get bar 'y))))
+
 (run)

@@ -757,7 +757,7 @@
               (let ((name v) x)
                 (cat! s c ind (key name) sep (compile v)))
             (let ((prefix name args rest: body) x
-                  prefix (if (= prefix "define") "" prefix)
+                  prefix (if (in? prefix '(define def)) "" prefix)
                   h (if (some? body)
                         (compile-function args `(do ,@body) name: (key name) prefix: prefix)
                       (cat (key name) sep (compile args))))

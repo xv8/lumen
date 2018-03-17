@@ -2793,7 +2793,7 @@ var create = (function (globals) {
           var __args23 = ____id80[2];
           var __body41 = cut(____id80, 3);
           var __e76;
-          if (__prefix3 === "define") {
+          if (in63(__prefix3, ["define", "def"])) {
             __e76 = "";
           } else {
             __e76 = __prefix3;
@@ -2844,21 +2844,21 @@ var create = (function (globals) {
       __e80 = [];
     }
     var __ext = __e80;
-    var ____x379 = ["%table"];
-    ____x379.comma = "\"\"";
-    return compile(join(["%literal", "\"class \""], __name23, __ext, [join(____x379, __body42)]));
+    var ____x380 = ["%table"];
+    ____x380.comma = "\"\"";
+    return compile(join(["%literal", "\"class \""], __name23, __ext, [join(____x380, __body42)]));
   })});
   setenv("%literal", {["_stash"]: true, ["special"]: (function (...args) {
     var __args24 = unstash(args);
     var __s9 = "";
-    var ____x380 = __args24;
+    var ____x381 = __args24;
     var ____i54 = 0;
-    while (____i54 < _35(____x380)) {
-      var __x381 = ____x380[____i54];
-      if (string_literal63(__x381)) {
-        __s9 = __s9 + _eval(__x381);
+    while (____i54 < _35(____x381)) {
+      var __x382 = ____x381[____i54];
+      if (string_literal63(__x382)) {
+        __s9 = __s9 + _eval(__x382);
       } else {
-        __s9 = __s9 + compile(__x381);
+        __s9 = __s9 + compile(__x382);
       }
       ____i54 = ____i54 + 1;
     }
@@ -2867,14 +2867,14 @@ var create = (function (globals) {
   setenv("%statement", {["_stash"]: true, ["special"]: (function (...args) {
     var __args25 = unstash(args);
     var __s10 = indentation();
-    var ____x382 = __args25;
+    var ____x383 = __args25;
     var ____i55 = 0;
-    while (____i55 < _35(____x382)) {
-      var __x383 = ____x382[____i55];
-      if (string_literal63(__x383)) {
-        __s10 = __s10 + _eval(__x383);
+    while (____i55 < _35(____x383)) {
+      var __x384 = ____x383[____i55];
+      if (string_literal63(__x384)) {
+        __s10 = __s10 + _eval(__x384);
       } else {
-        __s10 = __s10 + compile(__x383);
+        __s10 = __s10 + compile(__x384);
       }
       ____i55 = ____i55 + 1;
     }
@@ -2959,9 +2959,9 @@ var create = (function (globals) {
     return __l9;
   });
   read_string = (function (str, more) {
-    var __x384 = read(stream(str, more));
-    if (!( __x384 === eof)) {
-      return __x384;
+    var __x385 = read(stream(str, more));
+    if (!( __x385 === eof)) {
+      return __x385;
     }
   });
   _G.read_string = read_string;
@@ -3063,16 +3063,16 @@ var create = (function (globals) {
         if (nil63(__c14)) {
           __r252 = expected(s, ")");
         } else {
-          var __x386 = read(s);
-          if (key63(__x386)) {
-            var __k43 = clip(__x386, 0, edge(__x386));
+          var __x387 = read(s);
+          if (key63(__x387)) {
+            var __k43 = clip(__x387, 0, edge(__x387));
             var __v31 = read(s);
             __l10[__k43] = __v31;
           } else {
-            if (flag63(__x386)) {
-              __l10[clip(__x386, 1)] = true;
+            if (flag63(__x387)) {
+              __l10[clip(__x387, 1)] = true;
             } else {
-              add(__l10, __x386);
+              add(__l10, __x387);
             }
           }
         }
@@ -3254,11 +3254,11 @@ var create = (function (globals) {
         return str(body);
       } else {
         var __s111 = "(";
-        var ____x388 = body;
+        var ____x389 = body;
         var ____i57 = 0;
-        while (____i57 < _35(____x388)) {
-          var __x389 = ____x388[____i57];
-          __s111 = __s111 + str(__x389) + "\n\n";
+        while (____i57 < _35(____x389)) {
+          var __x390 = ____x389[____i57];
+          __s111 = __s111 + str(__x390) + "\n\n";
           ____i57 = ____i57 + 1;
         }
         return __s111 + ")";
@@ -3296,10 +3296,10 @@ var create = (function (globals) {
     var __code1 = compile_file(path);
     var __prev = _G.exports || {};
     _G.exports = {};
-    var __x392 = _G.exports;
+    var __x393 = _G.exports;
     compiler.run(__code1);
     _G.exports = __prev;
-    return __x392;
+    return __x393;
   });
   _G.load = load;
   var script_file63 = (function (path) {
@@ -3377,10 +3377,10 @@ var create = (function (globals) {
           }
           __i58 = __i58 + 1;
         }
-        var ____x393 = __pre1;
+        var ____x394 = __pre1;
         var ____i59 = 0;
-        while (____i59 < _35(____x393)) {
-          var __file = ____x393[____i59];
+        while (____i59 < _35(____x394)) {
+          var __file = ____x394[____i59];
           run_file(__file);
           ____i59 = ____i59 + 1;
         }
