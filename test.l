@@ -1094,9 +1094,12 @@ c"
   (test= 42 ((fn ((o a (apply + '(41 1)))) a)))
   (let i 0
     (test= 1 ((fn ((o a ((fn () (inc i))))) i)))
-    (test= 1 i)
-    (test= 1 ((fn ((o a ((fn () (inc i))))) i) 7))
-    (test= 1 i))
+    (test= 2 ((fn ((o a (inc i))) i)))
+    (test= 2 i)
+    (test= 2 ((fn ((o a ((fn () (inc i))))) i) 7))
+    (test= 2 ((fn ((o a (inc i))) i) 7))
+    (test= 2 ((fn ((o a (do (return i) (inc i)))) (error))))
+    (test= 2 i))
   (test= 42 ((fn (((o a 42))) a) '()))
   (let l (let ((o ((o x 'a) (o y 'b) (o z 'c) q: (o qb 99)) '()) '(z q: 42))
            (list x y z qb))
@@ -1125,5 +1128,26 @@ c"
     (test= 2 (get bar 'y))
     (test= 2 (set (get bar 'y) 3))
     (test= 2 (get bar 'y))))
+
+(define-test errors
+  (let x (try 1 (finally 2))
+    (test= 1 x))
+  (let x (try (error) (catch Error e 3) (finally 4))
+    (test= 3 x))
+  (let x 0
+    (try (error)
+         (inc x)
+         (catch Error e (inc x))
+         (finally (inc x)))
+    (test= x 2))
+  (let x 0
+    (class (MyError Error))
+    (try
+      (throw (new (MyError "foo")))
+      (inc x)
+      (catch TypeError e (inc x))
+      (catch MyError e (inc x))
+      (catch Error e (inc x)))
+    (test= x 1)))
 
 (run)

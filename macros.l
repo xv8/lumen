@@ -1,6 +1,3 @@
-(define-macro void body
-  `(do ,@body (do)))
-
 (define-macro quote (form)
   (quoted form))
 
@@ -55,7 +52,7 @@
   (if (atom? bs) `(let (,bs ,(hd body)) ,@(tl body))
       (none? bs) `(do ,@body)
     (let ((lh rh rest: bs2) bs
-          (id val rest: bs1) (bind lh rh))
+          (id val rest: bs1) (bind lh (either rh 'nil)))
       (let renames ()
         (unless (id-literal? id)
           (let id1 (unique id)
@@ -74,6 +71,9 @@
        (when (yes ,y)
          (let (,x ,y)
            ,@body)))))
+
+(define-macro void body
+  `(do ,@body (do)))
 
 (define-macro %setenv (name rest: keys)
   `(void (setenv ',name ,@keys)))
@@ -227,3 +227,22 @@
                   (string-literal? x))
               expr
             `(,expr ,@args))))))
+
+(define-macro try body
+  (let-unique (e)
+    `(%condition-case ,e
+       (do ,@(map (fn (x)
+                    (unless (and (obj? x)
+                                 (in? (hd x) '(catch finally)))
+                      x))
+                  body))
+       ,@(map (fn (x)
+                (when (obj? x)
+                  (if (= (hd x) 'finally) x
+                      (= (hd x) 'catch)
+                    (let ((_ type var rest: body) x)
+                      `(catch ,type (let (,var ,e) ,@body))))))
+              body))))
+
+(define-macro throw (x)
+  `(%throw ,x))

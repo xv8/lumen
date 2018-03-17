@@ -88,14 +88,11 @@
       (let bs ()
         (let-unique (r)
           (each (k v) args
-            (let v1 nil
-              (when (default-assignment? v)
-                (set v1 v v (at v 1)))
-              (when (number? k)
-                (if (atom? v) (add args1 (or v1 v))
-                  (let-unique (x)
-                    (add args1 (if v1 `(,(hd v) ,x ,(at v1 2)) x))
-                    (join! bs (list v x)))))))
+            (when (number? k)
+              (if (atom? v) (add args1 v)
+                (let-unique (x)
+                  (add args1 x)
+                  (join! bs (list v x))))))
           (when (keys? args)
             (join! bs (list r (rest r)))
             (let n (# args1)
@@ -123,18 +120,9 @@
   (setenv name :variable)
   `(%local ,name ,(macroexpand value)))
 
-(define-global expand-args (args)
-  (if (atom? args) args
-    (with l '()
-      (each (k x) args
-        (if (default-assignment? x)
-            (let ((op lh rh) x)
-              (set (get l k) `(,op ,lh ,(macroexpand rh))))
-          (set (get l k) x))))))
-
 (define expand-function ((x args rest: body))
   (with-bindings (args)
-    `(%function ,(expand-args args) ,@(macroexpand body))))
+    `(%function ,args ,@(macroexpand body))))
 
 (define expand-table ((x rest: args))
   (with expr `(,x ,@(keys args))
@@ -152,9 +140,19 @@
 (define expand-class ((x name rest: body))
   `(,x ,name ,@(tl (expand-table `(%table ,@body)))))
 
+(define-global expand-condition-case ((x var form rest: clauses))
+  `(%condition-case ,var
+     ,(macroexpand form)
+     ,@(map (fn ((which rest: body))
+              (if (= which 'finally)
+                  `(,which ,@(map macroexpand body))
+                (with-bindings ((list var))
+                  `(,which ,@(map macroexpand body)))))
+            clauses)))
+
 (define expand-definition ((x name args rest: body))
   (with-bindings (args)
-    `(,x ,name ,(expand-args args) ,@(macroexpand body))))
+    `(,x ,name ,args ,@(macroexpand body))))
 
 (define expand-macro (form)
   (macroexpand (expand1 form)))
@@ -171,6 +169,7 @@
           (= x '%function) (expand-function form)
           (= x '%table) (expand-table form)
           (= x '%class) (expand-class form)
+          (= x '%condition-case) (expand-condition-case form)
           (= x '%global-function) (expand-definition form)
           (= x '%local-function) (expand-definition form)
           (macro? x) (expand-macro form)
@@ -305,7 +304,7 @@
     (cat: (js: +))
     (:+ :-)
     (:< :> :<= :>=)
-    (=: (js: ===))
+    (=: (js: ===) ==: (js: ==))
     (and: (js: &&))
     (or: (js: ,"||"))))
 
@@ -506,6 +505,28 @@
 (define lower-try (args hoist tail?)
   (add hoist `(%try ,(lower-body args tail?))))
 
+(define-global lower-condition-case ((var form rest: clauses) hoist stmt? tail?)
+  (if stmt? (add hoist
+    `(%condition-case ,var
+       ,(lower-body `(do ,form) tail?)
+       ,@(map (fn ((which rest: body))
+                (if (= which 'finally)
+                    `(,which ,(lower-body body))
+                  (let ((x rest: args) body)
+                  `(,which ,(lower x) ,(lower-body args tail?)))))
+              clauses)))
+    (let-unique (e)
+      (add hoist `(%local ,e))
+      (add hoist `(%condition-case ,var
+                    ,(lower `(%set ,e ,form))
+                    ,@(map (fn ((which rest: body))
+                             (if (= which 'finally)
+                                 `(,which ,(lower-body body))
+                               (let ((x rest: args) body)
+                                 `(,which ,(lower x) ,(lower `(%set ,e (do ,@args)))))))
+                           clauses)))
+      e)))
+
 (define lower-while (args hoist)
   (let ((c rest: body) args
         pre ()
@@ -596,6 +617,7 @@
           (= x '%set) (lower-set args hoist stmt? tail?)
           (= x '%if) (lower-if args hoist stmt? tail?)
           (= x '%try) (lower-try args hoist tail?)
+          (= x '%condition-case) (lower-condition-case args hoist stmt? tail?)
           (= x 'while) (lower-while args hoist)
           (= x '%for) (lower-for args hoist)
           (= x '%table) (lower-table args hoist stmt? tail?)
@@ -673,6 +695,28 @@
       (cat ind "try {\n" body ind "}\n"
            ind "catch (" e ") {\n" h ind "}\n"))))
 
+(define-special %condition-case (e form rest: clauses) :stmt :tr
+  (let (ind (indentation)
+        body (with-indent (compile form :stmt)))
+    (with str (cat ind "try {\n" body ind "}")
+      (let form '()
+        (step x clauses
+          (when (= (hd x) 'catch)
+            (let ((_ type body) x)
+              (add form (if (boolean? type) type `(instanceof ,e ,type)))
+              (add form body))))
+        (unless (none? form)
+          (add form `(%throw ,e))
+          (let (expr (hd (expand-if form))
+                h (with-indent (compile expr :stmt)))
+            (cat! str " catch (" e ") {\n" h ind "}"))))
+      (let clause (first (fn (x) (if (= (hd x) 'finally) x)) clauses)
+        (when clause
+          (let (body (tl clause)
+                h (with-indent (compile `(do ,@body) :stmt)))
+            (cat! str " finally {\n" h ind "}"))))
+      (cat! str "\n"))))
+
 (define-special %delete (place) :stmt
   (cat (indentation) "delete " (compile place)))
 
@@ -702,6 +746,9 @@
 
 (define-special typeof (x)
   (cat "typeof(" (compile x) ")"))
+
+(define-special %throw (x) :stmt
+  (cat (indentation) "throw " (compile x)))
 
 (define-special error (x) :stmt
   (let e (cat "throw " (compile `(new (Error ,x))))
