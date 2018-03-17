@@ -1,14 +1,16 @@
 {
   "name": "dax",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A Lisp for JavaScript",
   "main": "index.js",
   "bin": {
-    "dax": "index.js"
+    "dax": "bin/cli.js"
   },
   "scripts": {
-    "test": "make test",
-    "start": "node index.js"
+    "clean": "git checkout *.js",
+    "build": "node . -c lib.l -o lib.js",
+    "test": "npm run build && node . test.l",
+    "start": "node bin/cli.js"
   },
   "repository": {
     "type": "git",

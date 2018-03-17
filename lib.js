@@ -1788,7 +1788,7 @@ var create = function (_G) {
   var parenthesize_call63 = function (x) {
     return ! atom63(x) && hd(x) === "%function" || precedence(x) > 0;
   };
-  var compile_call = function (form) {
+  compile_call = function (form) {
     var __f3 = hd(form);
     var __f11 = compile(__f3);
     var __args15 = compile_args(stash42(tl(form)));
@@ -1797,6 +1797,7 @@ var create = function (_G) {
     } else {
       return __f11 + __args15;
     }  };
+  _G.compile_call = compile_call;
   var op_delims = function (parent, child) {
     var ____r213 = unstash(Array.prototype.slice.call(arguments, 2));
     var __parent = destash33(parent, ____r213);
@@ -2150,6 +2151,10 @@ var create = function (_G) {
     return obj63(x) && obj63(hd(x)) && hd(hd(x)) === "%function";
   };
   _G.immediate_call63 = immediate_call63;
+  setenv("%call", {"_stash": true, "special": function () {
+    var __form9 = unstash(Array.prototype.slice.call(arguments, 0));
+    return compile_call(__form9);
+  }});
   setenv("do", {"_stash": true, "special": function () {
     var __forms3 = unstash(Array.prototype.slice.call(arguments, 0));
     var __s6 = "";
@@ -2423,11 +2428,11 @@ var create = function (_G) {
   var read_all = function (s) {
     var __l10 = [];
     while (true) {
-      var __form8 = read(s);
-      if (__form8 === eof) {
+      var __form10 = read(s);
+      if (__form10 === eof) {
         break;
       }
-      add(__l10, __form8);
+      add(__l10, __form10);
     }
     return __l10;
   };
@@ -2687,9 +2692,9 @@ var create = function (_G) {
     var rep1 = function (s) {
       __buf = __buf + s;
       var __more1 = [];
-      var __form9 = reader["read-string"](__buf, __more1);
-      if (!( __form9 === __more1)) {
-        eval_print(__form9);
+      var __form11 = reader["read-string"](__buf, __more1);
+      if (!( __form11 === __more1)) {
+        eval_print(__form11);
         __buf = "";
         return system.write("> ");
       }
@@ -2707,8 +2712,8 @@ var create = function (_G) {
   _G.expand_file = expand_file;
   compile_file = function (path) {
     var __body60 = expand_file(path);
-    var __form10 = compiler.expand(join(["do"], __body60));
-    return compiler.compile(__form10, {"_stash": true, "stmt": true});
+    var __form12 = compiler.expand(join(["do"], __body60));
+    return compiler.compile(__form12, {"_stash": true, "stmt": true});
   };
   _G.compile_file = compile_file;
   load = function (path) {

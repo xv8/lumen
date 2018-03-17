@@ -335,7 +335,7 @@
            (= (hd x) '%function))
       (> (precedence x) 0)))
 
-(define compile-call (form)
+(define-global compile-call (form)
   (let (f (hd form)
         f1 (compile f)
         args (compile-args (stash* (tl form))))
@@ -562,6 +562,9 @@
 
 (define-global immediate-call? (x)
   (and (obj? x) (obj? (hd x)) (= (hd (hd x)) '%function)))
+
+(define-special %call form
+  (compile-call form))
 
 (define-special do forms :stmt :tr
   (with s ""
