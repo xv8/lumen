@@ -58,8 +58,16 @@
 (define bias (k)
   k)
 
+(define default-assignment-op 'o)
+
+(define-global default-assignment? (x)
+  (and (not (atom? x))
+       (= (hd x) default-assignment-op)))
+
 (define-global bind (lh rh)
   (if (atom? lh) `(,lh ,rh)
+      (default-assignment? lh)
+      (bind (at lh 1) `(if (is? ,rh) ,rh ,(at lh 2)))
     (let-unique (id)
       (with bs (list id rh)
         (each (k v) lh
@@ -80,11 +88,14 @@
       (let bs ()
         (let-unique (r)
           (each (k v) args
-            (when (number? k)
-              (if (atom? v) (add args1 v)
-                (let-unique (x)
-                  (add args1 x)
-                  (join! bs (list v x))))))
+            (let v1 nil
+              (when (default-assignment? v)
+                (set v1 v v (at v 1)))
+              (when (number? k)
+                (if (atom? v) (add args1 (or v1 v))
+                  (let-unique (x)
+                    (add args1 (if v1 `(,(hd v) ,x ,(at v1 2)) x))
+                    (join! bs (list v x)))))))
           (when (keys? args)
             (join! bs (list r (rest r)))
             (let n (# args1)
@@ -112,9 +123,18 @@
   (setenv name :variable)
   `(%local ,name ,(macroexpand value)))
 
+(define-global expand-args (args)
+  (if (atom? args) args
+    (with l '()
+      (each (k x) args
+        (if (default-assignment? x)
+            (let ((op lh rh) x)
+              (set (get l k) `(,op ,lh ,(macroexpand rh))))
+          (set (get l k) x))))))
+
 (define expand-function ((x args rest: body))
   (with-bindings (args)
-    `(%function ,args ,@(macroexpand body))))
+    `(%function ,(expand-args args) ,@(macroexpand body))))
 
 (define expand-table ((x rest: args))
   (with expr `(,x ,@(keys args))
@@ -134,7 +154,7 @@
 
 (define expand-definition ((x name args rest: body))
   (with-bindings (args)
-    `(,x ,name ,args ,@(macroexpand body))))
+    `(,x ,name ,(expand-args args) ,@(macroexpand body))))
 
 (define expand-macro (form)
   (macroexpand (expand1 form)))
@@ -317,7 +337,10 @@
 (define compile-args (args)
   (let (s "(" c "")
     (step x args
-      (cat! s c (compile x))
+      (if (default-assignment? x)
+          (let ((_ x1 val) x)
+            (cat! s c (compile x1) " = " (compile val)))
+        (cat! s c (compile x)))
       (set c ", "))
     (when (get args 'rest)
       (cat! s c "..." (compile (get args 'rest))))
@@ -657,7 +680,7 @@
   (cat (indentation) "break"))
 
 (define-special %function (args body)
-  (compile-function args body prefix: "function"))
+  (cat "(" (compile-function args body prefix: "function") ")"))
 
 (define-special %global-function (name args body) :stmt :tr
   (compile `(%set ,name (%function ,args ,body)) :stmt))

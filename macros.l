@@ -114,7 +114,9 @@
   (let-unique (x)
    `(with-frame
       (each ,x ,names
-        (setenv ,x :variable))
+        (if (default-assignment? ,x)
+            (setenv (at ,x 1) :variable)
+          (setenv ,x :variable)))
       ,@body)))
 
 (define-macro let-macro (definitions rest: body)

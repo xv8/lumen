@@ -1089,4 +1089,17 @@ c"
     (f 1 'x g)
     (test= (list 'x g) l)))
 
+(define-test defaults
+  (test= 42 ((fn ((o a 42)) a)))
+  (test= 42 ((fn ((o a (apply + '(41 1)))) a)))
+  (let i 0
+    (test= 1 ((fn ((o a ((fn () (inc i))))) i)))
+    (test= 1 i)
+    (test= 1 ((fn ((o a ((fn () (inc i))))) i) 7))
+    (test= 1 i))
+  (test= 42 ((fn (((o a 42))) a) '()))
+  (let l (let ((o ((o x 'a) (o y 'b) (o z 'c) q: (o qb 99)) '()) '(z q: 42))
+           (list x y z qb))
+    (test= '(z b c 42) l)))
+
 (run)
