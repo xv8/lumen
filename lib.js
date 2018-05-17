@@ -2641,7 +2641,7 @@ var create = (function (globals) {
     return vm.runInContext(code, sandbox || _G);
   });
   _eval = (function (form) {
-    var __code = compile(expand(form));
+    var __code = compile(expand(["%set", "%result", form]));
     return run(__code);
   });
   _G._eval = _eval;
@@ -2659,13 +2659,13 @@ var create = (function (globals) {
   setenv("do", {["_stash"]: true, ["special"]: (function (...forms) {
     var __forms1 = unstash(forms);
     var __s4 = "";
-    var ____x380 = __forms1;
+    var ____x381 = __forms1;
     var ____i50 = 0;
-    while (____i50 < _35(____x380)) {
-      var __x381 = ____x380[____i50];
-      __s4 = __s4 + compile(__x381, {["_stash"]: true, ["stmt"]: true});
-      if (! atom63(__x381)) {
-        if (hd(__x381) === "return" || hd(__x381) === "break") {
+    while (____i50 < _35(____x381)) {
+      var __x382 = ____x381[____i50];
+      __s4 = __s4 + compile(__x382, {["_stash"]: true, ["stmt"]: true});
+      if (! atom63(__x382)) {
+        if (hd(__x382) === "return" || hd(__x382) === "break") {
           break;
         }
       }
@@ -2676,15 +2676,15 @@ var create = (function (globals) {
   setenv("%if", {["_stash"]: true, ["special"]: (function (cond, cons, alt) {
     var __cond3 = compile(cond);
     indent_level = indent_level + 1;
-    var ____x382 = compile(cons, {["_stash"]: true, ["stmt"]: true});
+    var ____x383 = compile(cons, {["_stash"]: true, ["stmt"]: true});
     indent_level = indent_level - 1;
-    var __cons = ____x382;
+    var __cons = ____x383;
     var __e73;
     if (alt) {
       indent_level = indent_level + 1;
-      var ____x383 = compile(alt, {["_stash"]: true, ["stmt"]: true});
+      var ____x384 = compile(alt, {["_stash"]: true, ["stmt"]: true});
       indent_level = indent_level - 1;
-      __e73 = ____x383;
+      __e73 = ____x384;
     }
     var __alt = __e73;
     var __ind2 = indentation();
@@ -2698,9 +2698,9 @@ var create = (function (globals) {
   setenv("while", {["_stash"]: true, ["special"]: (function (cond, form) {
     var __cond4 = compile(cond);
     indent_level = indent_level + 1;
-    var ____x384 = compile(form, {["_stash"]: true, ["stmt"]: true});
+    var ____x385 = compile(form, {["_stash"]: true, ["stmt"]: true});
     indent_level = indent_level - 1;
-    var __body44 = ____x384;
+    var __body44 = ____x385;
     var __ind3 = indentation();
     return __ind3 + "while (" + __cond4 + ") {\n" + __body44 + __ind3 + "}\n";
   }), ["stmt"]: true, ["tr"]: true});
@@ -2708,23 +2708,23 @@ var create = (function (globals) {
     var __t5 = compile(t);
     var __ind4 = indentation();
     indent_level = indent_level + 1;
-    var ____x385 = compile(form, {["_stash"]: true, ["stmt"]: true});
+    var ____x386 = compile(form, {["_stash"]: true, ["stmt"]: true});
     indent_level = indent_level - 1;
-    var __body45 = ____x385;
+    var __body45 = ____x386;
     return __ind4 + "for (" + k + " in " + __t5 + ") {\n" + __body45 + __ind4 + "}\n";
   }), ["stmt"]: true, ["tr"]: true});
   setenv("%try", {["_stash"]: true, ["special"]: (function (form) {
     var __e38 = unique("e");
     var __ind5 = indentation();
     indent_level = indent_level + 1;
-    var ____x386 = compile(form, {["_stash"]: true, ["stmt"]: true});
+    var ____x387 = compile(form, {["_stash"]: true, ["stmt"]: true});
     indent_level = indent_level - 1;
-    var __body46 = ____x386;
+    var __body46 = ____x387;
     var __hf = ["return", ["%array", false, __e38]];
     indent_level = indent_level + 1;
-    var ____x389 = compile(__hf, {["_stash"]: true, ["stmt"]: true});
+    var ____x390 = compile(__hf, {["_stash"]: true, ["stmt"]: true});
     indent_level = indent_level - 1;
-    var __h = ____x389;
+    var __h = ____x390;
     return __ind5 + "try {\n" + __body46 + __ind5 + "}\n" + __ind5 + "catch (" + __e38 + ") {\n" + __h + __ind5 + "}\n";
   }), ["stmt"]: true, ["tr"]: true});
   setenv("%condition-case", {["_stash"]: true, ["special"]: (function (e, form, ...__r227) {
@@ -2735,17 +2735,17 @@ var create = (function (globals) {
     var __clauses3 = cut(____id83, 0);
     var __ind6 = indentation();
     indent_level = indent_level + 1;
-    var ____x390 = compile(__form6, {["_stash"]: true, ["stmt"]: true});
+    var ____x391 = compile(__form6, {["_stash"]: true, ["stmt"]: true});
     indent_level = indent_level - 1;
-    var __body47 = ____x390;
+    var __body47 = ____x391;
     var __str = __ind6 + "try {\n" + __body47 + __ind6 + "}";
     var __form7 = [];
-    var ____x392 = __clauses3;
+    var ____x393 = __clauses3;
     var ____i51 = 0;
-    while (____i51 < _35(____x392)) {
-      var __x393 = ____x392[____i51];
-      if (hd(__x393) === "catch") {
-        var ____id84 = __x393;
+    while (____i51 < _35(____x393)) {
+      var __x394 = ____x393[____i51];
+      if (hd(__x394) === "catch") {
+        var ____id84 = __x394;
         var ___2 = ____id84[0];
         var __type1 = ____id84[1];
         var __body48 = ____id84[2];
@@ -2764,9 +2764,9 @@ var create = (function (globals) {
       add(__form7, ["%throw", __e39]);
       var __expr5 = hd(expand_if(__form7));
       indent_level = indent_level + 1;
-      var ____x396 = compile(__expr5, {["_stash"]: true, ["stmt"]: true});
+      var ____x397 = compile(__expr5, {["_stash"]: true, ["stmt"]: true});
       indent_level = indent_level - 1;
-      var __h1 = ____x396;
+      var __h1 = ____x397;
       __str = __str + " catch (" + __e39 + ") {\n" + __h1 + __ind6 + "}";
     }
     var __clause = first((function (x) {
@@ -2777,9 +2777,9 @@ var create = (function (globals) {
     if (__clause) {
       var __body49 = tl(__clause);
       indent_level = indent_level + 1;
-      var ____x397 = compile(join(["do"], __body49), {["_stash"]: true, ["stmt"]: true});
+      var ____x398 = compile(join(["do"], __body49), {["_stash"]: true, ["stmt"]: true});
       indent_level = indent_level - 1;
-      var __h2 = ____x397;
+      var __h2 = ____x398;
       __str = __str + " finally {\n" + __h2 + __ind6 + "}";
     }
     __str = __str + "\n";
@@ -2807,11 +2807,11 @@ var create = (function (globals) {
     } else {
       __e75 = "return " + compile(x);
     }
-    var __x403 = __e75;
-    return indentation() + __x403;
+    var __x404 = __e75;
+    return indentation() + __x404;
   }), ["stmt"]: true});
-  setenv("new", {["_stash"]: true, ["special"]: (function (__x404) {
-    var ____id85 = __x404;
+  setenv("new", {["_stash"]: true, ["special"]: (function (__x405) {
+    var ____id85 = __x405;
     var __name18 = ____id85[0];
     var __args24 = cut(____id85, 1);
     return "new " + compile_call(__name18, __args24, true);
@@ -2895,10 +2895,10 @@ var create = (function (globals) {
     var __s7 = "{";
     var __c8 = "";
     var __sep = ": ";
-    var ____x407 = pair(__forms3);
+    var ____x408 = pair(__forms3);
     var ____i53 = 0;
-    while (____i53 < _35(____x407)) {
-      var ____id87 = ____x407[____i53];
+    while (____i53 < _35(____x408)) {
+      var ____id87 = ____x408[____i53];
       var __k40 = ____id87[0];
       var __v29 = ____id87[1];
       __s7 = __s7 + __c8 + key(__k40) + __sep + compile(__v29);
@@ -2915,20 +2915,20 @@ var create = (function (globals) {
     var __comma = either(__forms4.comma, ", ");
     indent_level = indent_level + 1;
     var __ind8 = indentation();
-    var ____x409 = __forms4;
+    var ____x410 = __forms4;
     var ____i54 = 0;
-    while (____i54 < _35(____x409)) {
-      var __x410 = ____x409[____i54];
-      if (atom63(__x410)) {
-        __s8 = __s8 + __c9 + __ind8 + key(__x410) + __sep1 + compile(__x410);
+    while (____i54 < _35(____x410)) {
+      var __x411 = ____x410[____i54];
+      if (atom63(__x411)) {
+        __s8 = __s8 + __c9 + __ind8 + key(__x411) + __sep1 + compile(__x411);
       } else {
-        if (_35(__x410) <= 2) {
-          var ____id88 = __x410;
+        if (_35(__x411) <= 2) {
+          var ____id88 = __x411;
           var __name19 = ____id88[0];
           var __v30 = ____id88[1];
           __s8 = __s8 + __c9 + __ind8 + key(__name19) + __sep1 + compile(__v30);
         } else {
-          var ____id89 = __x410;
+          var ____id89 = __x411;
           var __prefix3 = ____id89[0];
           var __name20 = ____id89[1];
           var __args25 = ____id89[2];
@@ -2953,7 +2953,7 @@ var create = (function (globals) {
       __c9 = inner(__comma) + "\n";
       ____i54 = ____i54 + 1;
     }
-    var ____x408;
+    var ____x409;
     indent_level = indent_level - 1;
     return __s8 + "\n" + indentation() + "}";
   })});
@@ -2985,21 +2985,21 @@ var create = (function (globals) {
       __e83 = [];
     }
     var __ext = __e83;
-    var ____x420 = ["%table"];
-    ____x420.comma = "\"\"";
-    return compile(join(["%literal", "\"class \""], __name23, __ext, [join(____x420, __body51)]));
+    var ____x421 = ["%table"];
+    ____x421.comma = "\"\"";
+    return compile(join(["%literal", "\"class \""], __name23, __ext, [join(____x421, __body51)]));
   })});
   setenv("%literal", {["_stash"]: true, ["special"]: (function (...args) {
     var __args26 = unstash(args);
     var __s9 = "";
-    var ____x421 = __args26;
+    var ____x422 = __args26;
     var ____i55 = 0;
-    while (____i55 < _35(____x421)) {
-      var __x422 = ____x421[____i55];
-      if (string_literal63(__x422)) {
-        __s9 = __s9 + _eval(__x422);
+    while (____i55 < _35(____x422)) {
+      var __x423 = ____x422[____i55];
+      if (string_literal63(__x423)) {
+        __s9 = __s9 + _eval(__x423);
       } else {
-        __s9 = __s9 + compile(__x422);
+        __s9 = __s9 + compile(__x423);
       }
       ____i55 = ____i55 + 1;
     }
@@ -3008,14 +3008,14 @@ var create = (function (globals) {
   setenv("%statement", {["_stash"]: true, ["special"]: (function (...args) {
     var __args27 = unstash(args);
     var __s10 = indentation();
-    var ____x423 = __args27;
+    var ____x424 = __args27;
     var ____i56 = 0;
-    while (____i56 < _35(____x423)) {
-      var __x424 = ____x423[____i56];
-      if (string_literal63(__x424)) {
-        __s10 = __s10 + _eval(__x424);
+    while (____i56 < _35(____x424)) {
+      var __x425 = ____x424[____i56];
+      if (string_literal63(__x425)) {
+        __s10 = __s10 + _eval(__x425);
       } else {
-        __s10 = __s10 + compile(__x424);
+        __s10 = __s10 + compile(__x425);
       }
       ____i56 = ____i56 + 1;
     }
@@ -3100,9 +3100,9 @@ var create = (function (globals) {
     return __l8;
   });
   read_string = (function (str, more) {
-    var __x425 = read(stream(str, more));
-    if (!( __x425 === eof)) {
-      return __x425;
+    var __x426 = read(stream(str, more));
+    if (!( __x426 === eof)) {
+      return __x426;
     }
   });
   _G.read_string = read_string;
@@ -3204,16 +3204,16 @@ var create = (function (globals) {
         if (nil63(__c14)) {
           __r262 = expected(s, ")");
         } else {
-          var __x427 = read(s);
-          if (key63(__x427)) {
-            var __k41 = clip(__x427, 0, edge(__x427));
+          var __x428 = read(s);
+          if (key63(__x428)) {
+            var __k41 = clip(__x428, 0, edge(__x428));
             var __v31 = read(s);
             __l9[__k41] = __v31;
           } else {
-            if (flag63(__x427)) {
-              __l9[clip(__x427, 1)] = true;
+            if (flag63(__x428)) {
+              __l9[clip(__x428, 1)] = true;
             } else {
-              add(__l9, __x427);
+              add(__l9, __x428);
             }
           }
         }
@@ -3395,11 +3395,11 @@ var create = (function (globals) {
         return str(body);
       } else {
         var __s111 = "(";
-        var ____x429 = body;
+        var ____x430 = body;
         var ____i58 = 0;
-        while (____i58 < _35(____x429)) {
-          var __x430 = ____x429[____i58];
-          __s111 = __s111 + str(__x430) + "\n\n";
+        while (____i58 < _35(____x430)) {
+          var __x431 = ____x430[____i58];
+          __s111 = __s111 + str(__x431) + "\n\n";
           ____i58 = ____i58 + 1;
         }
         return __s111 + ")";
@@ -3437,10 +3437,10 @@ var create = (function (globals) {
     var __code1 = compile_file(path);
     var __prev = _G.exports || {};
     _G.exports = {};
-    var __x433 = _G.exports;
+    var __x434 = _G.exports;
     compiler.run(__code1);
     _G.exports = __prev;
-    return __x433;
+    return __x434;
   });
   _G.load = load;
   var script_file63 = (function (path) {
@@ -3518,10 +3518,10 @@ var create = (function (globals) {
           }
           __i59 = __i59 + 1;
         }
-        var ____x434 = __pre1;
+        var ____x435 = __pre1;
         var ____i60 = 0;
-        while (____i60 < _35(____x434)) {
-          var __file = ____x434[____i60];
+        while (____i60 < _35(____x435)) {
+          var __file = ____x435[____i60];
           run_file(__file);
           ____i60 = ____i60 + 1;
         }

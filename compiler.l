@@ -646,7 +646,7 @@
   ((get vm 'runInContext) code (or sandbox _G)))
 
 (define-global eval (form)
-  (let code (compile (expand form))
+  (let code (compile (expand `(%set %result ,form)))
     (run code)))
 
 (define-global immediate-call? (x)
