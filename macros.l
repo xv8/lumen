@@ -209,6 +209,10 @@
 (define-macro when-compiling body
   (eval `(do ,@body)))
 
+(define-macro during-compilation body
+  (with x (expand `(do ,@body))
+    (eval x)))
+
 (define-macro class (x rest: body)
   (if (atom? x)
       `(%class (,x) ,@body)
