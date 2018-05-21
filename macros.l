@@ -219,18 +219,19 @@
     `(%class ,x ,@body)))
 
 (define-macro . args
-    (if (none? args) `(get this 'constructor)
-        (one? args) `(. this ,(hd args) ,@(tl args))
-      (let ((name x rest: args) args)
-        (let (prop (if (atom? x) `',(compile x)
-                       (= 'quote (hd x)) `',(compile (at x 1))
-                      x)
-              expr `(get ,name ,prop))
-          (if (or (and (not (atom? x))
-                       (= 'quote (hd x)))
-                  (string-literal? x))
-              expr
-            `(,expr ,@args))))))
+  (if (none? args) `(get this 'constructor)
+      (one? args) `(. this ,(hd args) ,@(tl args))
+    (let ((name a rest: bs) args)
+      (let (prop (if (atom? a) `',(compile a)
+                     (= 'quote (hd a)) `',(compile (at a 1))
+                    a)
+            expr `(get ,name ,prop))
+        (if (or (and (not (atom? a))
+                     (= 'quote (hd a)))
+                (string-literal? a)
+                (none? bs))
+            expr
+          `(,expr ,@bs))))))
 
 (define-macro try body
   (let-unique (e)
