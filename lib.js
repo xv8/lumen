@@ -661,8 +661,8 @@ var create = (function (globals) {
         try {
           return [true, read_string(x)];
         }
-        catch (__e89) {
-          return [false, __e89];
+        catch (__e90) {
+          return [false, __e90];
         }
       }))();
       var __ok = ____id[0];
@@ -3029,28 +3029,33 @@ var create = (function (globals) {
   __exports.compile = compile;
   _G.compiler = __exports;
   var __exports1 = {};
-  var delimiters = {["("]: true, [")"]: true, [";"]: true, ["\r"]: true, ["\n"]: true};
-  var whitespace = {[" "]: true, ["\t"]: true, ["\r"]: true, ["\n"]: true};
-  var stream = (function (str, more) {
-    return {["pos"]: 0, ["string"]: str, ["len"]: _35(str), ["more"]: more};
+  delimiters = {["{"]: true, ["}"]: true, ["["]: true, ["]"]: true, ["("]: true, [")"]: true, [";"]: true, ["\r"]: true, ["\n"]: true};
+  _G.delimiters = delimiters;
+  whitespace = {[" "]: true, ["\t"]: true, ["\r"]: true, ["\n"]: true};
+  _G.whitespace = whitespace;
+  stream = (function (str, more) {
+    var __s111 = {["pos"]: 0, ["string"]: str, ["len"]: _35(str)};
+    if (is63(more)) {
+      __s111.more = more;
+    }
+    return __s111;
   });
-  var peek_char = (function (s) {
-    var ____id92 = s;
-    var __pos = ____id92.pos;
-    var __len = ____id92.len;
-    var __string = ____id92.string;
-    if (__pos < __len) {
-      return char(__string, __pos);
+  _G.stream = stream;
+  peek_char = (function (s) {
+    if (s.pos < s.len) {
+      return char(s.string, s.pos);
     }
   });
-  var read_char = (function (s) {
+  _G.peek_char = peek_char;
+  read_char = (function (s) {
     var __c10 = peek_char(s);
     if (__c10) {
       s.pos = s.pos + 1;
       return __c10;
     }
   });
-  var skip_non_code = (function (s) {
+  _G.read_char = read_char;
+  skip_non_code = (function (s) {
     while (true) {
       var __c111 = peek_char(s);
       if (nil63(__c111)) {
@@ -3071,9 +3076,12 @@ var create = (function (globals) {
       }
     }
   });
-  var read_table = {};
-  var eof = {};
-  var read = (function (s) {
+  _G.skip_non_code = skip_non_code;
+  read_table = {};
+  _G.read_table = read_table;
+  eof = {};
+  _G.eof = eof;
+  read = (function (s) {
     skip_non_code(s);
     var __c121 = peek_char(s);
     if (is63(__c121)) {
@@ -3082,7 +3090,8 @@ var create = (function (globals) {
       return eof;
     }
   });
-  var read_all = (function (s) {
+  _G.read = read;
+  read_all = (function (s) {
     var __l8 = [];
     while (true) {
       var __form8 = read(s);
@@ -3093,6 +3102,7 @@ var create = (function (globals) {
     }
     return __l8;
   });
+  _G.read_all = read_all;
   read_string = (function (str, more) {
     var __x423 = read(stream(str, more));
     if (!( __x423 === eof)) {
@@ -3103,24 +3113,22 @@ var create = (function (globals) {
   var key63 = (function (atom) {
     return string63(atom) && _35(atom) > 1 && char(atom, edge(atom)) === ":";
   });
-  var flag63 = (function (atom) {
-    return string63(atom) && _35(atom) > 1 && char(atom, 0) === ":";
-  });
-  var expected = (function (s, c) {
-    var ____id93 = s;
-    var __more = ____id93.more;
-    var __pos1 = ____id93.pos;
-    var __id94 = __more;
+  expected = (function (s, c) {
+    var ____id92 = s;
+    var __more = ____id92.more;
+    var __pos = ____id92.pos;
+    var __id93 = __more;
     var __e84;
-    if (__id94) {
-      __e84 = __id94;
+    if (__id93) {
+      __e84 = __id93;
     } else {
-      throw new (Error)("Expected " + c + " at " + __pos1);
+      throw new (Error)("Expected " + c + " at " + __pos);
       __e84 = undefined;
     }
     return __e84;
   });
-  var wrap = (function (s, x) {
+  _G.expected = expected;
+  wrap = (function (s, x) {
     var __y6 = read(s);
     if (__y6 === s.more) {
       return __y6;
@@ -3128,7 +3136,8 @@ var create = (function (globals) {
       return [x, __y6];
     }
   });
-  var hex_prefix63 = (function (str) {
+  _G.wrap = wrap;
+  hex_prefix63 = (function (str) {
     var __e85;
     if (code(str, 0) === 45) {
       __e85 = 1;
@@ -3136,18 +3145,19 @@ var create = (function (globals) {
       __e85 = 0;
     }
     var __i57 = __e85;
-    var __id95 = code(str, __i57) === 48;
+    var __id94 = code(str, __i57) === 48;
     var __e86;
-    if (__id95) {
+    if (__id94) {
       __i57 = __i57 + 1;
       var __n34 = code(str, __i57);
       __e86 = __n34 === 120 || __n34 === 88;
     } else {
-      __e86 = __id95;
+      __e86 = __id94;
     }
     return __e86;
   });
-  var maybe_number = (function (str) {
+  _G.hex_prefix63 = hex_prefix63;
+  maybe_number = (function (str) {
     if (hex_prefix63(str)) {
       return parseInt(str, 16);
     } else {
@@ -3156,14 +3166,19 @@ var create = (function (globals) {
       }
     }
   });
-  var real63 = (function (x) {
+  _G.maybe_number = maybe_number;
+  real63 = (function (x) {
     return number63(x) && ! nan63(x) && ! inf63(x);
   });
+  _G.real63 = real63;
   read_table[""] = (function (s) {
     var __str1 = "";
     while (true) {
       var __c13 = peek_char(s);
       if (__c13 && (! whitespace[__c13] && ! delimiters[__c13])) {
+        if (__c13 === "\\") {
+          __str1 = __str1 + read_char(s);
+        }
         __str1 = __str1 + read_char(s);
       } else {
         break;
@@ -3186,17 +3201,17 @@ var create = (function (globals) {
   });
   read_table["("] = (function (s) {
     read_char(s);
-    var __r262 = undefined;
+    var __r261 = undefined;
     var __l9 = [];
-    while (nil63(__r262)) {
+    while (nil63(__r261)) {
       skip_non_code(s);
       var __c14 = peek_char(s);
       if (__c14 === ")") {
         read_char(s);
-        __r262 = __l9;
+        __r261 = __l9;
       } else {
         if (nil63(__c14)) {
-          __r262 = expected(s, ")");
+          __r261 = expected(s, ")");
         } else {
           var __x425 = read(s);
           if (key63(__x425)) {
@@ -3204,58 +3219,102 @@ var create = (function (globals) {
             var __v31 = read(s);
             __l9[__k41] = __v31;
           } else {
-            if (flag63(__x425)) {
-              __l9[clip(__x425, 1)] = true;
-            } else {
-              add(__l9, __x425);
-            }
+            add(__l9, __x425);
           }
         }
       }
     }
-    return __r262;
+    return __r261;
   });
   read_table[")"] = (function (s) {
     throw new (Error)("Unexpected ) at " + s.pos);
   });
-  read_table["\""] = (function (s) {
+  read_table["["] = (function (s) {
     read_char(s);
-    var __r265 = undefined;
-    var __str2 = "\"";
-    while (nil63(__r265)) {
+    var __r264 = undefined;
+    var __l10 = [];
+    while (nil63(__r264)) {
+      skip_non_code(s);
       var __c15 = peek_char(s);
-      if (__c15 === "\"") {
-        __r265 = __str2 + read_char(s);
+      if (__c15 === "]") {
+        read_char(s);
+        __r264 = join(["%brackets"], __l10);
       } else {
         if (nil63(__c15)) {
-          __r265 = expected(s, "\"");
+          __r264 = expected(s, "]");
         } else {
-          if (__c15 === "\\") {
+          var __x427 = read(s);
+          add(__l10, __x427);
+        }
+      }
+    }
+    return __r264;
+  });
+  read_table["]"] = (function (s) {
+    throw new (Error)("Unexpected ] at " + s.pos);
+  });
+  read_table["{"] = (function (s) {
+    read_char(s);
+    var __r267 = undefined;
+    var __l111 = [];
+    while (nil63(__r267)) {
+      skip_non_code(s);
+      var __c16 = peek_char(s);
+      if (__c16 === "}") {
+        read_char(s);
+        __r267 = join(["%braces"], __l111);
+      } else {
+        if (nil63(__c16)) {
+          __r267 = expected(s, "}");
+        } else {
+          var __x429 = read(s);
+          add(__l111, __x429);
+        }
+      }
+    }
+    return __r267;
+  });
+  read_table["}"] = (function (s) {
+    throw new (Error)("Unexpected } at " + s.pos);
+  });
+  read_table["\""] = (function (s) {
+    read_char(s);
+    var __r270 = undefined;
+    var __str2 = "\"";
+    while (nil63(__r270)) {
+      var __c17 = peek_char(s);
+      if (__c17 === "\"") {
+        __r270 = __str2 + read_char(s);
+      } else {
+        if (nil63(__c17)) {
+          __r270 = expected(s, "\"");
+        } else {
+          if (__c17 === "\\") {
             __str2 = __str2 + read_char(s);
           }
           __str2 = __str2 + read_char(s);
         }
       }
     }
-    return __r265;
+    return __r270;
   });
   read_table["|"] = (function (s) {
     read_char(s);
-    var __r267 = undefined;
+    var __r272 = undefined;
     var __str3 = "|";
-    while (nil63(__r267)) {
-      var __c16 = peek_char(s);
-      if (__c16 === "|") {
-        __r267 = __str3 + read_char(s);
+    while (nil63(__r272)) {
+      var __c18 = peek_char(s);
+      if (__c18 === "|") {
+        __r272 = __str3 + read_char(s);
       } else {
-        if (nil63(__c16)) {
-          __r267 = expected(s, "|");
+        if (nil63(__c18)) {
+          __r272 = expected(s, "|");
         } else {
           __str3 = __str3 + read_char(s);
         }
       }
     }
-    return __r267;
+    return __r272;
   });
   read_table["'"] = (function (s) {
     read_char(s);
@@ -3274,6 +3333,29 @@ var create = (function (globals) {
       return wrap(s, "unquote");
     }
   });
+  read_table["?"] = (function (s) {
+    read_char(s);
+    var __c19 = read_char(s);
+    var __e87;
+    if (__c19 === "\\") {
+      __e87 = read_char(s);
+    } else {
+      __e87 = __c19;
+    }
+    var __c131 = __e87;
+    return code(__c131);
+  });
+  read_table["#"] = (function (s) {
+    read_char(s);
+    var __c20 = peek_char(s);
+    if (__c20 === "'") {
+      read_char(s);
+      return wrap(s, "function");
+    } else {
+      s.pos = s.pos - 1;
+      return read_table[""](s);
+    }
+  });
   __exports1.stream = stream;
   __exports1.read = read;
   __exports1["read-all"] = read_all;
@@ -3283,18 +3365,22 @@ var create = (function (globals) {
   var __exports2 = {};
   var fs = require("fs");
   var child_process = require("child_process");
-  var read_file = (function (path) {
+  read_file = (function (path) {
     return fs.readFileSync(path, "utf8");
   });
-  var write_file = (function (path, data) {
+  _G.read_file = read_file;
+  write_file = (function (path, data) {
     return fs.writeFileSync(path, data, "utf8");
   });
-  var file_exists63 = (function (path) {
+  _G.write_file = write_file;
+  file_exists63 = (function (path) {
     return fs.existsSync(path, "utf8") && fs.statSync(path).isFile();
   });
-  var directory_exists63 = (function (path) {
+  _G.file_exists63 = file_exists63;
+  directory_exists63 = (function (path) {
     return fs.existsSync(path, "utf8") && fs.statSync(path).isDirectory();
   });
+  _G.directory_exists63 = directory_exists63;
   var path_separator = require("path").sep;
   var path_join = (function (...parts) {
     var __parts = unstash(parts);
@@ -3302,28 +3388,35 @@ var create = (function (globals) {
       return x + path_separator + y;
     }), __parts) || "";
   });
-  var get_environment_variable = (function (name) {
+  get_environment_variable = (function (name) {
     return process.env[name];
   });
-  var set_environment_variable = (function (name, value) {
+  _G.get_environment_variable = get_environment_variable;
+  set_environment_variable = (function (name, value) {
     process.env[name] = value;
     return process.env[name];
   });
-  var write = (function (x) {
+  _G.set_environment_variable = set_environment_variable;
+  write = (function (x) {
     var __out = process.stdout;
     return __out.write(x);
   });
-  var exit = (function (code) {
+  _G.write = write;
+  exit = (function (code) {
     return process.exit(code);
   });
-  var argv = cut(process.argv, 2);
-  var reload = (function (module) {
+  _G.exit = exit;
+  argv = cut(process.argv, 2);
+  _G.argv = argv;
+  reload = (function (module) {
     delete require.cache[require.resolve(module)];
     return require(module);
   });
-  var shell = (function (command) {
+  _G.reload = reload;
+  shell = (function (command) {
     return child_process.execSync(command).toString();
   });
+  _G.shell = shell;
   __exports2["read-file"] = read_file;
   __exports2["write-file"] = write_file;
   __exports2["file-exists?"] = file_exists63;
@@ -3342,16 +3435,16 @@ var create = (function (globals) {
   var compiler = _G.compiler;
   var system = _G.system;
   var eval_print = (function (form) {
-    var ____id96 = ((function () {
+    var ____id95 = ((function () {
       try {
         return [true, compiler["eval"](form)];
       }
-      catch (__e90) {
-        return [false, __e90];
+      catch (__e91) {
+        return [false, __e91];
       }
     }))();
-    var __ok1 = ____id96[0];
-    var __v32 = ____id96[1];
+    var __ok1 = ____id95[0];
+    var __v32 = ____id95[1];
     if (! __ok1) {
       return print(__v32.stack);
     } else {
@@ -3388,15 +3481,15 @@ var create = (function (globals) {
       if (empty63(body)) {
         return str(body);
       } else {
-        var __s111 = "(";
-        var ____x427 = body;
+        var __s121 = "(";
+        var ____x431 = body;
         var ____i58 = 0;
-        while (____i58 < _35(____x427)) {
-          var __x428 = ____x427[____i58];
-          __s111 = __s111 + str(__x428) + "\n\n";
+        while (____i58 < _35(____x431)) {
+          var __x432 = ____x431[____i58];
+          __s121 = __s121 + str(__x432) + "\n\n";
           ____i58 = ____i58 + 1;
         }
-        return __s111 + ")";
+        return __s121 + ")";
       }
     }
   });
@@ -3406,24 +3499,18 @@ var create = (function (globals) {
     return body;
   });
   _G.pp = pp;
-  read_file = (function (path) {
-    var __s121 = reader.stream(system["read-file"](path));
-    var __body51 = reader["read-all"](__s121);
-    if (one63(__body51)) {
-      return hd(__body51);
-    } else {
-      return join(["do"], __body51);
-    }
+  read_from_file = (function (path) {
+    var __s13 = reader.stream(system["read-file"](path));
+    return reader["read-all"](__s13);
   });
-  _G.read_file = read_file;
+  _G.read_from_file = read_from_file;
   expand_file = (function (path) {
-    var __body52 = read_file(path);
-    return compiler.expand(__body52);
+    var __body51 = join(["do"], read_from_file(path));
+    return compiler.expand(__body51);
   });
   _G.expand_file = expand_file;
   compile_file = (function (path) {
-    var __body53 = expand_file(path);
-    var __form10 = compiler.expand(join(["do"], __body53));
+    var __form10 = expand_file(path);
     return compiler.compile(__form10, {["_stash"]: true, ["stmt"]: true});
   });
   _G.compile_file = compile_file;
@@ -3431,10 +3518,10 @@ var create = (function (globals) {
     var __code1 = compile_file(path);
     var __prev = _G.exports || {};
     _G.exports = {};
-    var __x431 = _G.exports;
+    var __x434 = _G.exports;
     compiler.run(__code1);
     _G.exports = __prev;
-    return __x431;
+    return __x434;
   });
   _G.load = load;
   var script_file63 = (function (path) {
@@ -3512,10 +3599,10 @@ var create = (function (globals) {
           }
           __i59 = __i59 + 1;
         }
-        var ____x432 = __pre1;
+        var ____x435 = __pre1;
         var ____i60 = 0;
-        while (____i60 < _35(____x432)) {
-          var __file = ____x432[____i60];
+        while (____i60 < _35(____x435)) {
+          var __file = ____x435[____i60];
           run_file(__file);
           ____i60 = ____i60 + 1;
         }
@@ -3526,19 +3613,19 @@ var create = (function (globals) {
             return repl();
           }
         } else {
-          var __e87;
+          var __e88;
           if (__op2 === "expand") {
-            __e87 = pp_to_string(expand_file(__input));
+            __e88 = pp_to_string(expand_file(__input));
           } else {
-            var __e88;
+            var __e89;
             if (__op2 === "read") {
-              __e88 = pp_to_string(read_file(__input));
+              __e89 = pp_to_string(read_from_file(__input));
             } else {
-              __e88 = compile_file(__input);
+              __e89 = compile_file(__input);
             }
-            __e87 = __e88;
+            __e88 = __e89;
           }
-          var __code2 = __e87;
+          var __code2 = __e88;
           if (nil63(__output) || __output === "-") {
             return print(__code2);
           } else {

@@ -370,7 +370,7 @@
 
 (define compile-special (form stmt?)
   (let ((x rest: args) form
-        (special: true stmt: true tr: self-tr?) (getenv x)
+        (special: special stmt: stmt tr: self-tr?) (getenv x)
         tr (terminator (and stmt? (not self-tr?))))
     (cat (apply special args) tr)))
 

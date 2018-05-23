@@ -39,18 +39,16 @@
   (print (pp-to-string body))
   body)
 
-(define-global read-file (path)
-  (let (s ((get reader 'stream) ((get system 'read-file) path))
-        body ((get reader 'read-all) s))
-    (if (one? body) (hd body) `(do ,@body))))
+(define-global read-from-file (path)
+  (let s ((get reader 'stream) ((get system 'read-file) path))
+    ((get reader 'read-all) s)))
 
 (define-global expand-file (path)
-  (let body (read-file path)
+  (let body `(do ,@(read-from-file path))
     ((get compiler 'expand) body)))
 
 (define-global compile-file (path)
-  (let (body (expand-file path)
-        form ((get compiler 'expand) `(do ,@body)))
+  (let form (expand-file path)
     ((get compiler 'compile) form stmt: true)))
 
 (define-global load (path)
@@ -111,7 +109,7 @@
           (run-file file))
         (if (nil? input) (if expr (rep expr) (repl))
           (do (let code (if (= op 'expand) (pp-to-string (expand-file input))
-                            (= op 'read) (pp-to-string (read-file input))
+                            (= op 'read) (pp-to-string (read-from-file input))
                           (compile-file input))
                 (if (or (nil? output) (= output "-"))
                     (print code)
