@@ -5,7 +5,7 @@
   (obj pos: 0 string: str len: (# str) more: more))
 
 (define peek-char (s)
-  (let ((:pos :len :string) s)
+  (let ((pos: true len: true string: true) s)
     (when (< pos len)
       (char string pos))))
 
@@ -58,7 +58,7 @@
        (= (char atom 0) ":")))
 
 (define expected (s c)
-  (let ((:more :pos) s)
+  (let ((more: true pos: true) s)
     (or more (error (cat "Expected " c " at " pos)))))
 
 (define wrap (s x)
