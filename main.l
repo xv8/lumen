@@ -51,7 +51,7 @@
 (define-global compile-file (path)
   (let (body (expand-file path)
         form ((get compiler 'expand) `(do ,@body)))
-    ((get compiler 'compile) form :stmt)))
+    ((get compiler 'compile) form stmt: true)))
 
 (define-global load (path)
   (let code (compile-file path)
