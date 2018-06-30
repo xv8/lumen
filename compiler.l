@@ -239,9 +239,9 @@
           ;; js
           "break" "case" "catch" "class" "const" "continue"
           "debugger" "default" "delete" "do" "else" "eval"
-          "finally" "for" "function" "if" "import" "in"
-          "instanceof" "let" "new" "return" "switch" "throw"
-          "try" "typeof" "var" "void" "with"))
+          "export" "extends" "finally" "for" "function" "if"
+          "import" "in" "instanceof" "new" "return" "switch"
+          "throw" "try" "typeof" "var" "void" "while" "with"))
 
 (define-global reserved? (x)
   (has? reserved x))
