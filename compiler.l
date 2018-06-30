@@ -264,13 +264,14 @@
   (new RegExp "[-](\\w|$)" "g"))
 
 (define-global camel-case (name)
-  (if (string? name)
+  (if (and (string? name) (> (# name) 2))
       (name .replace camel-case-regex
             (fn (_ x) (x (.to-upper-case))))
     name))
 
 (define id (id raw?)
-  (let id1 (if (and (not raw?) (number-code? (code id 0))) "_" "")
+  (let (id (camel-case id)
+        id1 (if (and (not raw?) (number-code? (code id 0))) "_" ""))
     (for i (# id)
       (let (c (char id i)
             n (code c)
@@ -358,10 +359,10 @@
 (define-global compile-args (args call?)
   (let a (hd args)
     (if (accessor? a)
-        (compile-next (compile (camel-case a)) (tl args) call?)
+        (compile-next (compile a) (tl args) call?)
         (and (obj? a) (accessor? (hd a)))
         (let ((x rest: ys) a
-              s (compile-next (compile (camel-case x)) ys true))
+              s (compile-next (compile x) ys true))
           (compile-next s (tl args) call?))
       (let (s "" c "")
         (for i (# args)
@@ -495,7 +496,8 @@
            (not (infix? (hd form)))
            (not (literal? form))
            (not (= 'get (hd form)))
-           (not (= '%statement (hd form))))
+           (not (= '%statement (hd form)))
+           (not (and (two? form) (accessor? (at form 1)))))
       (id-literal? form)))
 
 (define lower-do (args hoist stmt? tail?)
