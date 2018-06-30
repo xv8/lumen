@@ -104,6 +104,13 @@
     `(do (%set ,name ,x)
          (%set (get _G ',(compile name)) ,name))))
 
+(define-macro define-export (name rest: body)
+  (if (none? body)
+      `(%set (get module 'exports) ,name)
+      (one? body)
+      `(%set (get (get module 'exports) ',name) ,@body)
+    `(%set (get (get module 'exports) ',name) (%function ,@(bind* x body)))))
+
 (define-macro with-frame body
   (let-unique (x)
     `(do (add (get _G 'environment) (obj))
