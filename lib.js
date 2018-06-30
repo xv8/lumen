@@ -3071,12 +3071,28 @@ var create = (function (globals) {
     var __x440 = __e76;
     return indentation() + __x440;
   }), ["stmt"]: true});
-  setenv("new", {["_stash"]: true, ["special"]: (function (...x) {
+  setenv("async", {["_stash"]: true, ["special"]: (function (...x) {
     var __x441 = unstash(x);
     if (_35(__x441) > 1) {
-      return compile(join([["new", hd(__x441)]], tl(__x441)));
+      return compile(join([["async", hd(__x441)]], tl(__x441)));
     } else {
-      return "new " + compile(hd(__x441));
+      return "async " + inner(compile(hd(__x441)));
+    }
+  })});
+  setenv("await", {["_stash"]: true, ["special"]: (function (...x) {
+    var __x444 = unstash(x);
+    if (_35(__x444) > 1) {
+      return compile(join([["await", hd(__x444)]], tl(__x444)));
+    } else {
+      return "await " + compile(hd(__x444));
+    }
+  })});
+  setenv("new", {["_stash"]: true, ["special"]: (function (...x) {
+    var __x447 = unstash(x);
+    if (_35(__x447) > 1) {
+      return compile(join([["new", hd(__x447)]], tl(__x447)));
+    } else {
+      return "new " + compile(hd(__x447));
     }
   })});
   setenv("instanceof", {["_stash"]: true, ["special"]: (function (a, b) {
@@ -3158,10 +3174,10 @@ var create = (function (globals) {
     var __s8 = "{";
     var __c8 = "";
     var __sep = ": ";
-    var ____x446 = pair(__forms3);
+    var ____x452 = pair(__forms3);
     var ____i53 = 0;
-    while (____i53 < _35(____x446)) {
-      var ____id89 = ____x446[____i53];
+    while (____i53 < _35(____x452)) {
+      var ____id89 = ____x452[____i53];
       var __k40 = ____id89[0];
       var __v29 = ____id89[1];
       __s8 = __s8 + __c8 + key(__k40) + __sep + compile(__v29);
@@ -3178,20 +3194,20 @@ var create = (function (globals) {
     var __comma = either(__forms4.comma, ", ");
     indent_level = indent_level + 1;
     var __ind8 = indentation();
-    var ____x448 = __forms4;
+    var ____x454 = __forms4;
     var ____i54 = 0;
-    while (____i54 < _35(____x448)) {
-      var __x449 = ____x448[____i54];
-      if (atom63(__x449)) {
-        __s9 = __s9 + __c9 + __ind8 + key(__x449) + __sep1 + compile(__x449);
+    while (____i54 < _35(____x454)) {
+      var __x455 = ____x454[____i54];
+      if (atom63(__x455)) {
+        __s9 = __s9 + __c9 + __ind8 + key(__x455) + __sep1 + compile(__x455);
       } else {
-        if (_35(__x449) <= 2) {
-          var ____id90 = __x449;
+        if (_35(__x455) <= 2) {
+          var ____id90 = __x455;
           var __name20 = ____id90[0];
           var __v30 = ____id90[1];
           __s9 = __s9 + __c9 + __ind8 + key(__name20) + __sep1 + compile(__v30);
         } else {
-          var ____id91 = __x449;
+          var ____id91 = __x455;
           var __prefix3 = ____id91[0];
           var __name21 = ____id91[1];
           var __args24 = ____id91[2];
@@ -3216,7 +3232,7 @@ var create = (function (globals) {
       __c9 = inner(__comma) + "\n";
       ____i54 = ____i54 + 1;
     }
-    var ____x447;
+    var ____x453;
     indent_level = indent_level - 1;
     return __s9 + "\n" + indentation() + "}";
   })});
@@ -3248,21 +3264,21 @@ var create = (function (globals) {
       __e84 = [];
     }
     var __ext = __e84;
-    var ____x459 = ["%table"];
-    ____x459.comma = "\"\"";
-    return compile(join(["%literal", "\"class \""], __name24, __ext, [join(____x459, __body52)]));
+    var ____x465 = ["%table"];
+    ____x465.comma = "\"\"";
+    return compile(join(["%literal", "\"class \""], __name24, __ext, [join(____x465, __body52)]));
   })});
   setenv("%literal", {["_stash"]: true, ["special"]: (function (...args) {
     var __args25 = unstash(args);
     var __s10 = "";
-    var ____x460 = __args25;
+    var ____x466 = __args25;
     var ____i55 = 0;
-    while (____i55 < _35(____x460)) {
-      var __x461 = ____x460[____i55];
-      if (string_literal63(__x461)) {
-        __s10 = __s10 + _eval(__x461);
+    while (____i55 < _35(____x466)) {
+      var __x467 = ____x466[____i55];
+      if (string_literal63(__x467)) {
+        __s10 = __s10 + _eval(__x467);
       } else {
-        __s10 = __s10 + compile(__x461);
+        __s10 = __s10 + compile(__x467);
       }
       ____i55 = ____i55 + 1;
     }
@@ -3271,14 +3287,14 @@ var create = (function (globals) {
   setenv("%statement", {["_stash"]: true, ["special"]: (function (...args) {
     var __args26 = unstash(args);
     var __s111 = indentation();
-    var ____x462 = __args26;
+    var ____x468 = __args26;
     var ____i56 = 0;
-    while (____i56 < _35(____x462)) {
-      var __x463 = ____x462[____i56];
-      if (string_literal63(__x463)) {
-        __s111 = __s111 + _eval(__x463);
+    while (____i56 < _35(____x468)) {
+      var __x469 = ____x468[____i56];
+      if (string_literal63(__x469)) {
+        __s111 = __s111 + _eval(__x469);
       } else {
-        __s111 = __s111 + compile(__x463);
+        __s111 = __s111 + compile(__x469);
       }
       ____i56 = ____i56 + 1;
     }
@@ -3405,9 +3421,9 @@ var create = (function (globals) {
   _G.readAll;
   _G.read_all = read_all;
   read_string = (function (str, more) {
-    var __x464 = read(stream(str, more));
-    if (!( __x464 === eof)) {
-      return __x464;
+    var __x470 = read(stream(str, more));
+    if (!( __x470 === eof)) {
+      return __x470;
     }
   });
   _G.readString = read_string;
@@ -3526,13 +3542,13 @@ var create = (function (globals) {
         if (nil63(__c14)) {
           __r270 = expected(s, ")");
         } else {
-          var __x466 = read(s);
-          if (key63(__x466)) {
-            var __k41 = clip(__x466, 0, edge(__x466));
+          var __x472 = read(s);
+          if (key63(__x472)) {
+            var __k41 = clip(__x472, 0, edge(__x472));
             var __v31 = read(s);
             __l9[__k41] = __v31;
           } else {
-            add(__l9, __x466);
+            add(__l9, __x472);
           }
         }
       }
@@ -3556,8 +3572,8 @@ var create = (function (globals) {
         if (nil63(__c15)) {
           __r273 = expected(s, "]");
         } else {
-          var __x468 = read(s);
-          add(__l10, __x468);
+          var __x474 = read(s);
+          add(__l10, __x474);
         }
       }
     }
@@ -3580,8 +3596,8 @@ var create = (function (globals) {
         if (nil63(__c16)) {
           __r276 = expected(s, "}");
         } else {
-          var __x470 = read(s);
-          add(__l111, __x470);
+          var __x476 = read(s);
+          add(__l111, __x476);
         }
       }
     }
@@ -3823,11 +3839,11 @@ var create = (function (globals) {
         return str(body);
       } else {
         var __s13 = "(";
-        var ____x472 = body;
+        var ____x478 = body;
         var ____i58 = 0;
-        while (____i58 < _35(____x472)) {
-          var __x473 = ____x472[____i58];
-          __s13 = __s13 + str(__x473) + "\n\n";
+        while (____i58 < _35(____x478)) {
+          var __x479 = ____x478[____i58];
+          __s13 = __s13 + str(__x479) + "\n\n";
           ____i58 = ____i58 + 1;
         }
         return __s13 + ")";
@@ -3875,10 +3891,10 @@ var create = (function (globals) {
     var __code1 = compile_file(path);
     var __prev = _G.exports || {};
     _G.exports = {};
-    var __x476 = _G.exports;
+    var __x482 = _G.exports;
     compiler.run(__code1);
     _G.exports = __prev;
-    return __x476;
+    return __x482;
   });
   _G.load = load;
   _G.load;
@@ -3958,10 +3974,10 @@ var create = (function (globals) {
           }
           __i59 = __i59 + 1;
         }
-        var ____x477 = __pre1;
+        var ____x483 = __pre1;
         var ____i60 = 0;
-        while (____i60 < _35(____x477)) {
-          var __file = ____x477[____i60];
+        while (____i60 < _35(____x483)) {
+          var __file = ____x483[____i60];
           run_file(__file);
           ____i60 = ____i60 + 1;
         }

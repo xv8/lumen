@@ -775,6 +775,16 @@
            (cat "return " (compile x)))
     (cat (indentation) x)))
 
+(define-special async x
+  (if (> (# x) 1)
+      (compile `((async ,(hd x)) ,@(tl x)))
+    (cat "async " (inner (compile (hd x))))))
+
+(define-special await x
+  (if (> (# x) 1)
+      (compile `((await ,(hd x)) ,@(tl x)))
+    (cat "await " (compile (hd x)))))
+
 (define-special new x
   (if (> (# x) 1)
       (compile `((new ,(hd x)) ,@(tl x)))
