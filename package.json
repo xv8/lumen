@@ -1,6 +1,6 @@
 {
   "name": "dax",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "A Lisp for JavaScript",
   "main": "index.js",
   "bin": {
