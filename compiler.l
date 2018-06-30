@@ -2,9 +2,9 @@
   (when (string? k)
     (let i (edge (_G .environment))
       (while (>= i 0)
-        (let b (get (at (_G .environment) i) k)
+        (let b (_G .environment [i] [k])
           (if (is? b)
-              (return (if p (get b p) b))
+              (return (if p (b [p]) b))
             (dec i)))))))
 
 (define macro-function (k)
@@ -253,17 +253,21 @@
       (= n 95)))               ; _
 
 (define-global accessor? (x)
-  (and (string? x)
-       (> (# x) 1)
-       (= (code x 0) 46)
-       (not (= (code x 1) 46)))) ; .
+  (or (and (string? x)
+           (> (# x) 1)
+           (= (code x 0) 46)
+           (not (= (code x 1) 46))) ; .
+      (and (obj? x)
+           (= (hd x) '%brackets))))
 
 (define-global camel-case-regex
   (new RegExp "[-](\\w|$)" "g"))
 
 (define-global camel-case (name)
-  (name .replace camel-case-regex
-        (fn (_ x) (x (.to-upper-case)))))
+  (if (string? name)
+      (name .replace camel-case-regex
+            (fn (_ x) (x (.to-upper-case))))
+    name))
 
 (define id (id raw?)
   (let id1 (if (and (not raw?) (number-code? (code id 0))) "_" "")
@@ -691,6 +695,9 @@
 
 (define-special %call (f rest: args)
   (compile-call f args))
+
+(define-special %brackets (x)
+  (cat "[" (compile x) "]"))
 
 (define-special do forms stmt: true tr: true
   (with s ""

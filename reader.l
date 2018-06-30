@@ -18,7 +18,7 @@
   (while true
     (let c (peek-char s)
       (if (nil? c) (break)
-          (get whitespace c) (read-char s)
+          (whitespace [c]) (read-char s)
           (= c ";")
           (do (while (and c (not (= c "\n")))
                 (set c (read-char s)))
@@ -32,8 +32,8 @@
   (skip-non-code s)
   (let c (peek-char s)
     (if (is? c)
-        ((or (get read-table c)
-             (get read-table ""))
+        ((or (read-table [c])
+             (read-table [""]))
          s)
       eof)))
 
@@ -71,7 +71,8 @@
 (define-global maybe-number (str)
   (if (hex-prefix? str)
       (parseInt str 16)
-      (number-code? (code str (edge str)))
+      (and (number-code? (code str (edge str)))
+           (not (= (code str 0) 46))) ; "."
     (number str)))
 
 (define-global real? (x)
@@ -81,8 +82,8 @@
   (let (str "")
     (while true
       (let c (peek-char s)
-        (if (and c (and (not (get whitespace c))
-                        (not (get delimiters c))))
+        (if (and c (and (not (whitespace [c]))
+                        (not (delimiters [c]))))
             (do (when (= c "\\")
                   (cat! str (read-char s)))
                 (cat! str (read-char s)))
@@ -105,7 +106,7 @@
               (if (key? x)
                   (let (k (clip x 0 (edge x))
                         v (read s))
-                    (set (get l k) v))
+                    (set (l [k]) v))
                 (add l x)))))))))
 
 (define-reader (")" s)
@@ -191,7 +192,7 @@
         (do (read-char s)
           (wrap s 'function))
       (do (dec (s .pos))
-          ((get read-table "") s)))))
+          (read-table [""] s)))))
 
 (export stream
         read

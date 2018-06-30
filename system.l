@@ -23,10 +23,10 @@
   (or (reduce (fn (x y) (cat x path-separator y)) parts) ""))
 
 (define get-environment-variable (name)
-  (get (process .env) name))
+  (process .env [name]))
 
 (define set-environment-variable (name value)
-  (set (get (process .env) name) value))
+  (set (process .env [name]) value))
 
 (define write (x cb)
   (let out (process .stdout)
@@ -52,6 +52,7 @@
         path-separator
         path-join
         get-environment-variable
+        set-environment-variable
         write
         exit
         argv

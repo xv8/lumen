@@ -62,13 +62,13 @@
         (inc j))
       (each (k v) x
         (unless (number? k)
-          (set (get l k) v))))))
+          (set (l [k]) v))))))
 
 (define-global keys (x)
   (with t ()
     (each (k v) x
       (unless (number? k)
-        (set (get t k) v)))))
+        (set (t [k]) v)))))
 
 (define-global edge (x)
   (- (# x) 1))
@@ -121,7 +121,7 @@
         (let n (# r)
           (each (k v) l
             (if (number? k) (inc k n))
-            (set (get r k) v)))))))
+            (set (r [k]) v)))))))
 
 (define-global find (f t)
   (each x t
@@ -155,7 +155,7 @@
       (unless (number? k)
         (let y (f v)
           (when (is? y)
-            (set (get t k) y)))))))
+            (set (t [k]) y)))))))
 
 (define-global keep (f x)
   (map (fn (v) (when (yes (f v)) v)) x))
@@ -176,7 +176,7 @@
     (let p ()
       (each (k v) args
         (unless (number? k)
-          (set (get p k) v)))
+          (set (p [k]) v)))
       (set (p ._stash) true)
       (add args p)))
   args)
@@ -188,14 +188,14 @@
           (with args1 (almost args)
             (each (k v) l
               (unless (= k "_stash")
-                (set (get args1 k) v))))
+                (set (args1 [k]) v))))
         args))))
 
 (define-global destash! (l args1)
   (if (and (obj? l) (l ._stash))
       (each (k v) l
         (unless (= k "_stash")
-          (set (get args1 k) v)))
+          (set (args1 [k]) v)))
     l))
 
 (define-global search (s pattern start)
@@ -297,7 +297,7 @@
       (add l x)
       (each (k v) x
         (if (number? k)
-            (set (get xs k) (str v l))
+            (set (xs [k]) (str v l))
           (do (add ks (cat (str k l) ":"))
               (add ks (str v l)))))
       (drop l)
@@ -318,10 +318,10 @@
     (let (frame (if (keys .toplevel)
                     (hd (_G .environment))
                   (last (_G .environment)))
-          entry (or (get frame k) (obj)))
+          entry (or (frame [k]) (obj)))
       (each (k v) keys
-        (set (get entry k) v))
-      (set (get frame k) entry))))
+        (set (entry [k]) v))
+      (set (frame [k]) entry))))
 
 (define-global print (x)
   (console .log x))

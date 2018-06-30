@@ -1,6 +1,6 @@
-(define reader (get _G 'reader))
-(define compiler (get _G 'compiler))
-(define system (get _G 'system))
+(define reader (_G .reader))
+(define compiler (_G .compiler))
+(define system (_G .system))
 
 (define eval-print (form)
   (let ((ok v) (guard (compiler .eval form)))
@@ -55,10 +55,10 @@
 
 (define-global load (path)
   (let code (compile-file path)
-    (let prev (or (get _G 'exports) (obj))
-      (with x (set (get _G 'exports) (obj))
+    (let prev (or (_G .exports) (obj))
+      (with x (set (_G .exports) (obj))
         (compiler .run code)
-        (set (get _G 'exports) prev)))))
+        (set (_G .exports) prev)))))
 
 (define script-file? (path)
   (not (or (= "-" (char path 0))
