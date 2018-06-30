@@ -1,49 +1,49 @@
-(define fs (require 'fs))
-(define child_process (require 'child_process))
+(define fs (require "fs"))
+(define child-process (require "child_process"))
+(define path (require "path"))
 
 (define read-file (path)
-  ((get fs 'readFileSync) path 'utf8))
+  (fs .read-file-sync path "utf8"))
 
 (define write-file (path data)
-  ((get fs 'writeFileSync) path data 'utf8))
+  (fs .write-file-sync path data "utf8"))
 
 (define file-exists? (path)
-  (and ((get fs 'existsSync) path 'utf8)
-       ((get ((get fs 'statSync) path) 'isFile))))
-
+  (and (fs .exists-sync path "utf8")
+       (fs .stat-sync path (.is-file))))
 
 (define directory-exists? (path)
-  (and ((get fs 'existsSync) path 'utf8)
-       ((get ((get fs 'statSync) path) 'isDirectory))))
+  (and (fs .exists-sync path "utf8")
+       (fs .stat-sync path (.is-directory))))
 
 (define path-separator
-  (get (require 'path) 'sep))
+  (path .sep))
 
 (define path-join parts
   (or (reduce (fn (x y) (cat x path-separator y)) parts) ""))
 
 (define get-environment-variable (name)
-  (get (get process 'env) name))
+  (get (process .env) name))
 
 (define set-environment-variable (name value)
-  (set (get (get process 'env) name) value))
+  (set (get (process .env) name) value))
 
-(define write (x)
-  (let out (get process 'stdout)
-    ((get out 'write) x)))
+(define write (x cb)
+  (let out (process .stdout)
+    (out .write x cb)))
 
 (define exit (code)
-  ((get process 'exit) code))
+  (process .exit code))
 
 (define argv
-  (cut (get process 'argv) 2))
+  (cut (process .argv) 2))
 
 (define reload (module)
-  (wipe (get (get require 'cache) ((get require 'resolve) module)))
+  (wipe (get (require .cache) (require .resolve module)))
   (require module))
 
 (define shell (command)
-  ((get ((get child_process 'execSync) command) 'toString)))
+  (child-process .exec-sync command (.to-string)))
 
 (export read-file
         write-file

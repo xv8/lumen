@@ -32,7 +32,7 @@
   (print (cat " " passed " passed, " failed " failed")))
 
 (define-test reader
-  (let read (get reader 'read-string)
+  (let read (reader .read-string)
     (test= nil (read ""))
     (test= "nil" (read "nil"))
     (test= 17 (read "17"))
@@ -54,15 +54,15 @@
     (test= '(quasiquote (unquote a)) (read "`,a"))
     (test= '(quasiquote (unquote-splicing a)) (read "`,@a"))
     (test= 2 (# (read "(1 2 a: 7)")))
-    (test= 7 (get (read "(1 2 a: 7)") 'a))
-    (test= true (get (read "(a: true)") 'a))
+    (test= 7 ((read "(1 2 a: 7)") .a))
+    (test= true ((read "(a: true)") .a))
     (test= 1 (- -1))
     (test= "0?" (read "0?"))
     (test= "0!" (read "0!"))
     (test= "0." (read "0."))))
 
 (define-test read-more
-  (let read (get reader 'read-string)
+  (let read (reader .read-string)
     (test= 17 (read "17" true))
     (let more ()
       (test= more (read "(open" more))
@@ -75,7 +75,7 @@
       (test= more (read "'\"boz" more)))
     (let ((ok e) (guard (read "(open")))
       (test= false ok)
-      (test= "Expected ) at 5" (get e 'message)))))
+      (test= "Expected ) at 5" (e .message)))))
 
 (define-test nil?
   (test= true (nil? nil))
@@ -119,8 +119,8 @@
   (test= false (and true true false)))
 
 (define-test short
-  (test= true (or true (error 'bad)))
-  (test= false (and false (error 'bad)))
+  (test= true (or true (error "bad")))
+  (test= false (and false (error "bad")))
   (let a true
     (test= true (or true (do (set a false) false)))
     (test= true a)
@@ -233,8 +233,8 @@ c"
   (test= (quote (unquote a)) '(unquote a))
   (let x '(10 20 a: 33 1a: 44)
     (test= 20 (at x 1))
-    (test= 33 (get x 'a))
-    (test= 44 (get x '1a))))
+    (test= 33 (x .a))
+    (test= 44 (x .1a))))
 
 (define-test list
   (test= '() (list))
@@ -245,11 +245,11 @@ c"
   (test= 0 (# (list)))
   (test= 2 (# (list 1 2)))
   (test= '(1 2 3) (list 1 2 3))
-  (test= 17 (get (list foo: 17) 'foo))
-  (test= 17 (get (list 1 foo: 17) 'foo))
-  (test= true (get (list foo: true) 'foo))
-  (test= true (get '(foo: true) 'foo))
-  (test= true (get (hd '((foo: true))) 'foo))
+  (test= 17 ((list foo: 17) .foo))
+  (test= 17 ((list 1 foo: 17) .foo))
+  (test= true ((list foo: true) .foo))
+  (test= true ('(foo: true) .foo))
+  (test= true ((hd '((foo: true))) .foo))
   (test= '(a: true) (list a: true))
   (test= '(b: false) (list b: false))
   (test= '(c: 0) (list c: 0)))
@@ -285,25 +285,25 @@ c"
   (let a 42
     (test= '(quasiquote ((unquote-splicing (list a)))) ``(,@(list a)))
     (test= '(quasiquote ((unquote-splicing (list 42)))) ``(,@(list ,a))))
-  (test= true (get `(foo: true) 'foo))
+  (test= true (`(foo: true) .foo))
   (let (a 17
         b '(1 2)
         c (obj a: 10)
         d (list a: 10))
-    (test= 17 (get `(foo: ,a) 'foo))
+    (test= 17 (`(foo: ,a) .foo))
     (test= 2 (# `(foo: ,a ,@b)))
-    (test= 17 (get `(foo: ,@a) 'foo))
+    (test= 17 (`(foo: ,@a) .foo))
     (test= '(1 a: 10) `(1 ,@c))
     (test= '(1 a: 10) `(1 ,@d))
-    (test= true (get (hd `((foo: true))) 'foo))
-    (test= true (get (hd `(,(list foo: true))) 'foo))
-    (test= true (get `(,@(list foo: true)) 'foo))
-    (test= true (get `(1 2 3 ,@'(foo: true)) 'foo)))
+    (test= true ((hd `((foo: true))) .foo))
+    (test= true ((hd `(,(list foo: true))) .foo))
+    (test= true (`(,@(list foo: true)) .foo))
+    (test= true (`(1 2 3 ,@'(foo: true)) .foo)))
   (let-macro ((a keys `(obj ,@keys)))
-    (test= true (get (a foo: true) 'foo))
-    (test= 17 (get (a bar: 17) 'bar)))
+    (test= true ((a foo: true) .foo))
+    (test= 17 ((a bar: 17) .bar)))
   (let-macro ((a () `(obj baz: (fn () 17))))
-    (test= 17 ((get (a) 'baz)))))
+    (test= 17 (((a) .baz)))))
 
 (define-test quasiexpand
   (test= 'a (macroexpand 'a))
@@ -334,7 +334,7 @@ c"
     ((fn ()
       (test= 42 (f))))
     (test= 42 ((at l 0)))
-    (test= 42 ((get t 'f)))
+    (test= 42 ((t .f)))
     (test= nil ((fn () (return))))
     (test= 10 ((fn (x) (- x 2)) 12))))
 
@@ -378,14 +378,14 @@ c"
 
 (define-test wipe
   (let x '(a: true b: true c: true)
-    (wipe (get x 'a))
-    (test= nil (get x 'a))
-    (test= true (get x 'b))
-    (wipe (get x 'c))
-    (test= nil (get x 'c))
-    (test= true (get x 'b))
-    (wipe (get x 'b))
-    (test= nil (get x 'b))
+    (wipe (x .a))
+    (test= nil (x .a))
+    (test= true (x .b))
+    (wipe (x .c))
+    (test= nil (x .c))
+    (test= true (x .b))
+    (wipe (x .b))
+    (test= nil (x .b))
     (test= () x)))
 
 (define-test do
@@ -478,8 +478,8 @@ c"
     (test= 3 n)))
 
 (define-test table
-  (test= 10 (get (obj a: 10) 'a))
-  (test= true (get (obj a: true) 'a)))
+  (test= 10 ((obj a: 10) .a))
+  (test= true ((obj a: true) .a)))
 
 (define-test empty
   (test= true (empty? ()))
@@ -500,16 +500,16 @@ c"
 
 (define-test get-set
   (let t (obj)
-    (set (get t 'foo) 'bar)
-    (test= 'bar (get t 'foo))
+    (set (t .foo) 'bar)
+    (test= 'bar (t .foo))
     (test= 'bar (get t "foo"))
-    (let k 'foo
+    (let k "foo"
       (test= 'bar (get t k)))
     (test= 'bar (get t (cat "f" "oo"))))
   (let (t1 (obj) t2 (obj))
-    (set (get (or nil t1 t2) 'foo) 'bar)
-    (test= 'bar (get t1 'foo))
-    (test= nil (get t2 'foo))))
+    (set ((or nil t1 t2) .foo) 'bar)
+    (test= 'bar (t1 .foo))
+    (test= nil (t2 .foo))))
 
 (define-test each
   (let t '(1 2 3 a: true b: false)
@@ -596,7 +596,7 @@ c"
   (let-macro ((guard1 (x)
                 (let-unique (ok v)
                   `(let ((,ok ,v) (guard ,x))
-                     (list ,ok (if ,ok ,v (get ,v 'message)))))))
+                     (list ,ok (if ,ok ,v (,v .message)))))))
     (test= (list false "") (guard1 (error)))
     (test= (list false "") (guard1 (error nil)))
     (test= (list false "false") (guard1 (error false)))
@@ -870,8 +870,8 @@ c"
   (test= '(a b: 10) (join '(a b: true) (obj b: 10)))
   (test= '(b: 10) (join (obj b: true) '(b: 10)))
   (let t (join '(a b: 1) '(b c: 2))
-    (test= 1 (get t 'b))
-    (test= 2 (get t 'c))
+    (test= 1 (t .b))
+    (test= 2 (t .c))
     (test= 'b (at t 1))))
 
 (define-test reverse
@@ -1023,14 +1023,14 @@ c"
   (test= 4 (apply (fn (a b) (+ a b)) '(2 2)))
   (test= '(2 2) (apply (fn a a) '(2 2)))
   (let t '(1)
-    (set (get t 'foo) 17)
-    (test= 17 (apply (fn a (get a 'foo)) t)))
+    (set (t .foo) 17)
+    (test= 17 (apply (fn a (a .foo)) t)))
   (test= 42 (apply (fn (foo: true) foo) (list foo: 42)))
   (test= 42 (apply (fn ((foo: true)) foo) (list (list foo: 42))))
   (test= 116 (apply + 1 5 '(100 10))))
 
 (define-test eval
-  (let eval (get compiler 'eval)
+  (let eval (compiler .eval)
     (test= 4 (eval '(+ 2 2)))
     (test= 5 (eval '(let a 3 (+ 2 a))))
     (test= 9 (eval '(do (define x 7) (+ x 2))))
@@ -1108,26 +1108,26 @@ c"
 (define-test classes
   (class Foo
     (define constructor (x)
-      (set (get this '_x) x)
+      (set (this ._x) x)
       this)
-    (get x () (get this '_x))
-    (set x (val) (set (get this '_x) val)))
+    (get x () (this ._x))
+    (set x (val) (set (this ._x) val)))
   (let foo (new (Foo 1))
-    (test= 1 (get foo 'x))
-    (test= 2 (set (get foo 'x) 2))
-    (test= 2 (get foo 'x)))
+    (test= 1 (foo .x))
+    (test= 2 (set (foo .x) 2))
+    (test= 2 (foo .x)))
   (class (Bar Foo)
     (define constructor (x y)
       (super x)
-      (set (get this '_y) y)
+      (set (this ._y) y)
       this)
-    (get y () (get this '_y))
-    (set y (val) (get this '_y)))
+    (get y () (this ._y))
+    (set y (val) (this ._y)))
   (let bar (new (Bar 1 2))
-    (test= 1 (get bar 'x))
-    (test= 2 (get bar 'y))
-    (test= 2 (set (get bar 'y) 3))
-    (test= 2 (get bar 'y))))
+    (test= 1 (bar .x))
+    (test= 2 (bar .y))
+    (test= 2 (set (bar .y) 3))
+    (test= 2 (bar .y))))
 
 (define-test errors
   (let x (try 1 (finally 2))

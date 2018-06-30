@@ -3,29 +3,29 @@
 (define system (get _G 'system))
 
 (define eval-print (form)
-  (let ((ok v) (guard ((get compiler 'eval) form)))
+  (let ((ok v) (guard (compiler .eval form)))
     (if (not ok)
-        (print (get v 'stack))
+        (print (v .stack))
         (is? v) (print (str v)))))
 
 (define rep (s)
-  (eval-print ((get reader 'read-string) s)))
+  (eval-print (reader .read-string s)))
 
 (define repl ()
   (let buf ""
     (define rep1 (s)
       (cat! buf s)
       (let (more ()
-            form ((get reader 'read-string) buf more))
+            form (reader .read-string buf more))
           (unless (= form more)
             (eval-print form)
             (set buf "")
-            ((get system 'write) "> ")))))
-  ((get system 'write) "> ")
-  (let in (get process 'stdin)
-    ((get in 'removeAllListeners))
-    ((get in 'setEncoding) 'utf8)
-    ((get in 'on) 'data rep1)))
+            (system .write "> ")))))
+  (system .write "> ")
+  (let in (process .stdin)
+    (in (.removeAllListeners))
+    (in .setEncoding "utf8")
+    (in .on "data" rep1)))
 
 (define-global pp-to-string (body)
   (if (atom? body) (str body)
@@ -40,24 +40,24 @@
   body)
 
 (define-global read-file (path)
-  (let (s ((get reader 'stream) ((get system 'read-file) path))
-        body ((get reader 'read-all) s))
+  (let (s (reader .stream (system .read-file path))
+        body (reader .read-all s))
     (if (one? body) (hd body) `(do ,@body))))
 
 (define-global expand-file (path)
   (let body (read-file path)
-    ((get compiler 'expand) body)))
+    (compiler .expand body)))
 
 (define-global compile-file (path)
   (let (body (expand-file path)
-        form ((get compiler 'expand) `(do ,@body)))
-    ((get compiler 'compile) form stmt: true)))
+        form (compiler .expand `(do ,@body)))
+    (compiler .compile form stmt: true)))
 
 (define-global load (path)
   (let code (compile-file path)
     (let prev (or (get _G 'exports) (obj))
       (with x (set (get _G 'exports) (obj))
-        ((get compiler 'run) code)
+        (compiler .run code)
         (set (get _G 'exports) prev)))))
 
 (define script-file? (path)
@@ -67,7 +67,7 @@
 (define run-file (path)
   (if (script-file? path)
       (load path)
-    ((get compiler 'run) ((get system 'read-file) path))))
+    (compiler .run (system .read-file path))))
 
 (define usage ()
   (print "usage: dax [<file> <arguments> | options <object files>]")
@@ -82,7 +82,7 @@
   (print " -e <expr>\tExpression to evaluate"))
 
 (define main ()
-  (let arg (hd (get system 'argv))
+  (let arg (hd (system .argv))
     (if (and arg (script-file? arg))
         (load arg)
         (or (= arg "-h")
@@ -93,7 +93,7 @@
             input nil
             output nil
             expr nil
-            argv (get system 'argv))
+            argv (system .argv))
         (for i (# argv)
           (let a (at argv i)
             (if (or (= a "-c") (= a "-x") (= a "-a") (= a "-o") (= a "-t") (= a "-e"))
@@ -115,7 +115,7 @@
                           (compile-file input))
                 (if (or (nil? output) (= output "-"))
                     (print code)
-                  ((get system 'write-file) output code)))))))))
+                  (system .write-file output code)))))))))
 
 (export reader
         compiler

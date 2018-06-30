@@ -1,8 +1,8 @@
 (define-global getenv (k p)
   (when (string? k)
-    (let i (edge (get _G 'environment))
+    (let i (edge (_G .environment))
       (while (>= i 0)
-        (let b (get (at (get _G 'environment) i) k)
+        (let b (get (at (_G .environment) i) k)
           (if (is? b)
               (return (if p (get b p) b))
             (dec i)))))))
@@ -81,7 +81,7 @@
 (define-global bind* (args body)
   (let args1 ()
     (define rest (r)
-      (set (get args1 'rest) r)
+      (set (args1 .rest) r)
       `(unstash ,r))
     (if (atom? args)
         (list args1 `(let ,(list args (rest args)) ,@body))
@@ -258,8 +258,15 @@
        (= (code x 0) 46)
        (not (= (code x 1) 46)))) ; .
 
-(define id (id)
-  (let id1 (if (number-code? (code id 0)) "_" "")
+(define-global camel-case-regex
+  (new RegExp "[-](\\w|$)" "g"))
+
+(define-global camel-case (name)
+  (name .replace camel-case-regex
+        (fn (_ x) (x (.to-upper-case)))))
+
+(define id (id raw?)
+  (let id1 (if (and (not raw?) (number-code? (code id 0))) "_" "")
     (for i (# id)
       (let (c (char id i)
             n (code c)
@@ -270,7 +277,7 @@
                    (= i 0) (cat "_" n)
                  n))
         (cat! id1 c1)))
-    (if (reserved? id1)
+    (if (and (not raw?) (reserved? id1))
         (cat "_" id1)
         id1)))
 
@@ -330,7 +337,7 @@
   (find (fn (level)
           (let x (get level op)
             (if (= x true) op
-                (is? x) (get x 'js))))
+                (is? x) (x .js))))
         infix))
 
 (define infix? (x)
@@ -347,36 +354,46 @@
 (define-global compile-args (args call?)
   (let a (hd args)
     (if (accessor? a)
-        (compile-next (compile a) (tl args) call?)
+        (compile-next (compile (camel-case a)) (tl args) call?)
         (and (obj? a) (accessor? (hd a)))
         (let ((x rest: ys) a
-              s (compile-next (compile x) ys true))
+              s (compile-next (compile (camel-case x)) ys true))
           (compile-next s (tl args) call?))
-      (let (s "(" c "")
-        (step x args
-          (if (default-assignment? x)
-              (let ((_ x1 val) x)
-                (cat! s c (compile x1) " = " (compile val)))
-            (cat! s c (compile x)))
-          (set c ", "))
-        (when (get args 'rest)
-          (cat! s c "..." (compile (get args 'rest))))
-        (cat s ")")))))
+      (let (s "" c "")
+        (for i (# args)
+          (let x (at args i)
+            (if (default-assignment? x)
+                (let ((_ x1 val) x)
+                  (cat! s c (compile x1) " = " (compile val)))
+                (or (accessor? x)
+                    (and (obj? x) (accessor? (hd x))))
+                (return (compile-next (cat "(" s ")") (cut args i) call?))
+              (cat! s c (compile x)))
+            (set c ", ")))
+        (when (args .rest)
+          (cat! s c "..." (compile (args .rest))))
+        (cat "(" s ")")))))
 
 (define escape-newlines (s)
   (with s1 ""
     (for i (# s)
       (let c (char s i)
         (cat! s1 (if (= c "\n") "\\n"
-                     (= c "\r") "\\r"
+                     (= c "\r") ""
                    c))))))
 
-(define compile-atom (x)
+(define-global accessor (x)
+  (let prop (compile-atom (clip x 1) true)
+    (if (valid-id? prop)
+        (cat "." prop)
+      (cat "[" (escape prop) "]"))))
+
+(define compile-atom (x ignore-reserved?)
   (if (= x "nil") "undefined"
-      (accessor? x) (cat "." (compile-atom (clip x 1)))
+      (accessor? x) (accessor x)
       (id-literal? x) (inner x)
       (string-literal? x) (escape-newlines x)
-      (string? x) (id x)
+      (string? x) (id x ignore-reserved?)
       (boolean? x) (if x "true" "false")
       (nan? x) "nan"
       (= x inf) "inf"
@@ -621,9 +638,10 @@
                    (reverse args))
            hoist)))
 
-(define lower-special (form hoist)
-  (let e (lower-call form hoist)
-    (if e (add hoist e))))
+(define lower-special ((name rest: args) hoist)
+  (let (args1 (map (fn (x) (lower x hoist)) args)
+        form `(,name ,@args1))
+    (add hoist form)))
 
 (define-global lower (form hoist stmt? tail?)
   (if (atom? form) form
@@ -656,13 +674,13 @@
 (define vm (require 'vm))
 
 (define context (ctx)
-  (with sandbox ((get vm 'createContext) ctx)
-    (set (get sandbox '_G) sandbox)))
+  (with sandbox (vm .createContext ctx)
+    (set (sandbox ._G) sandbox)))
 
 (context _G)
 
 (define run (code sandbox)
-  ((get vm 'runInContext) code (or sandbox _G)))
+  (vm .runInContext code (or sandbox _G)))
 
 (define-global eval (form)
   (let code (compile (expand `(%set %result ,form)))
@@ -757,8 +775,10 @@
            (cat "return " (compile x)))
     (cat (indentation) x)))
 
-(define-special new ((name rest: args))
-  (cat "new " (compile-call name args true)))
+(define-special new x
+  (if (> (# x) 1)
+      (compile `((new ,(hd x)) ,@(tl x)))
+    (cat "new " (compile (hd x)))))
 
 (define-special instanceof (a b)
   (cat "(" (compile a) " instanceof " (compile b) ")"))
@@ -813,7 +833,7 @@
     (cat s "}")))
 
 (define-special %table forms
-  (let (s "{\n" c "" sep ": " comma (either (get forms 'comma) ", "))
+  (let (s "{\n" c "" sep ": " comma (either (forms .comma) ", "))
     (with-indent
       (let ind (indentation)
         (step x forms

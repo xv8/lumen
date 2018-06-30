@@ -8,10 +8,10 @@
 (define-global either (x y) (if (is? x) x y))
 
 (define-global has? (l k)
-  ((get l 'hasOwnProperty) k))
+  (l .has-own-property k))
 
 (define-global # (x)
-  (or (get x 'length) 0))
+  (or (x .length) 0))
 
 (define-global none? (x) (= (# x) 0))
 (define-global some? (x) (> (# x) 0))
@@ -22,17 +22,20 @@
 
 (define-global type (x) (typeof x))
 
-(define-global string? (x) (= (type x) 'string))
-(define-global number? (x) (= (type x) 'number))
-(define-global boolean? (x) (= (type x) 'boolean))
-(define-global function? (x) (= (type x) 'function))
+(define-global type? (x y) (= (type x) y))
+
+(define-global string? (x) (type? x "string"))
+(define-global number? (x) (type? x "number"))
+(define-global boolean? (x) (type? x "boolean"))
+(define-global function? (x) (type? x "function"))
+(define-global function? (x) (type? x "function"))
+(define-global symbol? (x) (type? x "symbol"))
 
 (define-global obj? (x)
-  (and (is? x)
-       (= (type x) 'object)))
+  (and (is? x) (type? x "object")))
 
 (define-global atom? (x)
-  (or (nil? x) (string? x) (number? x) (boolean? x) (= (type x) 'symbol)))
+  (or (nil? x) (string? x) (number? x) (boolean? x) (symbol? x)))
 
 (define-global nan (/ 0 0))
 (define-global inf (/ 1 0))
@@ -45,7 +48,7 @@
   (or (= n inf) (= n -inf)))
 
 (define-global clip (s from upto)
-  ((get s 'substring) from upto))
+  (s .substring from upto))
 
 (define-global cut (x from upto)
   (with l ()
@@ -76,10 +79,10 @@
 (define-global tl (l) (cut l 1))
 
 (define-global char (s n)
-  ((get s 'charAt) n))
+  (s .char-at n))
 
 (define-global code (s n)
-  ((get s 'charCodeAt) n))
+  (s .char-code-at n))
 
 (define-global string-literal? (x)
   (and (string? x) (= (char x 0) "\"")))
@@ -88,10 +91,10 @@
   (and (string? x) (= (char x 0) "|")))
 
 (define-global add (l x)
-  (do ((get l 'push) x) nil))
+  (do (l .push x) nil))
 
 (define-global drop (l)
-  ((get l 'pop)))
+  (l (.pop)))
 
 (define-global last (l)
   (at l (edge l)))
@@ -140,7 +143,7 @@
       (inc i))))
 
 (define-global sort (l f)
-  ((get l 'sort) (when f (fn (a b) (if (f a b) -1 1)))))
+  (l .sort (when f (fn (a b) (if (f a b) -1 1)))))
 
 (define-global map (f x)
   (with t ()
@@ -174,29 +177,29 @@
       (each (k v) args
         (unless (number? k)
           (set (get p k) v)))
-      (set (get p '_stash) true)
+      (set (p ._stash) true)
       (add args p)))
   args)
 
 (define-global unstash (args)
   (if (none? args) ()
     (let l (last args)
-      (if (and (obj? l) (get l '_stash))
+      (if (and (obj? l) (l ._stash))
           (with args1 (almost args)
             (each (k v) l
-              (unless (= k '_stash)
+              (unless (= k "_stash")
                 (set (get args1 k) v))))
         args))))
 
 (define-global destash! (l args1)
-  (if (and (obj? l) (get l '_stash))
+  (if (and (obj? l) (l ._stash))
       (each (k v) l
-        (unless (= k '_stash)
+        (unless (= k "_stash")
           (set (get args1 k) v)))
     l))
 
 (define-global search (s pattern start)
-  (let i ((get s 'indexOf) pattern start)
+  (let i (s .index-of pattern start)
     (if (>= i 0) i)))
 
 (define-global split (s sep)
@@ -257,7 +260,7 @@
   (some? s))
 
 (define-global tostring (x)
-  ((get x 'toString)))
+  (x (.to-string)))
 
 (define-global escape (s)
   (let s1 "\""
@@ -305,41 +308,41 @@
 
 (define-global apply (f args)
   (let args (stash args)
-    ((get f 'apply) f args)))
+    (f .apply f args)))
 
 (define-global call (f rest: args)
   (apply f args))
 
 (define-global setenv (k rest: keys)
   (when (string? k)
-    (let (frame (if (get keys 'toplevel)
-                    (hd (get _G 'environment))
-                  (last (get _G 'environment)))
+    (let (frame (if (keys .toplevel)
+                    (hd (_G .environment))
+                  (last (_G .environment)))
           entry (or (get frame k) (obj)))
       (each (k v) keys
         (set (get entry k) v))
       (set (get frame k) entry))))
 
 (define-global print (x)
-  ((get console 'log) x))
+  (console .log x))
 
-(define-global abs (get Math 'abs))
-(define-global acos (get Math 'acos))
-(define-global asin (get Math 'asin))
-(define-global atan (get Math 'atan))
-(define-global atan2 (get Math 'atan2))
-(define-global ceil (get Math 'ceil))
-(define-global cos (get Math 'cos))
-(define-global floor (get Math 'floor))
-(define-global log (get Math 'log))
-(define-global log10 (get Math 'log10))
-(define-global max (get Math 'max))
-(define-global min (get Math 'min))
-(define-global pow (get Math 'pow))
-(define-global random (get Math 'random))
-(define-global sin (get Math 'sin))
-(define-global sinh (get Math 'sinh))
-(define-global sqrt (get Math 'sqrt))
-(define-global tan (get Math 'tan))
-(define-global tanh (get Math 'tanh))
-(define-global trunc (get Math 'floor))
+(define-global abs (Math .abs))
+(define-global acos (Math .acos))
+(define-global asin (Math .asin))
+(define-global atan (Math .atan))
+(define-global atan2 (Math .atan2))
+(define-global ceil (Math .ceil))
+(define-global cos (Math .cos))
+(define-global floor (Math .floor))
+(define-global log (Math .log))
+(define-global log10 (Math .log10))
+(define-global max (Math .max))
+(define-global min (Math .min))
+(define-global pow (Math .pow))
+(define-global random (Math .random))
+(define-global sin (Math .sin))
+(define-global sinh (Math .sinh))
+(define-global sqrt (Math .sqrt))
+(define-global tan (Math .tan))
+(define-global tanh (Math .tanh))
+(define-global trunc (Math .floor))

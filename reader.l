@@ -1,19 +1,20 @@
-(define delimiters (set-of "(" ")" ";" "\r" "\n"))
-(define whitespace (set-of " " "\t" "\r" "\n"))
+(define-global delimiters (set-of "{" "}" "[" "]" "(" ")" ";" "\r" "\n"))
+(define-global whitespace (set-of " " "\t" "\r" "\n"))
 
-(define stream (str more)
-  (obj pos: 0 string: str len: (# str) more: more))
+(define-global stream (str more)
+  (with s (obj pos: 0 string: str len: (# str))
+    (when (is? more)
+      (set (s .more) more))))
 
-(define peek-char (s)
-  (let ((pos: true len: true string: true) s)
-    (when (< pos len)
-      (char string pos))))
+(define-global peek-char (s)
+  (when (< (s .pos) (s .len))
+    (char (s .string) (s .pos))))
 
-(define read-char (s)
+(define-global read-char (s)
   (let c (peek-char s)
-    (if c (do (inc (get s 'pos)) c))))
+    (if c (do (inc (s .pos)) c))))
 
-(define skip-non-code (s)
+(define-global skip-non-code (s)
   (while true
     (let c (peek-char s)
       (if (nil? c) (break)
@@ -24,10 +25,10 @@
               (skip-non-code s))
         (break)))))
 
-(define read-table (obj))
-(define eof (obj))
+(define-global read-table (obj))
+(define-global eof (obj))
 
-(define read (s)
+(define-global read (s)
   (skip-non-code s)
   (let c (peek-char s)
     (if (is? c)
@@ -36,7 +37,7 @@
          s)
       eof)))
 
-(define read-all (s)
+(define-global read-all (s)
   (with l ()
     (while true
       (let form (read s)
@@ -52,28 +53,28 @@
        (> (# atom) 1)
        (= (char atom (edge atom)) ":")))
 
-(define expected (s c)
+(define-global expected (s c)
   (let ((more: true pos: true) s)
     (or more (error (cat "Expected " c " at " pos)))))
 
-(define wrap (s x)
+(define-global wrap (s x)
   (let y (read s)
-    (if (= y (get s 'more)) y
+    (if (= y (s .more)) y
       (list x y))))
 
-(define hex-prefix? (str)
+(define-global hex-prefix? (str)
   (let i (if (= (code str 0) 45) 1 0)  ; "-"
     (and (= (code str i) 48)           ; "0"
          (let n (code str (inc i))
            (or (= n 120) (= n 88)))))) ; "x" or "X"
 
-(define maybe-number (str)
+(define-global maybe-number (str)
   (if (hex-prefix? str)
       (parseInt str 16)
       (number-code? (code str (edge str)))
     (number str)))
 
-(define real? (x)
+(define-global real? (x)
   (and (number? x) (not (nan? x)) (not (inf? x))))
 
 (define-reader ("" s) ; atom
@@ -82,7 +83,9 @@
       (let c (peek-char s)
         (if (and c (and (not (get whitespace c))
                         (not (get delimiters c))))
-            (cat! str (read-char s))
+            (do (when (= c "\\")
+                  (cat! str (read-char s)))
+                (cat! str (read-char s)))
           (break))))
   (if (= str "true") true
       (= str "false") false
@@ -106,7 +109,37 @@
                 (add l x)))))))))
 
 (define-reader (")" s)
-  (error (cat "Unexpected ) at " (get s 'pos))))
+  (error (cat "Unexpected ) at " (s .pos))))
+
+(define-reader ("[" s)
+  (read-char s)
+  (with r nil
+    (let l ()
+      (while (nil? r)
+        (skip-non-code s)
+        (let c (peek-char s)
+          (if (= c "]") (do (read-char s) (set r `(%brackets ,@l)))
+              (nil? c) (set r (expected s "]"))
+            (let x (read s)
+              (add l x))))))))
+
+(define-reader ("]" s)
+  (error (cat "Unexpected ] at " (s .pos))))
+
+(define-reader ("{" s)
+  (read-char s)
+  (with r nil
+    (let l ()
+      (while (nil? r)
+        (skip-non-code s)
+        (let c (peek-char s)
+          (if (= c "}") (do (read-char s) (set r `(%braces ,@l)))
+              (nil? c) (set r (expected s "}"))
+            (let x (read s)
+              (add l x))))))))
+
+(define-reader ("}" s)
+  (error (cat "Unexpected } at " (s .pos))))
 
 (define-reader ("\"" s)
   (read-char s)
@@ -144,6 +177,21 @@
       (do (read-char s)
           (wrap s 'unquote-splicing))
     (wrap s 'unquote)))
+
+(define-reader ("?" s)
+  (read-char s)
+  (let (c (read-char s)
+        c1 (if (= c "\\") (read-char s) c))
+    (code c1)))
+
+(define-reader ("#" s)
+  (read-char s)
+  (let c (peek-char s)
+    (if (= c "'")
+        (do (read-char s)
+          (wrap s 'function))
+      (do (dec (s .pos))
+          ((get read-table "") s)))))
 
 (export stream
         read

@@ -100,16 +100,17 @@
   (setenv name toplevel: true variable: true)
   (if (some? body)
       `(do (%global-function ,name ,@(bind* x body))
+           (%set (_G ,(cat "." name)) ,name)
            (%set (get _G ',(compile name)) ,name))
     `(do (%set ,name ,x)
+         (%set (_G ,(cat "." name)) ,name)
          (%set (get _G ',(compile name)) ,name))))
 
 (define-macro define-export (name rest: body)
-  (if (none? body)
-      `(%set (get module 'exports) ,name)
-      (one? body)
-      `(%set (get (get module 'exports) ',name) ,@body)
-    `(%set (get (get module 'exports) ',name) (%function ,@(bind* x body)))))
+  `(%local ,name
+    ,(if (none? body) `(%set (module .exports) ,name)
+         (one? body) `(%set (module .exports ,(cat "." name)) ,@body)
+       `(%set (module .exports ,(cat "." name)) (%function ,@(bind* x body))))))
 
 (define-macro with-frame body
   (let-unique (x)
@@ -210,7 +211,8 @@
 
 (define-macro export names
   `(do ,@(map (fn (k)
-                `(set (get exports ',k) ,k))
+                `(set (get exports ',k) ,k
+                      (exports ,(cat "." (camel-case k))) (get exports ',k)))
               names)))
 
 (define-macro when-compiling body
