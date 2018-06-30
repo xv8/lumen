@@ -252,6 +252,12 @@
       (and (> n 96) (< n 123)) ; a-z
       (= n 95)))               ; _
 
+(define-global accessor? (x)
+  (and (string? x)
+       (> (# x) 1)
+       (= (code x 0) 46)
+       (not (= (code x 1) 46)))) ; .
+
 (define id (id)
   (let id1 (if (number-code? (code id 0)) "_" "")
     (for i (# id)
@@ -333,17 +339,29 @@
 (define-global infix-operator? (x)
   (and (obj? x) (infix? (hd x))))
 
-(define compile-args (args)
-  (let (s "(" c "")
-    (step x args
-      (if (default-assignment? x)
-          (let ((_ x1 val) x)
-            (cat! s c (compile x1) " = " (compile val)))
-        (cat! s c (compile x)))
-      (set c ", "))
-    (when (get args 'rest)
-      (cat! s c "..." (compile (get args 'rest))))
-    (cat s ")")))
+(define-global compile-next (x args call?)
+  (if (none? args)
+      (if call? (cat x "()") x)
+    (cat x (compile-args args call?))))
+
+(define-global compile-args (args call?)
+  (let a (hd args)
+    (if (accessor? a)
+        (compile-next (compile a) (tl args) call?)
+        (and (obj? a) (accessor? (hd a)))
+        (let ((x rest: ys) a
+              s (compile-next (compile x) ys true))
+          (compile-next s (tl args) call?))
+      (let (s "(" c "")
+        (step x args
+          (if (default-assignment? x)
+              (let ((_ x1 val) x)
+                (cat! s c (compile x1) " = " (compile val)))
+            (cat! s c (compile x)))
+          (set c ", "))
+        (when (get args 'rest)
+          (cat! s c "..." (compile (get args 'rest))))
+        (cat s ")")))))
 
 (define escape-newlines (s)
   (with s1 ""
@@ -355,6 +373,7 @@
 
 (define compile-atom (x)
   (if (= x "nil") "undefined"
+      (accessor? x) (cat "." (compile-atom (clip x 1)))
       (id-literal? x) (inner x)
       (string-literal? x) (escape-newlines x)
       (string? x) (id x)
