@@ -3109,9 +3109,6 @@ var create = (function (globals) {
   var key63 = (function (atom) {
     return string63(atom) && _35(atom) > 1 && char(atom, edge(atom)) === ":";
   });
-  var flag63 = (function (atom) {
-    return string63(atom) && _35(atom) > 1 && char(atom, 0) === ":";
-  });
   var expected = (function (s, c) {
     var ____id93 = s;
     var __more = ____id93.more;
@@ -3192,17 +3189,17 @@ var create = (function (globals) {
   });
   read_table["("] = (function (s) {
     read_char(s);
-    var __r262 = undefined;
+    var __r261 = undefined;
     var __l9 = [];
-    while (nil63(__r262)) {
+    while (nil63(__r261)) {
       skip_non_code(s);
       var __c14 = peek_char(s);
       if (__c14 === ")") {
         read_char(s);
-        __r262 = __l9;
+        __r261 = __l9;
       } else {
         if (nil63(__c14)) {
-          __r262 = expected(s, ")");
+          __r261 = expected(s, ")");
         } else {
           var __x427 = read(s);
           if (key63(__x427)) {
@@ -3210,31 +3207,27 @@ var create = (function (globals) {
             var __v31 = read(s);
             __l9[__k41] = __v31;
           } else {
-            if (flag63(__x427)) {
-              __l9[clip(__x427, 1)] = true;
-            } else {
-              add(__l9, __x427);
-            }
+            add(__l9, __x427);
           }
         }
       }
     }
-    return __r262;
+    return __r261;
   });
   read_table[")"] = (function (s) {
     throw new (Error)("Unexpected ) at " + s.pos);
   });
   read_table["\""] = (function (s) {
     read_char(s);
-    var __r265 = undefined;
+    var __r264 = undefined;
     var __str2 = "\"";
-    while (nil63(__r265)) {
+    while (nil63(__r264)) {
       var __c15 = peek_char(s);
       if (__c15 === "\"") {
-        __r265 = __str2 + read_char(s);
+        __r264 = __str2 + read_char(s);
       } else {
         if (nil63(__c15)) {
-          __r265 = expected(s, "\"");
+          __r264 = expected(s, "\"");
         } else {
           if (__c15 === "\\") {
             __str2 = __str2 + read_char(s);
@@ -3243,25 +3236,25 @@ var create = (function (globals) {
         }
       }
     }
-    return __r265;
+    return __r264;
   });
   read_table["|"] = (function (s) {
     read_char(s);
-    var __r267 = undefined;
+    var __r266 = undefined;
     var __str3 = "|";
-    while (nil63(__r267)) {
+    while (nil63(__r266)) {
       var __c16 = peek_char(s);
       if (__c16 === "|") {
-        __r267 = __str3 + read_char(s);
+        __r266 = __str3 + read_char(s);
       } else {
         if (nil63(__c16)) {
-          __r267 = expected(s, "|");
+          __r266 = expected(s, "|");
         } else {
           __str3 = __str3 + read_char(s);
         }
       }
     }
-    return __r267;
+    return __r266;
   });
   read_table["'"] = (function (s) {
     read_char(s);
