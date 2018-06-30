@@ -444,14 +444,15 @@
         (cat op ao " " a ac)
       (cat ao a ac " " op " " bo b bc))))
 
-(define-global compile-function (args body name: true prefix: true tr: true)
+(define-global compile-function (args body name: true prefix: true infix: true tr: true)
   (let (id (either name "")
         args (compile-args args)
         body (with-indent (compile body stmt: true))
         ind (indentation)
+        mid (if infix (cat " " infix) "")
         p (if prefix (cat prefix " ") "")
         tr (either tr ""))
-    (cat p id args " {\n" body ind "}" tr)))
+    (cat p id args mid " {\n" body ind "}" tr)))
 
 (define can-return? (form)
   (and (is? form)
@@ -508,10 +509,12 @@
       e)))
 
 (define lower-set (args hoist stmt? tail?)
-  (let ((lh rh) args)
-    (add hoist `(%set ,(lower lh hoist) ,(lower rh hoist)))
+  (let ((lh rh) args
+        lh1 (lower lh hoist)
+        rh1 (lower rh hoist))
+    (add hoist `(%set ,lh1 ,rh1))
     (unless (and stmt? (not tail?))
-      lh)))
+      lh1)))
 
 (define lower-if (args hoist stmt? tail?)
   (let ((cond then else) args)
@@ -768,7 +771,7 @@
   (cat (indentation) "break"))
 
 (define-special %function (args body)
-  (cat "(" (compile-function args body prefix: "function") ")"))
+  (compile-function args body infix: "=>"))
 
 (define-special %global-function (name args body) stmt: true tr: true
   (compile `(%set ,name (%function ,args ,body)) stmt: true))
@@ -785,12 +788,12 @@
 (define-special async x
   (if (> (# x) 1)
       (compile `((async ,(hd x)) ,@(tl x)))
-    (cat "async " (inner (compile (hd x))))))
+    (cat "async " (compile (hd x)))))
 
 (define-special await x
   (if (> (# x) 1)
       (compile `((await ,(hd x)) ,@(tl x)))
-    (cat "await " (compile (hd x)))))
+    (cat "await (" (compile (hd x)) ")")))
 
 (define-special new x
   (if (> (# x) 1)
