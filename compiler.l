@@ -388,12 +388,12 @@
         (cat "." prop)
       (cat "[" (escape prop) "]"))))
 
-(define compile-atom (x ignore-reserved?)
-  (if (= x "nil") "undefined"
+(define compile-atom (x raw?)
+  (if (and (not raw?) (= x "nil")) "undefined"
       (accessor? x) (accessor x)
       (id-literal? x) (inner x)
       (string-literal? x) (escape-newlines x)
-      (string? x) (id x ignore-reserved?)
+      (string? x) (id x raw?)
       (boolean? x) (if x "true" "false")
       (nan? x) "nan"
       (= x inf) "inf"

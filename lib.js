@@ -2329,8 +2329,8 @@ var create = (function (globals) {
   _G.accessor = accessor;
   _G.accessor;
   _G.accessor = accessor;
-  var compile_atom = (function (x, ignore_reserved63) {
-    if (x === "nil") {
+  var compile_atom = (function (x, raw63) {
+    if (! raw63 && x === "nil") {
       return "undefined";
     } else {
       if (accessor63(x)) {
@@ -2343,7 +2343,7 @@ var create = (function (globals) {
             return escape_newlines(x);
           } else {
             if (string63(x)) {
-              return id(x, ignore_reserved63);
+              return id(x, raw63);
             } else {
               if (boolean63(x)) {
                 if (x) {
