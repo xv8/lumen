@@ -1955,14 +1955,18 @@ var create = (globals) => {
   _G.validId63 = validId63;
   var __names3 = {};
   unique = (x) => {
-    var __x292 = id(x);
-    if (__names3[__x292]) {
-      var __i43 = __names3[__x292];
-      __names3[__x292] = __names3[__x292] + 1;
-      return unique(__x292 + __i43);
+    if (string63(x)) {
+      var __x292 = id(x);
+      if (__names3[__x292]) {
+        var __i43 = __names3[__x292];
+        __names3[__x292] = __names3[__x292] + 1;
+        return unique(__x292 + __i43);
+      } else {
+        __names3[__x292] = 1;
+        return "__" + __x292;
+      }
     } else {
-      __names3[__x292] = 1;
-      return "__" + __x292;
+      return x;
     }
   };
   _G.unique = unique;
