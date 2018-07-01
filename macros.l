@@ -30,10 +30,10 @@
 
 (define-macro case (expr rest: clauses)
   (let-unique (x)
-    (let (eq (fn (_) `(= ',_ ,x))
+    (let (eq (fn (_) `(= ,_ ,x))
           cl (fn ((a b))
                (if (nil? b) (list a)
-                   (or (string? a) (number? a)) (list (eq a) b)
+                   (or (string? a) (number? a) (= (hd a) 'quote)) (list (eq a) b)
                    (one? a) (list (eq (hd a)) b)
                    (> (# a) 1) (list `(or ,@(map eq a)) b))))
       `(let ,x ,expr
