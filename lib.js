@@ -2,23 +2,23 @@ var create = (globals) => {
   var _G = Object.assign({}, globals || {});
   _G._G = _G;
   _G.environment = [{}];
-  nil63 = (x) => {
+  var nil63 = (x) => {
     return x === undefined || x === null;
   };
   _G.nil63 = nil63;
-  is63 = (x) => {
+  var is63 = (x) => {
     return ! nil63(x);
   };
   _G.is63 = is63;
-  no = (x) => {
+  var no = (x) => {
     return nil63(x) || x === false;
   };
   _G.no = no;
-  yes = (x) => {
+  var yes = (x) => {
     return ! no(x);
   };
   _G.yes = yes;
-  either = (x, y) => {
+  var either = (x, y) => {
     if (is63(x)) {
       return x;
     } else {
@@ -26,11 +26,11 @@ var create = (globals) => {
     }
   };
   _G.either = either;
-  has63 = (l, k) => {
+  var has63 = (l, k) => {
     return l.hasOwnProperty(k);
   };
   _G.has63 = has63;
-  _35 = (x) => {
+  var _35 = (x) => {
     var __n = x.length;
     if (number63(__n)) {
       return __n;
@@ -55,67 +55,67 @@ var create = (globals) => {
     }
   };
   _G._35 = _35;
-  none63 = (x) => {
+  var none63 = (x) => {
     return _35(x) === 0;
   };
   _G.none63 = none63;
-  some63 = (x) => {
+  var some63 = (x) => {
     return _35(x) > 0;
   };
   _G.some63 = some63;
-  one63 = (x) => {
+  var one63 = (x) => {
     return _35(x) === 1;
   };
   _G.one63 = one63;
-  two63 = (x) => {
+  var two63 = (x) => {
     return _35(x) === 2;
   };
   _G.two63 = two63;
-  hd = (l) => {
+  var hd = (l) => {
     return l[0];
   };
   _G.hd = hd;
-  type = (x) => {
+  var type = (x) => {
     return typeof(x);
   };
   _G.type = type;
-  type63 = (x, y) => {
+  var type63 = (x, y) => {
     return type(x) === y;
   };
   _G.type63 = type63;
-  string63 = (x) => {
+  var string63 = (x) => {
     return type63(x, "string");
   };
   _G.string63 = string63;
-  number63 = (x) => {
+  var number63 = (x) => {
     return type63(x, "number");
   };
   _G.number63 = number63;
-  boolean63 = (x) => {
+  var boolean63 = (x) => {
     return type63(x, "boolean");
   };
   _G.boolean63 = boolean63;
-  function63 = (x) => {
+  var function63 = (x) => {
     return type63(x, "function");
   };
   _G.function63 = function63;
-  symbol63 = (x) => {
+  var symbol63 = (x) => {
     return type63(x, "symbol");
   };
   _G.symbol63 = symbol63;
-  obj63 = (x) => {
+  var obj63 = (x) => {
     return is63(x) && type63(x, "object");
   };
   _G.obj63 = obj63;
-  array63 = (x) => {
+  var array63 = (x) => {
     return Array.isArray(x);
   };
   _G.array63 = array63;
-  atom63 = (x) => {
+  var atom63 = (x) => {
     return nil63(x) || string63(x) || number63(x) || boolean63(x) || symbol63(x);
   };
   _G.atom63 = atom63;
-  fresh = (x) => {
+  var fresh = (x) => {
     var ____x = type(x);
     if ("object" === ____x) {
       if (nil63(x)) {
@@ -152,19 +152,19 @@ var create = (globals) => {
   _G.inf = inf;
   _inf = - inf;
   _G._inf = _inf;
-  nan63 = (n) => {
+  var nan63 = (n) => {
     return !( n === n);
   };
   _G.nan63 = nan63;
-  inf63 = (n) => {
+  var inf63 = (n) => {
     return n === inf || n === _inf;
   };
   _G.inf63 = inf63;
-  clip = (s, from, upto) => {
+  var clip = (s, from, upto) => {
     return s.substring(from, upto);
   };
   _G.clip = clip;
-  cut = (x, from, upto) => {
+  var cut = (x, from, upto) => {
     var __l = fresh(x);
     var __j = 0;
     var __e1;
@@ -205,7 +205,7 @@ var create = (globals) => {
     return __l;
   };
   _G.cut = cut;
-  keys = (x) => {
+  var keys = (x) => {
     var __t = {};
     var ____o2 = x;
     var __k4 = undefined;
@@ -225,35 +225,35 @@ var create = (globals) => {
     return __t;
   };
   _G.keys = keys;
-  edge = (x) => {
+  var edge = (x) => {
     return _35(x) - 1;
   };
   _G.edge = edge;
-  inner = (x) => {
+  var inner = (x) => {
     return clip(x, 1, edge(x));
   };
   _G.inner = inner;
-  tl = (l) => {
+  var tl = (l) => {
     return cut(l, 1);
   };
   _G.tl = tl;
-  char = (s, n) => {
+  var char = (s, n) => {
     return s.charAt(n);
   };
   _G.char = char;
-  code = (s, n) => {
+  var code = (s, n) => {
     return s.charCodeAt(n);
   };
   _G.code = code;
-  stringLiteral63 = (x) => {
+  var stringLiteral63 = (x) => {
     return string63(x) && char(x, 0) === "\"";
   };
   _G.stringLiteral63 = stringLiteral63;
-  idLiteral63 = (x) => {
+  var idLiteral63 = (x) => {
     return string63(x) && char(x, 0) === "|";
   };
   _G.idLiteral63 = idLiteral63;
-  add = (l, x) => {
+  var add = (l, x) => {
     if (l.push) {
       l.push(x);
     } else {
@@ -262,7 +262,7 @@ var create = (globals) => {
     return undefined;
   };
   _G.add = add;
-  drop = (l) => {
+  var drop = (l) => {
     if (l.pop) {
       return l.pop();
     } else {
@@ -273,15 +273,15 @@ var create = (globals) => {
     }
   };
   _G.drop = drop;
-  last = (l) => {
+  var last = (l) => {
     return l[edge(l)];
   };
   _G.last = last;
-  almost = (l) => {
+  var almost = (l) => {
     return cut(l, 0, edge(l));
   };
   _G.almost = almost;
-  reverse = (l) => {
+  var reverse = (l) => {
     var __l1 = fresh(l);
     var __n6 = edge(l);
     var ____o3 = l;
@@ -303,7 +303,7 @@ var create = (globals) => {
     return __l1;
   };
   _G.reverse = reverse;
-  reduce = (f, x) => {
+  var reduce = (f, x) => {
     if (none63(x)) {
       return undefined;
     } else {
@@ -315,7 +315,7 @@ var create = (globals) => {
     }
   };
   _G.reduce = reduce;
-  join = (...ls) => {
+  var join = (...ls) => {
     var __ls = unstash(ls);
     var __r42 = fresh(hd(__ls));
     var ____x2 = __ls;
@@ -346,7 +346,7 @@ var create = (globals) => {
     return __r42;
   };
   _G.join = join;
-  find = (f, t) => {
+  var find = (f, t) => {
     var ____o5 = t;
     var ____i8 = undefined;
     for (____i8 in ____o5) {
@@ -365,7 +365,7 @@ var create = (globals) => {
     }
   };
   _G.find = find;
-  first = (f, l) => {
+  var first = (f, l) => {
     var ____x4 = l;
     var ____i9 = 0;
     while (____i9 < _35(____x4)) {
@@ -378,13 +378,13 @@ var create = (globals) => {
     }
   };
   _G.first = first;
-  in63 = (x, t) => {
+  var in63 = (x, t) => {
     return find((y) => {
       return x === y;
     }, t);
   };
   _G.in63 = in63;
-  pair = (l) => {
+  var pair = (l) => {
     var __l12 = fresh(l);
     var __i10 = 0;
     while (__i10 < _35(l)) {
@@ -395,7 +395,7 @@ var create = (globals) => {
     return __l12;
   };
   _G.pair = pair;
-  sort = (l, f) => {
+  var sort = (l, f) => {
     var __e8;
     if (f) {
       __e8 = (a, b) => {
@@ -409,7 +409,7 @@ var create = (globals) => {
     return l.sort(__e8);
   };
   _G.sort = sort;
-  map = (f, x) => {
+  var map = (f, x) => {
     var __t1 = fresh(x);
     var ____x6 = x;
     var ____i11 = 0;
@@ -442,7 +442,7 @@ var create = (globals) => {
     return __t1;
   };
   _G.map = map;
-  keep = (f, x) => {
+  var keep = (f, x) => {
     return map((v) => {
       if (yes(f(v))) {
         return v;
@@ -450,7 +450,7 @@ var create = (globals) => {
     }, x);
   };
   _G.keep = keep;
-  keys63 = (t) => {
+  var keys63 = (t) => {
     var ____o7 = t;
     var __k12 = undefined;
     for (__k12 in ____o7) {
@@ -469,7 +469,7 @@ var create = (globals) => {
     return false;
   };
   _G.keys63 = keys63;
-  empty63 = (t) => {
+  var empty63 = (t) => {
     var ____o8 = t;
     var ____i14 = undefined;
     for (____i14 in ____o8) {
@@ -486,7 +486,7 @@ var create = (globals) => {
     return true;
   };
   _G.empty63 = empty63;
-  stash = (args) => {
+  var stash = (args) => {
     if (args._stash) {
       return args;
     } else {
@@ -509,7 +509,7 @@ var create = (globals) => {
     }
   };
   _G.stash = stash;
-  unstash = (args) => {
+  var unstash = (args) => {
     if (none63(args)) {
       return fresh(args);
     } else {
@@ -538,7 +538,7 @@ var create = (globals) => {
     }
   };
   _G.unstash = unstash;
-  destash33 = (l, args1) => {
+  var destash33 = (l, args1) => {
     if (obj63(l) && l._stash) {
       var ____o10 = l;
       var __k16 = undefined;
@@ -560,14 +560,14 @@ var create = (globals) => {
     }
   };
   _G.destash33 = destash33;
-  search = (s, pattern, start) => {
+  var search = (s, pattern, start) => {
     var __i18 = s.indexOf(pattern, start);
     if (__i18 >= 0) {
       return __i18;
     }
   };
   _G.search = search;
-  split = (s, sep) => {
+  var split = (s, sep) => {
     if (s === "" || sep === "") {
       return [];
     } else {
@@ -587,49 +587,49 @@ var create = (globals) => {
     }
   };
   _G.split = split;
-  cat = (...xs) => {
+  var cat = (...xs) => {
     var __xs = unstash(xs);
     return either(reduce((a, b) => {
       return a + b;
     }, __xs), "");
   };
   _G.cat = cat;
-  _43 = (...xs) => {
+  var _43 = (...xs) => {
     var __xs1 = unstash(xs);
     return either(reduce((a, b) => {
       return a + b;
     }, __xs1), 0);
   };
   _G._43 = _43;
-  _45 = (...xs) => {
+  var _45 = (...xs) => {
     var __xs2 = unstash(xs);
     return either(reduce((b, a) => {
       return a - b;
     }, reverse(__xs2)), 0);
   };
   _G._45 = _45;
-  _42 = (...xs) => {
+  var _42 = (...xs) => {
     var __xs3 = unstash(xs);
     return either(reduce((a, b) => {
       return a * b;
     }, __xs3), 1);
   };
   _G._42 = _42;
-  _47 = (...xs) => {
+  var _47 = (...xs) => {
     var __xs4 = unstash(xs);
     return either(reduce((b, a) => {
       return a / b;
     }, reverse(__xs4)), 1);
   };
   _G._47 = _47;
-  _37 = (...xs) => {
+  var _37 = (...xs) => {
     var __xs5 = unstash(xs);
     return either(reduce((b, a) => {
       return a % b;
     }, reverse(__xs5)), 0);
   };
   _G._37 = _37;
-  pairwise = (f, xs) => {
+  var pairwise = (f, xs) => {
     var __i20 = 0;
     while (__i20 < edge(xs)) {
       var __a = xs[__i20];
@@ -642,53 +642,53 @@ var create = (globals) => {
     return true;
   };
   _G.pairwise = pairwise;
-  _60 = (...xs) => {
+  var _60 = (...xs) => {
     var __xs6 = unstash(xs);
     return pairwise((a, b) => {
       return a < b;
     }, __xs6);
   };
   _G._60 = _60;
-  _62 = (...xs) => {
+  var _62 = (...xs) => {
     var __xs7 = unstash(xs);
     return pairwise((a, b) => {
       return a > b;
     }, __xs7);
   };
   _G._62 = _62;
-  _61 = (...xs) => {
+  var _61 = (...xs) => {
     var __xs8 = unstash(xs);
     return pairwise((a, b) => {
       return a === b;
     }, __xs8);
   };
   _G._61 = _61;
-  _6061 = (...xs) => {
+  var _6061 = (...xs) => {
     var __xs9 = unstash(xs);
     return pairwise((a, b) => {
       return a <= b;
     }, __xs9);
   };
   _G._6061 = _6061;
-  _6261 = (...xs) => {
+  var _6261 = (...xs) => {
     var __xs10 = unstash(xs);
     return pairwise((a, b) => {
       return a >= b;
     }, __xs10);
   };
   _G._6261 = _6261;
-  number = (s) => {
+  var number = (s) => {
     var __n17 = parseFloat(s);
     if (! isNaN(__n17)) {
       return __n17;
     }
   };
   _G.number = number;
-  numberCode63 = (n) => {
+  var numberCode63 = (n) => {
     return n >= 48 && n <= 57;
   };
   _G.numberCode63 = numberCode63;
-  numeric63 = (s) => {
+  var numeric63 = (s) => {
     var __n18 = _35(s);
     var __i21 = 0;
     while (__i21 < __n18) {
@@ -700,11 +700,11 @@ var create = (globals) => {
     return some63(s);
   };
   _G.numeric63 = numeric63;
-  tostring = (x) => {
+  var tostring = (x) => {
     return x.toString();
   };
   _G.tostring = tostring;
-  escape = (s) => {
+  var escape = (s) => {
     var __s1 = "\"";
     var __i22 = 0;
     while (__i22 < _35(s)) {
@@ -740,7 +740,7 @@ var create = (globals) => {
     return __s1 + "\"";
   };
   _G.escape = escape;
-  simpleId63 = (x) => {
+  var simpleId63 = (x) => {
     var __id3 = string63(x);
     var __e18;
     if (__id3) {
@@ -761,7 +761,7 @@ var create = (globals) => {
     return __e18;
   };
   _G.simpleId63 = simpleId63;
-  str = (x, stack) => {
+  var str = (x, stack) => {
     if (nil63(x)) {
       return "nil";
     } else {
@@ -852,12 +852,12 @@ var create = (globals) => {
     }
   };
   _G.str = str;
-  apply = (f, args) => {
+  var apply = (f, args) => {
     var __args = stash(args);
     return f.apply(f, __args);
   };
   _G.apply = apply;
-  call = (f, ...__r81) => {
+  var call = (f, ...__r81) => {
     var ____r81 = unstash(__r81);
     var __f = destash33(f, ____r81);
     var ____id1 = ____r81;
@@ -865,7 +865,7 @@ var create = (globals) => {
     return apply(__f, __args11);
   };
   _G.call = call;
-  setenv = (k, ...__r82) => {
+  var setenv = (k, ...__r82) => {
     var ____r82 = unstash(__r82);
     var __k20 = destash33(k, ____r82);
     var ____id2 = ____r82;
@@ -897,7 +897,7 @@ var create = (globals) => {
     }
   };
   _G.setenv = setenv;
-  print = (x) => {
+  var print = (x) => {
     return console.log(x);
   };
   _G.print = print;
@@ -1403,7 +1403,7 @@ var create = (globals) => {
   var __exports = {};
   var __self = __exports;
   var __module = {["exports"]: __exports};
-  getenv = (k, p) => {
+  var getenv = (k, p) => {
     if (string63(k)) {
       var __i30 = edge(_G.environment);
       while (__i30 >= 0) {
@@ -1447,11 +1447,11 @@ var create = (globals) => {
   var variable63 = (k) => {
     return is63(getenv(k, "variable"));
   };
-  bound63 = (x) => {
+  var bound63 = (x) => {
     return macro63(x) || special63(x) || symbolMacro63(x) || variable63(x);
   };
   _G.bound63 = bound63;
-  quoted = (form) => {
+  var quoted = (form) => {
     if (string63(form)) {
       return escape(form);
     } else {
@@ -1502,11 +1502,11 @@ var create = (globals) => {
     return k;
   };
   var defaultAssignmentOp = "o";
-  defaultAssignment63 = (x) => {
+  var defaultAssignment63 = (x) => {
     return ! atom63(x) && hd(x) === defaultAssignmentOp;
   };
   _G.defaultAssignment63 = defaultAssignment63;
-  bind = (lh, rh) => {
+  var bind = (lh, rh) => {
     if (atom63(lh)) {
       return [lh, rh];
     } else {
@@ -1549,7 +1549,7 @@ var create = (globals) => {
     }
   };
   _G.bind = bind;
-  bind42 = (args, body) => {
+  var bind42 = (args, body) => {
     var __args12 = [];
     var rest = (r) => {
       __args12.rest = r;
@@ -1704,7 +1704,7 @@ var create = (globals) => {
     var __body30 = cut(____id45, 2);
     return join([__x45, __name10], tl(expandTable(join(["%table"], __body30))));
   };
-  expandConditionCase = (__x46) => {
+  var expandConditionCase = (__x46) => {
     var ____id46 = __x46;
     var __x47 = ____id46[0];
     var ___var1 = ____id46[1];
@@ -1773,14 +1773,14 @@ var create = (globals) => {
   var expandMacro = (form) => {
     return macroexpand(expand1(form));
   };
-  expand1 = (__x55) => {
+  var expand1 = (__x55) => {
     var ____id49 = __x55;
     var __name12 = ____id49[0];
     var __body33 = cut(____id49, 1);
     return apply(macroFunction(__name12), __body33);
   };
   _G.expand1 = expand1;
-  macroexpand = (form) => {
+  var macroexpand = (form) => {
     if (symbolMacro63(form)) {
       return macroexpand(symbolExpansion(form));
     } else {
@@ -1871,7 +1871,7 @@ var create = (globals) => {
       return join(["join"], __pruned);
     }
   };
-  quasiexpand = (form, depth) => {
+  var quasiexpand = (form, depth) => {
     if (quasiquoting63(depth)) {
       if (atom63(form)) {
         return ["quote", form];
@@ -1909,7 +1909,7 @@ var create = (globals) => {
     }
   };
   _G.quasiexpand = quasiexpand;
-  expandIf = (__x60) => {
+  var expandIf = (__x60) => {
     var ____id50 = __x60;
     var __a5 = ____id50[0];
     var __b2 = ____id50[1];
@@ -1925,7 +1925,7 @@ var create = (globals) => {
   _G.expandIf = expandIf;
   indentLevel = 0;
   _G.indentLevel = indentLevel;
-  indentation = () => {
+  var indentation = () => {
     var __s2 = "";
     var __i42 = 0;
     while (__i42 < indentLevel) {
@@ -1936,20 +1936,20 @@ var create = (globals) => {
   };
   _G.indentation = indentation;
   var reserved = {["="]: true, ["=="]: true, ["+"]: true, ["-"]: true, ["%"]: true, ["*"]: true, ["/"]: true, ["<"]: true, [">"]: true, ["<="]: true, [">="]: true, ["break"]: true, ["case"]: true, ["catch"]: true, ["class"]: true, ["const"]: true, ["continue"]: true, ["debugger"]: true, ["default"]: true, ["delete"]: true, ["do"]: true, ["else"]: true, ["eval"]: true, ["export"]: true, ["extends"]: true, ["finally"]: true, ["for"]: true, ["function"]: true, ["if"]: true, ["import"]: true, ["in"]: true, ["instanceof"]: true, ["new"]: true, ["return"]: true, ["switch"]: true, ["throw"]: true, ["try"]: true, ["typeof"]: true, ["var"]: true, ["void"]: true, ["while"]: true, ["with"]: true};
-  reserved63 = (x) => {
+  var reserved63 = (x) => {
     return has63(reserved, x);
   };
   _G.reserved63 = reserved63;
   var validCode63 = (n) => {
     return numberCode63(n) || n >= 65 && n <= 90 || n >= 97 && n <= 122 || n === 95;
   };
-  accessor63 = (x) => {
+  var accessor63 = (x) => {
     return string63(x) && _35(x) > 1 && code(x, 0) === 46 && !( code(x, 1) === 46) || obj63(x) && hd(x) === "%brackets";
   };
   _G.accessor63 = accessor63;
   camelCaseRegex = new RegExp("(?<=[a-z])[-](\\w|$)", "g");
   _G.camelCaseRegex = camelCaseRegex;
-  camelCase = (name) => {
+  var camelCase = (name) => {
     if (string63(name)) {
       return name.replace(camelCaseRegex, (_, x) => {
         return x.toUpperCase();
@@ -2000,12 +2000,12 @@ var create = (globals) => {
       return __id121;
     }
   };
-  validId63 = (x) => {
+  var validId63 = (x) => {
     return some63(x) && x === id(x);
   };
   _G.validId63 = validId63;
   var __names3 = {};
-  unique = (x) => {
+  var unique = (x) => {
     if (string63(x)) {
       var __x61 = id(x);
       if (__names3[__x61]) {
@@ -2021,7 +2021,7 @@ var create = (globals) => {
     }
   };
   _G.unique = unique;
-  key = (k) => {
+  var key = (k) => {
     if (string63(k) && validId63(k)) {
       return k;
     } else {
@@ -2033,7 +2033,7 @@ var create = (globals) => {
     }
   };
   _G.key = key;
-  mapo = (f, t) => {
+  var mapo = (f, t) => {
     var __o24 = [];
     var ____o25 = t;
     var __k33 = undefined;
@@ -2097,11 +2097,11 @@ var create = (globals) => {
   var infix63 = (x) => {
     return is63(getop(x));
   };
-  infixOperator63 = (x) => {
+  var infixOperator63 = (x) => {
     return obj63(x) && infix63(hd(x));
   };
   _G.infixOperator63 = infixOperator63;
-  compileNext = (x, args, call63) => {
+  var compileNext = (x, args, call63) => {
     if (none63(args)) {
       if (call63) {
         return x + "()";
@@ -2113,7 +2113,7 @@ var create = (globals) => {
     }
   };
   _G.compileNext = compileNext;
-  compileArgs = (args, call63) => {
+  var compileArgs = (args, call63) => {
     var __a6 = hd(args);
     if (accessor63(__a6)) {
       return compileNext(compile(__a6), tl(args), call63);
@@ -2176,7 +2176,7 @@ var create = (globals) => {
     }
     return __s12;
   };
-  accessor = (x) => {
+  var accessor = (x) => {
     var __prop1 = compileAtom(clip(x, 1), true);
     if (validId63(__prop1)) {
       return "." + __prop1;
@@ -2253,7 +2253,7 @@ var create = (globals) => {
   var parenthesizeCall63 = (x) => {
     return ! atom63(x) && hd(x) === "%function" || precedence(x) > 0;
   };
-  compileCall = (f, args, parens63) => {
+  var compileCall = (f, args, parens63) => {
     var __f11 = compile(f);
     var __args13 = compileArgs(stash42(args));
     if (parens63 || parenthesizeCall63(f)) {
@@ -2302,7 +2302,7 @@ var create = (globals) => {
       return __ao + __a8 + __ac + " " + __op1 + " " + __bo + __b4 + __bc;
     }
   };
-  compileFunction = (args, body, ...__r196) => {
+  var compileFunction = (args, body, ...__r196) => {
     var ____r196 = unstash(__r196);
     var __args131 = destash33(args, ____r196);
     var __body34 = destash33(body, ____r196);
@@ -2339,7 +2339,7 @@ var create = (globals) => {
   var canReturn63 = (form) => {
     return is63(form) && (atom63(form) || !( hd(form) === "return") && ! statement63(hd(form)));
   };
-  compile = (form, ...__r198) => {
+  var compile = (form, ...__r198) => {
     var ____r198 = unstash(__r198);
     var __form1 = destash33(form, ____r198);
     var ____id63 = ____r198;
@@ -2484,7 +2484,7 @@ var create = (globals) => {
   var lowerTry = (args, hoist, tail63) => {
     return add(hoist, ["%try", lowerBody(args, tail63)]);
   };
-  lowerConditionCase = (__x70, hoist, stmt63, tail63) => {
+  var lowerConditionCase = (__x70, hoist, stmt63, tail63) => {
     var ____id68 = __x70;
     var ___var2 = ____id68[0];
     var __form3 = ____id68[1];
@@ -2544,7 +2544,7 @@ var create = (globals) => {
     var __body39 = cut(____id74, 2);
     return add(hoist, ["%for", lower(__t4, hoist), __k37, lowerBody(__body39)]);
   };
-  lowerTable = (args, hoist, stmt63, tail63) => {
+  var lowerTable = (args, hoist, stmt63, tail63) => {
     var __expr3 = join(["%table"], keys(args));
     var ____x75 = args;
     var ____i50 = 0;
@@ -2576,7 +2576,7 @@ var create = (globals) => {
     return __expr3;
   };
   _G.lowerTable = lowerTable;
-  lowerClass = (__x77, hoist, stmt63, tail63) => {
+  var lowerClass = (__x77, hoist, stmt63, tail63) => {
     var ____id77 = __x77;
     var __x78 = ____id77[0];
     var __body41 = cut(____id77, 1);
@@ -2654,7 +2654,7 @@ var create = (globals) => {
     var __form6 = join([__name18], __args141);
     return add(hoist, __form6);
   };
-  lower = (form, hoist, stmt63, tail63) => {
+  var lower = (form, hoist, stmt63, tail63) => {
     if (atom63(form)) {
       return form;
     } else {
@@ -2733,7 +2733,7 @@ var create = (globals) => {
     }
   };
   _G.lower = lower;
-  expand = (form) => {
+  var expand = (form) => {
     return lower(macroexpand(form));
   };
   _G.expand = expand;
@@ -2743,16 +2743,16 @@ var create = (globals) => {
     __sandbox._G = __sandbox;
     return __sandbox;
   };
-  context(_G);
+  var sandbox = context(_G);
   var run = (code, sandbox) => {
     return vm.runInContext(code, sandbox || _G);
   };
-  _eval = (form) => {
+  var _eval = (form) => {
     var __code = compile(expand(["%set", "%result", form]));
     return run(__code);
   };
   _G["eval"] = _eval;
-  immediateCall63 = (x) => {
+  var immediateCall63 = (x) => {
     return obj63(x) && obj63(hd(x)) && hd(hd(x)) === "%function";
   };
   _G.immediateCall63 = immediateCall63;
@@ -2905,7 +2905,7 @@ var create = (globals) => {
     return compileFunction(args, body, {["_stash"]: true, ["infix"]: "=>"});
   }});
   setenv("%global-function", {["_stash"]: true, ["special"]: (name, args, body) => {
-    return compile(["%set", name, ["%function", args, body]], {["_stash"]: true, ["stmt"]: true});
+    return compile(["%local", name, ["%function", args, body]], {["_stash"]: true, ["stmt"]: true});
   }, ["stmt"]: true, ["tr"]: true});
   setenv("%local-function", {["_stash"]: true, ["special"]: (name, args, body) => {
     return compile(["%local", name, ["%function", args, body]], {["_stash"]: true, ["stmt"]: true});
@@ -3155,6 +3155,7 @@ var create = (globals) => {
     return "..." + compile(x);
   }});
   __exports.context = context;
+  __exports.sandbox = sandbox;
   __exports.run = run;
   __exports["eval"] = _eval;
   __exports.expand = expand;
@@ -3167,7 +3168,7 @@ var create = (globals) => {
   _G.delimiters = delimiters;
   whitespace = {[" "]: true, ["\t"]: true, ["\r"]: true, ["\n"]: true};
   _G.whitespace = whitespace;
-  stream = (str, more) => {
+  var stream = (str, more) => {
     var __s121 = {["pos"]: 0, ["string"]: str, ["len"]: _35(str)};
     if (is63(more)) {
       __s121.more = more;
@@ -3175,13 +3176,13 @@ var create = (globals) => {
     return __s121;
   };
   _G.stream = stream;
-  peekChar = (s) => {
+  var peekChar = (s) => {
     if (s.pos < s.len) {
       return char(s.string, s.pos);
     }
   };
   _G.peekChar = peekChar;
-  readChar = (s) => {
+  var readChar = (s) => {
     var __c10 = peekChar(s);
     if (__c10) {
       s.pos = s.pos + 1;
@@ -3189,7 +3190,7 @@ var create = (globals) => {
     }
   };
   _G.readChar = readChar;
-  skipNonCode = (s) => {
+  var skipNonCode = (s) => {
     while (true) {
       var __c111 = peekChar(s);
       if (nil63(__c111)) {
@@ -3215,7 +3216,7 @@ var create = (globals) => {
   _G.readTable = readTable;
   eof = {};
   _G.eof = eof;
-  read = (s) => {
+  var read = (s) => {
     skipNonCode(s);
     var __c121 = peekChar(s);
     if (is63(__c121)) {
@@ -3225,7 +3226,7 @@ var create = (globals) => {
     }
   };
   _G.read = read;
-  readAll = (s) => {
+  var readAll = (s) => {
     var __l8 = [];
     while (true) {
       var __form9 = read(s);
@@ -3237,7 +3238,7 @@ var create = (globals) => {
     return __l8;
   };
   _G.readAll = readAll;
-  readString = (str, more) => {
+  var readString = (str, more) => {
     var __x108 = read(stream(str, more));
     if (!( __x108 === eof)) {
       return __x108;
@@ -3247,7 +3248,7 @@ var create = (globals) => {
   var key63 = (atom) => {
     return string63(atom) && _35(atom) > 1 && char(atom, edge(atom)) === ":";
   };
-  expected = (s, c) => {
+  var expected = (s, c) => {
     var ____id94 = s;
     var __more = ____id94.more;
     var __pos = ____id94.pos;
@@ -3262,7 +3263,7 @@ var create = (globals) => {
     return __e84;
   };
   _G.expected = expected;
-  wrap = (s, x) => {
+  var wrap = (s, x) => {
     var __y6 = read(s);
     if (__y6 === s.more) {
       return __y6;
@@ -3271,7 +3272,7 @@ var create = (globals) => {
     }
   };
   _G.wrap = wrap;
-  hexPrefix63 = (str) => {
+  var hexPrefix63 = (str) => {
     var __e85;
     if (code(str, 0) === 45) {
       __e85 = 1;
@@ -3291,7 +3292,7 @@ var create = (globals) => {
     return __e86;
   };
   _G.hexPrefix63 = hexPrefix63;
-  maybeNumber = (str) => {
+  var maybeNumber = (str) => {
     if (hexPrefix63(str)) {
       return parseInt(str, 16);
     } else {
@@ -3301,7 +3302,7 @@ var create = (globals) => {
     }
   };
   _G.maybeNumber = maybeNumber;
-  real63 = (x) => {
+  var real63 = (x) => {
     return number63(x) && ! nan63(x) && ! inf63(x);
   };
   _G.real63 = real63;
@@ -3603,7 +3604,7 @@ var create = (globals) => {
     ___in.setEncoding("utf8");
     return ___in.on("data", rep1);
   };
-  ppToString = (body) => {
+  var ppToString = (body) => {
     if (atom63(body)) {
       return str(body);
     } else {
@@ -3623,12 +3624,12 @@ var create = (globals) => {
     }
   };
   _G.ppToString = ppToString;
-  pp = (body) => {
+  var pp = (body) => {
     print(ppToString(body));
     return body;
   };
   _G.pp = pp;
-  readFile = (path) => {
+  var readFile = (path) => {
     var __s14 = reader.stream(system.readFile(path));
     var __body53 = reader.readAll(__s14);
     if (one63(__body53)) {
@@ -3638,18 +3639,18 @@ var create = (globals) => {
     }
   };
   _G.readFile = readFile;
-  expandFile = (path) => {
+  var expandFile = (path) => {
     var __body54 = readFile(path);
     return compiler.expand(__body54);
   };
   _G.expandFile = expandFile;
-  compileFile = (path) => {
+  var compileFile = (path) => {
     var __body55 = expandFile(path);
     var __form11 = compiler.expand(join(["do"], __body55));
     return compiler.compile(__form11, {["_stash"]: true, ["stmt"]: true});
   };
   _G.compileFile = compileFile;
-  load = (path) => {
+  var load = (path) => {
     var __code1 = compileFile(path);
     var __prev = _G.exports || {};
     _G.exports = {};
@@ -3786,4 +3787,103 @@ var create = (globals) => {
   Object.assign(_G, _G.main);
   return _G;
 };
-module.exports.create = create;
+if (typeof(window) === "undefined") {
+  module.exports.create = create;
+} else {
+(function () {
+  var vm = {};
+  var contextifiedSandboxes = [];
+
+  function createIFrame() {
+    var iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    return iframe;
+  }
+
+  function createIFrameWithContext(sandbox) {
+    var iframe = createIFrame();
+    var key;
+    document.body.appendChild(iframe);
+    if (sandbox) {
+      for (key in sandbox) {
+        if (sandbox.hasOwnProperty(key)) {
+          iframe.contentWindow[key] = sandbox[key];
+        }
+      }
+      contextifiedSandboxes.push(sandbox);
+    }
+    return iframe;
+  }
+
+  function runCodeInNewContext(code, sandbox) {
+    var iframe = createIFrameWithContext(sandbox);
+    var result = iframe.contentWindow.eval(code);
+    document.body.removeChild(iframe);
+    return result;
+  }
+
+  function runCodeInContext(code, context) {
+    if (!context) {
+      throw new Error('Context cannot be undefined');
+    }
+    return context.eval(code);
+  }
+
+  function Script(code) {
+    this.code = code;
+  }
+
+  Script.prototype.runInContext = function (context) {
+    return runCodeInContext(this.code, context);
+  };
+
+  Script.prototype.runInNewContext = function (sandbox) {
+    return runCodeInNewContext(this.code, sandbox);
+  };
+
+  Script.prototype.runInThisContext = function () {
+    return runCodeInContext(this.code, window);
+  };
+
+  vm.Script = Script;
+
+  vm.createContext = function (sandbox) {
+    return createIFrameWithContext(sandbox).contentWindow;
+  };
+
+  vm.isContext = function (sandbox) {
+    return contextifiedSandboxes.indexOf(sandbox) !== -1;
+  };
+
+  vm.runInContext = function (code, context) {
+    return runCodeInContext(code, context);
+  };
+
+  vm.runInDebugContext = function () {
+    throw new Error('vm.runInDebugContext(code) does not work in browsers');
+  };
+
+  vm.runInNewContext = function (code, sandbox) {
+    return runCodeInNewContext(code, sandbox);
+  };
+
+  vm.runInThisContext = function (code) {
+    return runCodeInContext(code, window);
+  };
+  
+  vm.createScript = function (code) {
+    return new vm.Script(code);
+  };
+
+  window.vm = window.vm || vm;
+})();
+
+;
+  if (! window46require()) {
+    window.require = (x) => {
+      return window.DAX.shims[x];
+    };
+  }
+  window.DAX = Object.assign(window.DAX || {}, {["create"]: create, ["shims"]: {["fs"]: {}, ["child_process"]: {}, ["process"]: {["argv"]: []}, ["path"]: {["sep"]: ":"}}});
+  window.dax = window.DAX.create(window.dax || {});
+}

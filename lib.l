@@ -27,6 +27,21 @@
          (Object .assign _G (_G .main)))))
   _G)
 
-(set (module .exports .create) create)
+(if (= (typeof window) "undefined")
+    (set (module .exports .create) create)
+  (do (when-compiling
+        `(%literal ,(escape (system .read-file "vm.js" .replace |/[\r]/g| "")))) 
+      (unless (window.require)
+        (set (window .require) (fn (x) (window .DAX .shims [x]))))
+      (set (window .DAX)
+           (Object .assign
+                   (or (window .DAX) (obj))
+                   (obj create: create
+                        shims: (obj fs: (obj)
+                                    child_process: (obj)
+                                    process: (obj argv: (list))
+                                    path: (obj sep: ":")))))
+      (set (window .dax)
+           (window .DAX .create (or (window .dax) (obj))))))
 
 

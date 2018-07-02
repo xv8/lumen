@@ -690,7 +690,7 @@
   (with sandbox (vm .createContext ctx)
     (set (sandbox ._G) sandbox)))
 
-(context _G)
+(define sandbox (context _G))
 
 (define run (code sandbox)
   (vm .runInContext code (or sandbox _G)))
@@ -780,7 +780,7 @@
   (compile-function args body infix: "=>"))
 
 (define-special %global-function (name args body) stmt: true tr: true
-  (compile `(%set ,name (%function ,args ,body)) stmt: true))
+  (compile `(%local ,name (%function ,args ,body)) stmt: true))
 
 (define-special %local-function (name args body) stmt: true tr: true
   (compile `(%local ,name (%function ,args ,body)) stmt: true))
@@ -905,6 +905,7 @@
   (cat "..." (compile x)))
 
 (export context
+        sandbox
         run
         eval
         expand
