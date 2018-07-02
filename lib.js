@@ -317,7 +317,7 @@ var create = (globals) => {
   _G.reduce = reduce;
   join = (...ls) => {
     var __ls = unstash(ls);
-    var __r42 = [];
+    var __r42 = fresh(hd(__ls));
     var ____x2 = __ls;
     var ____i6 = 0;
     while (____i6 < _35(____x2)) {

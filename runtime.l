@@ -142,7 +142,7 @@
     (f (hd x) (reduce f (tl x)))))
 
 (define-global join ls
-  (with r ()
+  (with r (fresh (hd ls))
     (step l ls
       (when l
         (let n (# r)

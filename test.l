@@ -893,7 +893,10 @@ c"
   (let t (join '(a b: 1) '(b c: 2))
     (test= 1 (t .b))
     (test= 2 (t .c))
-    (test= 'b (at t 1))))
+    (test= 'b (at t 1)))
+  (let (l '(1 2 3))
+    (test= true (array? (join l '(foo: true))))
+    (test= false (array? (join '(foo: true) l)))))
 
 (define-test reverse
   (test= () (reverse ()))
@@ -1035,6 +1038,7 @@ c"
     (test= true (array? l))
     (test= true (array? (fresh l)))
     (test= true (array? (cut l)))
+    (test= true (array? (almost l)))
     (test= true (array? (reverse l)))
     (test= true (array? (pair l)))
     (test= true (array? (map (fn (x) x) l))))
@@ -1042,6 +1046,7 @@ c"
     (test= false (array? l))
     (test= false (array? (fresh l)))
     (test= false (array? (cut l)))
+    (test= false (array? (almost l)))
     (test= false (array? (reverse l)))
     (test= false (array? (pair l)))
     (test= false (array? (map (fn (x) x) l)))))
