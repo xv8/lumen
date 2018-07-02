@@ -116,7 +116,11 @@
   nil)
 
 (define-global drop (l)
-  (l (.pop)))
+  (if (l .pop)
+      (l (.pop))
+    (let i (edge l)
+      (with x (at l i)
+        (wipe (at l i))))))
 
 (define-global last (l)
   (at l (edge l)))

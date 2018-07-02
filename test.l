@@ -849,10 +849,21 @@ c"
     (add l 'b)
     (add l 'c)
     (test= '(a b c) l)
+    (test= nil (add () 'a)))
+  (let l '(foo: true)
+    (add l 'a)
+    (add l 'b)
+    (add l 'c)
+    (test= '(a b c foo: true) l)
     (test= nil (add () 'a))))
 
 (define-test drop
   (let l '(a b c)
+    (test= 'c (drop l))
+    (test= 'b (drop l))
+    (test= 'a (drop l))
+    (test= nil (drop l)))
+  (let l '(a b c foo: true)
     (test= 'c (drop l))
     (test= 'b (drop l))
     (test= 'a (drop l))
@@ -1018,6 +1029,22 @@ c"
   (test= false (obj? 1))
   (test= false (obj? 'zz))
   (test= false (obj? (fn ()))))
+
+(define-test species
+  (let (l '(1 2 3))
+    (test= true (array? l))
+    (test= true (array? (fresh l)))
+    (test= true (array? (cut l)))
+    (test= true (array? (reverse l)))
+    (test= true (array? (pair l)))
+    (test= true (array? (map (fn (x) x) l))))
+  (let l '(1 2 3 foo: true)
+    (test= false (array? l))
+    (test= false (array? (fresh l)))
+    (test= false (array? (cut l)))
+    (test= false (array? (reverse l)))
+    (test= false (array? (pair l)))
+    (test= false (array? (map (fn (x) x) l)))))
 
 ; TODO: fix
 ; (define-test str
