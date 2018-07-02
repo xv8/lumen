@@ -98,14 +98,14 @@ var create = (globals) => {
   _G.nan = nan;
   inf = 1 / 0;
   _G.inf = inf;
-  Inf = - inf;
-  _G.Inf = Inf;
+  _inf = - inf;
+  _G._inf = _inf;
   nan63 = (n) => {
     return !( n === n);
   };
   _G.nan63 = nan63;
   inf63 = (n) => {
-    return n === inf || n === Inf;
+    return n === inf || n === _inf;
   };
   _G.inf63 = inf63;
   clip = (s, from, upto) => {
@@ -696,7 +696,7 @@ var create = (globals) => {
         if (x === inf) {
           return "inf";
         } else {
-          if (x === Inf) {
+          if (x === _inf) {
             return "-inf";
           } else {
             if (boolean63(x)) {
@@ -1896,10 +1896,10 @@ var create = (globals) => {
     return string63(x) && _35(x) > 1 && code(x, 0) === 46 && !( code(x, 1) === 46) || obj63(x) && hd(x) === "%brackets";
   };
   _G.accessor63 = accessor63;
-  camelCaseRegex = new RegExp("[-](\\w|$)", "g");
+  camelCaseRegex = new RegExp("(?<=[a-z])[-](\\w|$)", "g");
   _G.camelCaseRegex = camelCaseRegex;
   camelCase = (name) => {
-    if (string63(name) && _35(name) > 2) {
+    if (string63(name)) {
       return name.replace(camelCaseRegex, (_, x) => {
         return x.toUpperCase();
       });
@@ -2198,7 +2198,7 @@ var create = (globals) => {
                   if (x === inf) {
                     return "inf";
                   } else {
-                    if (x === Inf) {
+                    if (x === _inf) {
                       return "-inf";
                     } else {
                       if (number63(x)) {

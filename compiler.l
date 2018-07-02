@@ -261,10 +261,10 @@
            (= (hd x) '%brackets))))
 
 (define-global camel-case-regex
-  (new RegExp "[-](\\w|$)" "g"))
+  (new RegExp "(?<=[a-z])[-](\\w|$)" "g"))
 
 (define-global camel-case (name)
-  (if (and (string? name) (> (# name) 2))
+  (if (string? name)
       (name .replace camel-case-regex
             (fn (_ x) (x (.to-upper-case))))
     name))
