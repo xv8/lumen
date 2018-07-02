@@ -926,60 +926,60 @@ var create = (globals) => {
     var __clauses = cut(____id5, 0);
     var __x51 = unique("x");
     var __eq = (_) => {
-      return ["=", _, __x51];
+      if (_ === "else") {
+        return true;
+      } else {
+        return ["=", _, __x51];
+      }
     };
     var __cl = (__x53) => {
       var ____id6 = __x53;
       var __a1 = ____id6[0];
-      var __b1 = ____id6[1];
-      if (nil63(__b1)) {
-        return [__a1];
+      var __body1 = cut(____id6, 1);
+      if (string63(__a1) || number63(__a1) || hd(__a1) === "quote") {
+        return [__eq(__a1), join(["do"], __body1)];
       } else {
-        if (string63(__a1) || number63(__a1) || hd(__a1) === "quote") {
-          return [__eq(__a1), __b1];
+        if (one63(__a1)) {
+          return [__eq(hd(__a1)), join(["do"], __body1)];
         } else {
-          if (one63(__a1)) {
-            return [__eq(hd(__a1)), __b1];
-          } else {
-            if (_35(__a1) > 1) {
-              return [join(["or"], map(__eq, __a1)), __b1];
-            }
+          if (_35(__a1) > 1) {
+            return [join(["or"], map(__eq, __a1)), join(["do"], __body1)];
           }
         }
       }
     };
-    return ["let", __x51, __expr, join(["if"], apply(join, map(__cl, pair(__clauses))))];
+    return ["let", __x51, __expr, join(["if"], apply(join, map(__cl, __clauses)))];
   }});
   setenv("when", {["_stash"]: true, ["macro"]: (cond, ...__r91) => {
     var ____r91 = unstash(__r91);
     var __cond = destash33(cond, ____r91);
     var ____id7 = ____r91;
-    var __body1 = cut(____id7, 0);
-    return ["if", __cond, join(["do"], __body1)];
+    var __body2 = cut(____id7, 0);
+    return ["if", __cond, join(["do"], __body2)];
   }});
   setenv("unless", {["_stash"]: true, ["macro"]: (cond, ...__r92) => {
     var ____r92 = unstash(__r92);
     var __cond1 = destash33(cond, ____r92);
     var ____id8 = ____r92;
-    var __body2 = cut(____id8, 0);
-    return ["if", ["not", __cond1], join(["do"], __body2)];
+    var __body3 = cut(____id8, 0);
+    return ["if", ["not", __cond1], join(["do"], __body3)];
   }});
   setenv("obj", {["_stash"]: true, ["macro"]: (...body) => {
-    var __body3 = unstash(body);
+    var __body4 = unstash(body);
     return join(["%object"], mapo((x) => {
       return x;
-    }, __body3));
+    }, __body4));
   }});
   setenv("let", {["_stash"]: true, ["macro"]: (bs, ...__r94) => {
     var ____r94 = unstash(__r94);
     var __bs = destash33(bs, ____r94);
     var ____id9 = ____r94;
-    var __body4 = cut(____id9, 0);
+    var __body5 = cut(____id9, 0);
     if (atom63(__bs)) {
-      return join(["let", [__bs, hd(__body4)]], tl(__body4));
+      return join(["let", [__bs, hd(__body5)]], tl(__body5));
     } else {
       if (none63(__bs)) {
-        return join(["do"], __body4);
+        return join(["do"], __body5);
       } else {
         var ____id10 = __bs;
         var __lh1 = ____id10[0];
@@ -995,30 +995,30 @@ var create = (globals) => {
           __renames = [__id12, __id111];
           __id12 = __id111;
         }
-        return ["do", ["%local", __id12, __val], ["let-symbol", __renames, join(["let", join(__bs1, __bs2)], __body4)]];
+        return ["do", ["%local", __id12, __val], ["let-symbol", __renames, join(["let", join(__bs1, __bs2)], __body5)]];
       }
     }
   }});
   setenv("with", {["_stash"]: true, ["macro"]: (x, v, ...__r95) => {
     var ____r95 = unstash(__r95);
-    var __x75 = destash33(x, ____r95);
+    var __x77 = destash33(x, ____r95);
     var __v14 = destash33(v, ____r95);
     var ____id13 = ____r95;
-    var __body5 = cut(____id13, 0);
-    return join(["let", [__x75, __v14]], __body5, [__x75]);
+    var __body6 = cut(____id13, 0);
+    return join(["let", [__x77, __v14]], __body6, [__x77]);
   }});
   setenv("let-when", {["_stash"]: true, ["macro"]: (x, v, ...__r96) => {
     var ____r96 = unstash(__r96);
-    var __x79 = destash33(x, ____r96);
+    var __x81 = destash33(x, ____r96);
     var __v15 = destash33(v, ____r96);
     var ____id14 = ____r96;
-    var __body6 = cut(____id14, 0);
+    var __body7 = cut(____id14, 0);
     var __y4 = unique("y");
-    return ["let", __y4, __v15, ["when", ["yes", __y4], join(["let", [__x79, __y4]], __body6)]];
+    return ["let", __y4, __v15, ["when", ["yes", __y4], join(["let", [__x81, __y4]], __body7)]];
   }});
   setenv("void", {["_stash"]: true, ["macro"]: (...body) => {
-    var __body7 = unstash(body);
-    return join(["do"], __body7, [["do"]]);
+    var __body8 = unstash(body);
+    return join(["do"], __body8, [["do"]]);
   }});
   setenv("%setenv", {["_stash"]: true, ["macro"]: (name, ...__r97) => {
     var ____r97 = unstash(__r97);
@@ -1032,126 +1032,126 @@ var create = (globals) => {
     var __name1 = destash33(name, ____r98);
     var __args3 = destash33(args, ____r98);
     var ____id16 = ____r98;
-    var __body8 = cut(____id16, 0);
-    var ____x91 = ["%setenv", __name1];
-    ____x91.macro = join(["fn", __args3], __body8);
-    return ____x91;
+    var __body9 = cut(____id16, 0);
+    var ____x93 = ["%setenv", __name1];
+    ____x93.macro = join(["fn", __args3], __body9);
+    return ____x93;
   }});
   setenv("define-special", {["_stash"]: true, ["macro"]: (name, args, ...__r99) => {
     var ____r99 = unstash(__r99);
     var __name2 = destash33(name, ____r99);
     var __args4 = destash33(args, ____r99);
     var ____id17 = ____r99;
-    var __body9 = cut(____id17, 0);
-    var ____x93 = ["%setenv", __name2];
-    ____x93.special = join(["fn", __args4], __body9);
-    return join(____x93, keys(__body9));
+    var __body10 = cut(____id17, 0);
+    var ____x95 = ["%setenv", __name2];
+    ____x95.special = join(["fn", __args4], __body10);
+    return join(____x95, keys(__body10));
   }});
   setenv("define-symbol-macro", {["_stash"]: true, ["macro"]: (name, expansion) => {
-    var ____x95 = ["%setenv", name];
-    ____x95.symbol = ["quote", expansion];
-    return ____x95;
+    var ____x97 = ["%setenv", name];
+    ____x97.symbol = ["quote", expansion];
+    return ____x97;
   }});
-  setenv("define-reader", {["_stash"]: true, ["macro"]: (__x97, ...__r101) => {
-    var ____id18 = __x97;
+  setenv("define-reader", {["_stash"]: true, ["macro"]: (__x99, ...__r101) => {
+    var ____id18 = __x99;
     var __char = ____id18[0];
     var __s11 = ____id18[1];
     var ____r101 = unstash(__r101);
-    var ____x97 = destash33(__x97, ____r101);
+    var ____x99 = destash33(__x99, ____r101);
     var ____id19 = ____r101;
-    var __body10 = cut(____id19, 0);
-    return ["set", ["get", "read-table", __char], join(["fn", [__s11]], __body10)];
+    var __body11 = cut(____id19, 0);
+    return ["set", ["get", "read-table", __char], join(["fn", [__s11]], __body11)];
   }});
   setenv("define", {["_stash"]: true, ["macro"]: (name, x, ...__r102) => {
     var ____r102 = unstash(__r102);
     var __name3 = destash33(name, ____r102);
-    var __x102 = destash33(x, ____r102);
+    var __x104 = destash33(x, ____r102);
     var ____id20 = ____r102;
-    var __body11 = cut(____id20, 0);
+    var __body12 = cut(____id20, 0);
     setenv(__name3, {["_stash"]: true, ["variable"]: true});
-    if (some63(__body11)) {
-      return join(["%local-function", __name3], bind42(__x102, __body11));
+    if (some63(__body12)) {
+      return join(["%local-function", __name3], bind42(__x104, __body12));
     } else {
-      return ["%local", __name3, __x102];
+      return ["%local", __name3, __x104];
     }
   }});
   setenv("define-global", {["_stash"]: true, ["macro"]: (name, x, ...__r103) => {
     var ____r103 = unstash(__r103);
     var __name4 = destash33(name, ____r103);
-    var __x105 = destash33(x, ____r103);
+    var __x107 = destash33(x, ____r103);
     var ____id21 = ____r103;
-    var __body12 = cut(____id21, 0);
+    var __body13 = cut(____id21, 0);
     setenv(__name4, {["_stash"]: true, ["toplevel"]: true, ["variable"]: true});
-    if (some63(__body12)) {
-      return ["do", join(["%global-function", __name4], bind42(__x105, __body12)), ["%set", ["_G", "." + __name4], __name4]];
+    if (some63(__body13)) {
+      return ["do", join(["%global-function", __name4], bind42(__x107, __body13)), ["%set", ["_G", "." + __name4], __name4]];
     } else {
-      return ["do", ["%set", __name4, __x105], ["%set", ["_G", "." + __name4], __name4]];
+      return ["do", ["%set", __name4, __x107], ["%set", ["_G", "." + __name4], __name4]];
     }
   }});
   setenv("with-frame", {["_stash"]: true, ["macro"]: (...body) => {
-    var __body13 = unstash(body);
-    var __x114 = unique("x");
-    return ["do", ["add", ["_G", ".environment"], ["obj"]], ["with", __x114, join(["do"], __body13), ["drop", ["_G", ".environment"]]]];
+    var __body14 = unstash(body);
+    var __x116 = unique("x");
+    return ["do", ["add", ["_G", ".environment"], ["obj"]], ["with", __x116, join(["do"], __body14), ["drop", ["_G", ".environment"]]]];
   }});
-  setenv("with-bindings", {["_stash"]: true, ["macro"]: (__x123, ...__r104) => {
-    var ____id22 = __x123;
+  setenv("with-bindings", {["_stash"]: true, ["macro"]: (__x125, ...__r104) => {
+    var ____id22 = __x125;
     var __names = ____id22[0];
     var ____r104 = unstash(__r104);
-    var ____x123 = destash33(__x123, ____r104);
+    var ____x125 = destash33(__x125, ____r104);
     var ____id23 = ____r104;
-    var __body14 = cut(____id23, 0);
-    var __x124 = unique("x");
-    var ____x129 = ["setenv", ["at", __x124, 1]];
-    ____x129.variable = true;
-    var ____x131 = ["setenv", __x124];
+    var __body15 = cut(____id23, 0);
+    var __x126 = unique("x");
+    var ____x131 = ["setenv", ["at", __x126, 1]];
     ____x131.variable = true;
-    return join(["with-frame", ["each", __x124, __names, ["if", ["default-assignment?", __x124], ____x129, ____x131]]], __body14);
+    var ____x133 = ["setenv", __x126];
+    ____x133.variable = true;
+    return join(["with-frame", ["each", __x126, __names, ["if", ["default-assignment?", __x126], ____x131, ____x133]]], __body15);
   }});
   setenv("let-macro", {["_stash"]: true, ["macro"]: (definitions, ...__r105) => {
     var ____r105 = unstash(__r105);
     var __definitions = destash33(definitions, ____r105);
     var ____id24 = ____r105;
-    var __body15 = cut(____id24, 0);
+    var __body16 = cut(____id24, 0);
     add(_G.environment, {});
     map((m) => {
       return _eval(join(["define-macro"], m));
     }, __definitions);
-    var ____x132 = join(["do"], macroexpand(__body15));
+    var ____x134 = join(["do"], macroexpand(__body16));
     drop(_G.environment);
-    return ____x132;
+    return ____x134;
   }});
   setenv("let-symbol", {["_stash"]: true, ["macro"]: (expansions, ...__r107) => {
     var ____r107 = unstash(__r107);
     var __expansions = destash33(expansions, ____r107);
     var ____id25 = ____r107;
-    var __body16 = cut(____id25, 0);
+    var __body17 = cut(____id25, 0);
     add(_G.environment, {});
-    map((__x136) => {
-      var ____id26 = __x136;
+    map((__x138) => {
+      var ____id26 = __x138;
       var __name5 = ____id26[0];
       var __exp = ____id26[1];
       return _eval(["define-symbol-macro", __name5, __exp]);
     }, pair(__expansions));
-    var ____x135 = join(["do"], macroexpand(__body16));
+    var ____x137 = join(["do"], macroexpand(__body17));
     drop(_G.environment);
-    return ____x135;
+    return ____x137;
   }});
   setenv("let-unique", {["_stash"]: true, ["macro"]: (names, ...__r109) => {
     var ____r109 = unstash(__r109);
     var __names1 = destash33(names, ____r109);
     var ____id27 = ____r109;
-    var __body17 = cut(____id27, 0);
+    var __body18 = cut(____id27, 0);
     var __bs11 = map((n) => {
       return [n, ["unique", ["quote", n]]];
     }, __names1);
-    return join(["let", apply(join, __bs11)], __body17);
+    return join(["let", apply(join, __bs11)], __body18);
   }});
   setenv("fn", {["_stash"]: true, ["macro"]: (args, ...__r111) => {
     var ____r111 = unstash(__r111);
     var __args5 = destash33(args, ____r111);
     var ____id28 = ____r111;
-    var __body18 = cut(____id28, 0);
-    return join(["%function"], bind42(__args5, __body18));
+    var __body19 = cut(____id28, 0);
+    return join(["%function"], bind42(__args5, __body19));
   }});
   setenv("apply", {["_stash"]: true, ["macro"]: (f, ...__r112) => {
     var ____r112 = unstash(__r112);
@@ -1169,47 +1169,47 @@ var create = (globals) => {
   }});
   setenv("each", {["_stash"]: true, ["macro"]: (x, t, ...__r114) => {
     var ____r114 = unstash(__r114);
-    var __x152 = destash33(x, ____r114);
+    var __x154 = destash33(x, ____r114);
     var __t2 = destash33(t, ____r114);
     var ____id30 = ____r114;
-    var __body19 = cut(____id30, 0);
+    var __body20 = cut(____id30, 0);
     var __o14 = unique("o");
     var __n19 = unique("n");
     var __i25 = unique("i");
     var __e24;
-    if (atom63(__x152)) {
-      __e24 = [__i25, __x152];
+    if (atom63(__x154)) {
+      __e24 = [__i25, __x154];
     } else {
       var __e25;
-      if (_35(__x152) > 1) {
-        __e25 = __x152;
+      if (_35(__x154) > 1) {
+        __e25 = __x154;
       } else {
-        __e25 = [__i25, hd(__x152)];
+        __e25 = [__i25, hd(__x154)];
       }
       __e24 = __e25;
     }
     var ____id31 = __e24;
     var __k23 = ____id31[0];
     var __v16 = ____id31[1];
-    return ["let", [__o14, __t2, __k23, "nil"], ["%for", __o14, __k23, ["let", [__v16, ["get", __o14, __k23]], join(["let", __k23, ["if", ["numeric?", __k23], ["parseInt", __k23], __k23]], __body19)]]];
+    return ["let", [__o14, __t2, __k23, "nil"], ["%for", __o14, __k23, ["let", [__v16, ["get", __o14, __k23]], join(["let", __k23, ["if", ["numeric?", __k23], ["parseInt", __k23], __k23]], __body20)]]];
   }});
   setenv("for", {["_stash"]: true, ["macro"]: (i, to, ...__r115) => {
     var ____r115 = unstash(__r115);
     var __i26 = destash33(i, ____r115);
     var __to = destash33(to, ____r115);
     var ____id32 = ____r115;
-    var __body20 = cut(____id32, 0);
-    return ["let", __i26, 0, join(["while", ["<", __i26, __to]], __body20, [["inc", __i26]])];
+    var __body21 = cut(____id32, 0);
+    return ["let", __i26, 0, join(["while", ["<", __i26, __to]], __body21, [["inc", __i26]])];
   }});
   setenv("step", {["_stash"]: true, ["macro"]: (v, t, ...__r116) => {
     var ____r116 = unstash(__r116);
     var __v17 = destash33(v, ____r116);
     var __t3 = destash33(t, ____r116);
     var ____id33 = ____r116;
-    var __body21 = cut(____id33, 0);
-    var __x170 = unique("x");
+    var __body22 = cut(____id33, 0);
+    var __x172 = unique("x");
     var __i27 = unique("i");
-    return ["let", [__x170, __t3], ["for", __i27, ["#", __x170], join(["let", [__v17, ["at", __x170, __i27]]], __body21)]];
+    return ["let", [__x172, __t3], ["for", __i27, ["#", __x172], join(["let", [__v17, ["at", __x172, __i27]]], __body22)]];
   }});
   setenv("set-of", {["_stash"]: true, ["macro"]: (...xs) => {
     var __xs12 = unstash(xs);
@@ -1217,7 +1217,7 @@ var create = (globals) => {
     var ____o15 = __xs12;
     var ____i28 = undefined;
     for (____i28 in ____o15) {
-      var __x178 = ____o15[____i28];
+      var __x180 = ____o15[____i28];
       var __e26;
       if (numeric63(____i28)) {
         __e26 = parseInt(____i28);
@@ -1225,7 +1225,7 @@ var create = (globals) => {
         __e26 = ____i28;
       }
       var ____i281 = __e26;
-      __l6[__x178] = true;
+      __l6[__x180] = true;
     }
     return join(["obj"], __l6);
   }});
@@ -1262,8 +1262,8 @@ var create = (globals) => {
     return ["set", n, ["-", n, __e28]];
   }});
   setenv("with-indent", {["_stash"]: true, ["macro"]: (form) => {
-    var __x188 = unique("x");
-    return ["do", ["inc", "indent-level"], ["with", __x188, form, ["dec", "indent-level"]]];
+    var __x190 = unique("x");
+    return ["do", ["inc", "indent-level"], ["with", __x190, form, ["dec", "indent-level"]]];
   }});
   setenv("export", {["_stash"]: true, ["macro"]: (...names) => {
     var __names2 = unstash(names);
@@ -1272,24 +1272,24 @@ var create = (globals) => {
     }, __names2));
   }});
   setenv("when-compiling", {["_stash"]: true, ["macro"]: (...body) => {
-    var __body22 = unstash(body);
-    return _eval(join(["do"], __body22));
+    var __body23 = unstash(body);
+    return _eval(join(["do"], __body23));
   }});
   setenv("during-compilation", {["_stash"]: true, ["macro"]: (...body) => {
-    var __body23 = unstash(body);
-    var __x197 = expand(join(["do"], __body23));
-    _eval(__x197);
-    return __x197;
+    var __body24 = unstash(body);
+    var __x199 = expand(join(["do"], __body24));
+    _eval(__x199);
+    return __x199;
   }});
   setenv("class", {["_stash"]: true, ["macro"]: (x, ...__r123) => {
     var ____r123 = unstash(__r123);
-    var __x199 = destash33(x, ____r123);
+    var __x201 = destash33(x, ____r123);
     var ____id36 = ____r123;
-    var __body24 = cut(____id36, 0);
-    if (atom63(__x199)) {
-      return join(["%class", [__x199]], __body24);
+    var __body25 = cut(____id36, 0);
+    if (atom63(__x201)) {
+      return join(["%class", [__x201]], __body25);
     } else {
-      return join(["%class", __x199], __body24);
+      return join(["%class", __x201], __body25);
     }
   }});
   setenv(".", {["_stash"]: true, ["macro"]: (...args) => {
@@ -1327,13 +1327,13 @@ var create = (globals) => {
     }
   }});
   setenv("try", {["_stash"]: true, ["macro"]: (...body) => {
-    var __body25 = unstash(body);
+    var __body26 = unstash(body);
     var __e22 = unique("e");
     return join(["%condition-case", __e22, join(["do"], map((x) => {
       if (!( obj63(x) && in63(hd(x), ["catch", "finally"]))) {
         return x;
       }
-    }, __body25))], map((x) => {
+    }, __body26))], map((x) => {
       if (obj63(x)) {
         if (hd(x) === "finally") {
           return x;
@@ -1343,12 +1343,12 @@ var create = (globals) => {
             var ___ = ____id38[0];
             var __type = ____id38[1];
             var ___var = ____id38[2];
-            var __body26 = cut(____id38, 3);
-            return ["catch", __type, join(["let", [___var, __e22]], __body26)];
+            var __body27 = cut(____id38, 3);
+            return ["catch", __type, join(["let", [___var, __e22]], __body27)];
           }
         }
       }
-    }, __body25));
+    }, __body26));
   }});
   setenv("throw", {["_stash"]: true, ["macro"]: (x) => {
     return ["%throw", x];
@@ -1360,13 +1360,13 @@ var create = (globals) => {
     if (string63(k)) {
       var __i29 = edge(_G.environment);
       while (__i29 >= 0) {
-        var __b2 = _G.environment[__i29][k];
-        if (is63(__b2)) {
+        var __b1 = _G.environment[__i29][k];
+        if (is63(__b1)) {
           var __e40;
           if (p) {
-            __e40 = __b2[p];
+            __e40 = __b1[p];
           } else {
-            __e40 = __b2;
+            __e40 = __b1;
           }
           return __e40;
         } else {
@@ -1481,7 +1481,7 @@ var create = (globals) => {
           } else {
             __e43 = ["get", __id39, ["quote", bias(__k27)]];
           }
-          var __x224 = __e43;
+          var __x226 = __e43;
           if (is63(__k27)) {
             var __e44;
             if (__v19 === true) {
@@ -1490,7 +1490,7 @@ var create = (globals) => {
               __e44 = __v19;
             }
             var __k28 = __e44;
-            __bs5 = join(__bs5, bind(__k28, __x224));
+            __bs5 = join(__bs5, bind(__k28, __x226));
           }
         }
         return __bs5;
@@ -1524,9 +1524,9 @@ var create = (globals) => {
           if (atom63(__v20)) {
             add(__args12, __v20);
           } else {
-            var __x232 = unique("x");
-            add(__args12, __x232);
-            __bs6 = join(__bs6, [__v20, __x232]);
+            var __x234 = unique("x");
+            add(__args12, __x234);
+            __bs6 = join(__bs6, [__v20, __x234]);
           }
         }
       }
@@ -1557,24 +1557,24 @@ var create = (globals) => {
   var quasisplice63 = (x, depth) => {
     return canUnquote63(depth) && ! atom63(x) && hd(x) === "unquote-splicing";
   };
-  var expandLocal = (__x240) => {
-    var ____id40 = __x240;
-    var __x241 = ____id40[0];
+  var expandLocal = (__x242) => {
+    var ____id40 = __x242;
+    var __x243 = ____id40[0];
     var __name7 = ____id40[1];
     var __value = ____id40[2];
     setenv(__name7, {["_stash"]: true, ["variable"]: true});
     return ["%local", __name7, macroexpand(__value)];
   };
-  var expandFunction = (__x243) => {
-    var ____id41 = __x243;
-    var __x244 = ____id41[0];
+  var expandFunction = (__x245) => {
+    var ____id41 = __x245;
+    var __x246 = ____id41[0];
     var __args8 = ____id41[1];
-    var __body27 = cut(____id41, 2);
+    var __body28 = cut(____id41, 2);
     add(_G.environment, {});
     var ____o19 = __args8;
     var ____i34 = undefined;
     for (____i34 in ____o19) {
-      var ____x245 = ____o19[____i34];
+      var ____x247 = ____o19[____i34];
       var __e46;
       if (numeric63(____i34)) {
         __e46 = parseInt(____i34);
@@ -1582,45 +1582,45 @@ var create = (globals) => {
         __e46 = ____i34;
       }
       var ____i341 = __e46;
-      if (defaultAssignment63(____x245)) {
-        setenv(____x245[1], {["_stash"]: true, ["variable"]: true});
+      if (defaultAssignment63(____x247)) {
+        setenv(____x247[1], {["_stash"]: true, ["variable"]: true});
       } else {
-        setenv(____x245, {["_stash"]: true, ["variable"]: true});
+        setenv(____x247, {["_stash"]: true, ["variable"]: true});
       }
     }
-    var ____x246 = join(["%function", __args8], macroexpand(__body27));
+    var ____x248 = join(["%function", __args8], macroexpand(__body28));
     drop(_G.environment);
-    return ____x246;
+    return ____x248;
   };
-  var expandTable = (__x248) => {
-    var ____id42 = __x248;
-    var __x249 = ____id42[0];
+  var expandTable = (__x250) => {
+    var ____id42 = __x250;
+    var __x251 = ____id42[0];
     var __args9 = cut(____id42, 1);
-    var __expr2 = join([__x249], keys(__args9));
-    var ____x251 = __args9;
+    var __expr2 = join([__x251], keys(__args9));
+    var ____x253 = __args9;
     var ____i35 = 0;
-    while (____i35 < _35(____x251)) {
-      var __x252 = ____x251[____i35];
-      if (atom63(__x252)) {
-        add(__expr2, [__x252, macroexpand(__x252)]);
+    while (____i35 < _35(____x253)) {
+      var __x254 = ____x253[____i35];
+      if (atom63(__x254)) {
+        add(__expr2, [__x254, macroexpand(__x254)]);
       } else {
-        if (_35(__x252) <= 2) {
-          var ____id43 = __x252;
+        if (_35(__x254) <= 2) {
+          var ____id43 = __x254;
           var __name8 = ____id43[0];
           var __v22 = ____id43[1];
           add(__expr2, [macroexpand(__name8), macroexpand(__v22)]);
         } else {
-          var ____id44 = __x252;
+          var ____id44 = __x254;
           var __prefix = ____id44[0];
           var __name9 = ____id44[1];
           var __args10 = ____id44[2];
-          var __body28 = cut(____id44, 3);
-          if (some63(__body28)) {
+          var __body29 = cut(____id44, 3);
+          if (some63(__body29)) {
             add(_G.environment, {});
             var ____o20 = __args10;
             var ____i36 = undefined;
             for (____i36 in ____o20) {
-              var ____x255 = ____o20[____i36];
+              var ____x257 = ____o20[____i36];
               var __e47;
               if (numeric63(____i36)) {
                 __e47 = parseInt(____i36);
@@ -1628,15 +1628,15 @@ var create = (globals) => {
                 __e47 = ____i36;
               }
               var ____i361 = __e47;
-              if (defaultAssignment63(____x255)) {
-                setenv(____x255[1], {["_stash"]: true, ["variable"]: true});
+              if (defaultAssignment63(____x257)) {
+                setenv(____x257[1], {["_stash"]: true, ["variable"]: true});
               } else {
-                setenv(____x255, {["_stash"]: true, ["variable"]: true});
+                setenv(____x257, {["_stash"]: true, ["variable"]: true});
               }
             }
-            var ____x256 = add(__expr2, join([__prefix, macroexpand(__name9), __args10], macroexpand(__body28)));
+            var ____x258 = add(__expr2, join([__prefix, macroexpand(__name9), __args10], macroexpand(__body29)));
             drop(_G.environment);
-            ____x256;
+            ____x258;
           } else {
             add(__expr2, [__prefix, macroexpand(__name9), macroexpand(__args10)]);
           }
@@ -1646,31 +1646,31 @@ var create = (globals) => {
     }
     return __expr2;
   };
-  var expandClass = (__x259) => {
-    var ____id45 = __x259;
-    var __x260 = ____id45[0];
+  var expandClass = (__x261) => {
+    var ____id45 = __x261;
+    var __x262 = ____id45[0];
     var __name10 = ____id45[1];
-    var __body29 = cut(____id45, 2);
-    return join([__x260, __name10], tl(expandTable(join(["%table"], __body29))));
+    var __body30 = cut(____id45, 2);
+    return join([__x262, __name10], tl(expandTable(join(["%table"], __body30))));
   };
-  expandConditionCase = (__x263) => {
-    var ____id46 = __x263;
-    var __x264 = ____id46[0];
+  expandConditionCase = (__x265) => {
+    var ____id46 = __x265;
+    var __x266 = ____id46[0];
     var ___var1 = ____id46[1];
     var __form = ____id46[2];
     var __clauses1 = cut(____id46, 3);
-    return join(["%condition-case", ___var1, macroexpand(__form)], map((__x266) => {
-      var ____id47 = __x266;
+    return join(["%condition-case", ___var1, macroexpand(__form)], map((__x268) => {
+      var ____id47 = __x268;
       var __which = ____id47[0];
-      var __body30 = cut(____id47, 1);
+      var __body31 = cut(____id47, 1);
       if (__which === "finally") {
-        return join([__which], map(macroexpand, __body30));
+        return join([__which], map(macroexpand, __body31));
       } else {
         add(_G.environment, {});
         var ____o21 = [___var1];
         var ____i37 = undefined;
         for (____i37 in ____o21) {
-          var ____x268 = ____o21[____i37];
+          var ____x270 = ____o21[____i37];
           var __e48;
           if (numeric63(____i37)) {
             __e48 = parseInt(____i37);
@@ -1678,30 +1678,30 @@ var create = (globals) => {
             __e48 = ____i37;
           }
           var ____i371 = __e48;
-          if (defaultAssignment63(____x268)) {
-            setenv(____x268[1], {["_stash"]: true, ["variable"]: true});
+          if (defaultAssignment63(____x270)) {
+            setenv(____x270[1], {["_stash"]: true, ["variable"]: true});
           } else {
-            setenv(____x268, {["_stash"]: true, ["variable"]: true});
+            setenv(____x270, {["_stash"]: true, ["variable"]: true});
           }
         }
-        var ____x269 = join([__which], map(macroexpand, __body30));
+        var ____x271 = join([__which], map(macroexpand, __body31));
         drop(_G.environment);
-        return ____x269;
+        return ____x271;
       }
     }, __clauses1));
   };
   _G.expandConditionCase = expandConditionCase;
-  var expandDefinition = (__x272) => {
-    var ____id48 = __x272;
-    var __x273 = ____id48[0];
+  var expandDefinition = (__x274) => {
+    var ____id48 = __x274;
+    var __x275 = ____id48[0];
     var __name11 = ____id48[1];
     var __args111 = ____id48[2];
-    var __body31 = cut(____id48, 3);
+    var __body32 = cut(____id48, 3);
     add(_G.environment, {});
     var ____o22 = __args111;
     var ____i38 = undefined;
     for (____i38 in ____o22) {
-      var ____x274 = ____o22[____i38];
+      var ____x276 = ____o22[____i38];
       var __e49;
       if (numeric63(____i38)) {
         __e49 = parseInt(____i38);
@@ -1709,24 +1709,24 @@ var create = (globals) => {
         __e49 = ____i38;
       }
       var ____i381 = __e49;
-      if (defaultAssignment63(____x274)) {
-        setenv(____x274[1], {["_stash"]: true, ["variable"]: true});
+      if (defaultAssignment63(____x276)) {
+        setenv(____x276[1], {["_stash"]: true, ["variable"]: true});
       } else {
-        setenv(____x274, {["_stash"]: true, ["variable"]: true});
+        setenv(____x276, {["_stash"]: true, ["variable"]: true});
       }
     }
-    var ____x275 = join([__x273, __name11, __args111], macroexpand(__body31));
+    var ____x277 = join([__x275, __name11, __args111], macroexpand(__body32));
     drop(_G.environment);
-    return ____x275;
+    return ____x277;
   };
   var expandMacro = (form) => {
     return macroexpand(expand1(form));
   };
-  expand1 = (__x277) => {
-    var ____id49 = __x277;
+  expand1 = (__x279) => {
+    var ____id49 = __x279;
     var __name12 = ____id49[0];
-    var __body32 = cut(____id49, 1);
-    return apply(macroFunction(__name12), __body32);
+    var __body33 = cut(____id49, 1);
+    return apply(macroFunction(__name12), __body33);
   };
   _G.expand1 = expand1;
   macroexpand = (form) => {
@@ -1736,29 +1736,29 @@ var create = (globals) => {
       if (atom63(form)) {
         return form;
       } else {
-        var __x278 = hd(form);
-        if (__x278 === "%local") {
+        var __x280 = hd(form);
+        if (__x280 === "%local") {
           return expandLocal(form);
         } else {
-          if (__x278 === "%function") {
+          if (__x280 === "%function") {
             return expandFunction(form);
           } else {
-            if (__x278 === "%table") {
+            if (__x280 === "%table") {
               return expandTable(form);
             } else {
-              if (__x278 === "%class") {
+              if (__x280 === "%class") {
                 return expandClass(form);
               } else {
-                if (__x278 === "%condition-case") {
+                if (__x280 === "%condition-case") {
                   return expandConditionCase(form);
                 } else {
-                  if (__x278 === "%global-function") {
+                  if (__x280 === "%global-function") {
                     return expandDefinition(form);
                   } else {
-                    if (__x278 === "%local-function") {
+                    if (__x280 === "%local-function") {
                       return expandDefinition(form);
                     } else {
-                      if (macro63(__x278)) {
+                      if (macro63(__x280)) {
                         return expandMacro(form);
                       } else {
                         return map(macroexpand, form);
@@ -1798,16 +1798,16 @@ var create = (globals) => {
         last(__xs13)[__k32] = __v24;
       }
     }
-    var ____x281 = form;
+    var ____x283 = form;
     var ____i40 = 0;
-    while (____i40 < _35(____x281)) {
-      var __x282 = ____x281[____i40];
-      if (quasisplice63(__x282, depth)) {
-        var __x283 = quasiexpand(__x282[1]);
-        add(__xs13, __x283);
+    while (____i40 < _35(____x283)) {
+      var __x284 = ____x283[____i40];
+      if (quasisplice63(__x284, depth)) {
+        var __x285 = quasiexpand(__x284[1]);
+        add(__xs13, __x285);
         add(__xs13, ["list"]);
       } else {
-        add(last(__xs13), quasiexpand(__x282, depth));
+        add(last(__xs13), quasiexpand(__x284, depth));
       }
       ____i40 = ____i40 + 1;
     }
@@ -1858,13 +1858,13 @@ var create = (globals) => {
     }
   };
   _G.quasiexpand = quasiexpand;
-  expandIf = (__x287) => {
-    var ____id50 = __x287;
+  expandIf = (__x289) => {
+    var ____id50 = __x289;
     var __a5 = ____id50[0];
-    var __b3 = ____id50[1];
+    var __b2 = ____id50[1];
     var __c11 = cut(____id50, 2);
-    if (is63(__b3)) {
-      return [join(["%if", __a5, __b3], expandIf(__c11))];
+    if (is63(__b2)) {
+      return [join(["%if", __a5, __b2], expandIf(__c11))];
     } else {
       if (is63(__a5)) {
         return [__a5];
@@ -1956,14 +1956,14 @@ var create = (globals) => {
   var __names3 = {};
   unique = (x) => {
     if (string63(x)) {
-      var __x291 = id(x);
-      if (__names3[__x291]) {
-        var __i43 = __names3[__x291];
-        __names3[__x291] = __names3[__x291] + 1;
-        return unique(__x291 + __i43);
+      var __x293 = id(x);
+      if (__names3[__x293]) {
+        var __i43 = __names3[__x293];
+        __names3[__x293] = __names3[__x293] + 1;
+        return unique(__x293 + __i43);
       } else {
-        __names3[__x291] = 1;
-        return "__" + __x291;
+        __names3[__x293] = 1;
+        return "__" + __x293;
       }
     } else {
       return x;
@@ -1995,51 +1995,51 @@ var create = (globals) => {
         __e56 = __k33;
       }
       var __k34 = __e56;
-      var __x292 = f(__v25);
-      if (is63(__x292)) {
+      var __x294 = f(__v25);
+      if (is63(__x294)) {
         add(__o24, literal(__k34));
-        add(__o24, __x292);
+        add(__o24, __x294);
       }
     }
     return __o24;
   };
   _G.mapo = mapo;
-  var ____x294 = [];
-  var ____x295 = [];
-  ____x295.js = "!";
-  ____x294.not = ____x295;
   var ____x296 = [];
-  ____x296["*"] = true;
-  ____x296["/"] = true;
-  ____x296["%"] = true;
   var ____x297 = [];
+  ____x297.js = "!";
+  ____x296.not = ____x297;
   var ____x298 = [];
-  ____x298.js = "+";
-  ____x297.cat = ____x298;
+  ____x298["*"] = true;
+  ____x298["/"] = true;
+  ____x298["%"] = true;
   var ____x299 = [];
-  ____x299["+"] = true;
-  ____x299["-"] = true;
   var ____x300 = [];
-  ____x300["<"] = true;
-  ____x300[">"] = true;
-  ____x300["<="] = true;
-  ____x300[">="] = true;
+  ____x300.js = "+";
+  ____x299.cat = ____x300;
   var ____x301 = [];
+  ____x301["+"] = true;
+  ____x301["-"] = true;
   var ____x302 = [];
-  ____x302.js = "===";
-  ____x301["="] = ____x302;
+  ____x302["<"] = true;
+  ____x302[">"] = true;
+  ____x302["<="] = true;
+  ____x302[">="] = true;
   var ____x303 = [];
-  ____x303.js = "==";
-  ____x301["=="] = ____x303;
   var ____x304 = [];
+  ____x304.js = "===";
+  ____x303["="] = ____x304;
   var ____x305 = [];
-  ____x305.js = "&&";
-  ____x304.and = ____x305;
+  ____x305.js = "==";
+  ____x303["=="] = ____x305;
   var ____x306 = [];
   var ____x307 = [];
-  ____x307.js = "||";
-  ____x306.or = ____x307;
-  var infix = [____x294, ____x296, ____x297, ____x299, ____x300, ____x301, ____x304, ____x306];
+  ____x307.js = "&&";
+  ____x306.and = ____x307;
+  var ____x308 = [];
+  var ____x309 = [];
+  ____x309.js = "||";
+  ____x308.or = ____x309;
+  var infix = [____x296, ____x298, ____x299, ____x301, ____x302, ____x303, ____x306, ____x308];
   var unary63 = (form) => {
     return two63(form) && in63(hd(form), ["not", "-"]);
   };
@@ -2068,12 +2068,12 @@ var create = (globals) => {
   };
   var getop = (op) => {
     return find((level) => {
-      var __x309 = level[op];
-      if (__x309 === true) {
+      var __x311 = level[op];
+      if (__x311 === true) {
         return op;
       } else {
-        if (is63(__x309)) {
-          return __x309.js;
+        if (is63(__x311)) {
+          return __x311.js;
         }
       }
     }, infix);
@@ -2104,27 +2104,27 @@ var create = (globals) => {
     } else {
       if (obj63(__a6) && accessor63(hd(__a6))) {
         var ____id52 = __a6;
-        var __x310 = ____id52[0];
+        var __x312 = ____id52[0];
         var __ys = cut(____id52, 1);
-        var __s3 = compileNext(compile(__x310), __ys, true);
+        var __s3 = compileNext(compile(__x312), __ys, true);
         return compileNext(__s3, tl(args), call63);
       } else {
         var __s4 = "";
         var __c3 = "";
         var __i46 = 0;
         while (__i46 < _35(args)) {
-          var __x311 = args[__i46];
-          if (defaultAssignment63(__x311)) {
-            var ____id53 = __x311;
+          var __x313 = args[__i46];
+          if (defaultAssignment63(__x313)) {
+            var ____id53 = __x313;
             var ___1 = ____id53[0];
             var __x1111 = ____id53[1];
             var __val1 = ____id53[2];
             __s4 = __s4 + __c3 + compile(__x1111) + " = " + compile(__val1);
           } else {
-            if (accessor63(__x311) || obj63(__x311) && accessor63(hd(__x311))) {
+            if (accessor63(__x313) || obj63(__x313) && accessor63(hd(__x313))) {
               return compileNext("(" + __s4 + ")", cut(args, __i46), call63);
             } else {
-              __s4 = __s4 + __c3 + compile(__x311);
+              __s4 = __s4 + __c3 + compile(__x313);
             }
           }
           __c3 = ", ";
@@ -2225,9 +2225,9 @@ var create = (globals) => {
   };
   var compileSpecial = (form, stmt63) => {
     var ____id54 = form;
-    var __x312 = ____id54[0];
+    var __x314 = ____id54[0];
     var __args121 = cut(____id54, 1);
-    var ____id55 = getenv(__x312);
+    var ____id55 = getenv(__x314);
     var __special = ____id55.special;
     var __stmt = ____id55.stmt;
     var __selfTr63 = ____id55.tr;
@@ -2270,26 +2270,26 @@ var create = (globals) => {
     var __op = ____id57[0];
     var ____id58 = cut(____id57, 1);
     var __a7 = ____id58[0];
-    var __b4 = ____id58[1];
+    var __b3 = ____id58[1];
     var ____id59 = opDelims(form, __a7);
     var __ao = ____id59[0];
     var __ac = ____id59[1];
-    var ____id60 = opDelims(form, __b4, {["_stash"]: true, ["right"]: true});
+    var ____id60 = opDelims(form, __b3, {["_stash"]: true, ["right"]: true});
     var __bo = ____id60[0];
     var __bc = ____id60[1];
     var __a8 = compile(__a7);
-    var __b5 = compile(__b4);
+    var __b4 = compile(__b3);
     var __op1 = getop(__op);
     if (unary63(form)) {
       return __op1 + __ao + " " + __a8 + __ac;
     } else {
-      return __ao + __a8 + __ac + " " + __op1 + " " + __bo + __b5 + __bc;
+      return __ao + __a8 + __ac + " " + __op1 + " " + __bo + __b4 + __bc;
     }
   };
   compileFunction = (args, body, ...__r194) => {
     var ____r194 = unstash(__r194);
     var __args131 = destash33(args, ____r194);
-    var __body33 = destash33(body, ____r194);
+    var __body34 = destash33(body, ____r194);
     var ____id61 = ____r194;
     var __name13 = ____id61.name;
     var __prefix1 = ____id61.prefix;
@@ -2298,9 +2298,9 @@ var create = (globals) => {
     var __id62 = either(__name13, "");
     var __args14 = compileArgs(__args131);
     indentLevel = indentLevel + 1;
-    var ____x315 = compile(__body33, {["_stash"]: true, ["stmt"]: true});
+    var ____x317 = compile(__body34, {["_stash"]: true, ["stmt"]: true});
     indentLevel = indentLevel - 1;
-    var __body34 = ____x315;
+    var __body35 = ____x317;
     var __ind = indentation();
     var __e61;
     if (__infix) {
@@ -2317,7 +2317,7 @@ var create = (globals) => {
     }
     var __p1 = __e62;
     var __tr2 = either(__tr1, "");
-    return __p1 + __id62 + __args14 + __mid + " {\n" + __body34 + __ind + "}" + __tr2;
+    return __p1 + __id62 + __args14 + __mid + " {\n" + __body35 + __ind + "}" + __tr2;
   };
   _G.compileFunction = compileFunction;
   var canReturn63 = (form) => {
@@ -2393,11 +2393,11 @@ var create = (globals) => {
     return ! atom63(form) && ! infix63(hd(form)) && ! literal63(form) && !( "get" === hd(form)) && !( "%statement" === hd(form)) && !( two63(form) && accessor63(form[1])) || idLiteral63(form);
   };
   var lowerDo = (args, hoist, stmt63, tail63) => {
-    var ____x321 = almost(args);
+    var ____x323 = almost(args);
     var ____i48 = 0;
-    while (____i48 < _35(____x321)) {
-      var __x322 = ____x321[____i48];
-      var ____y5 = lower(__x322, hoist, stmt63);
+    while (____i48 < _35(____x323)) {
+      var __x324 = ____x323[____i48];
+      var ____y5 = lower(__x324, hoist, stmt63);
       if (yes(____y5)) {
         var __e32 = ____y5;
         if (standalone63(__e32)) {
@@ -2449,16 +2449,16 @@ var create = (globals) => {
   var lowerShort = (x, args, hoist) => {
     var ____id66 = args;
     var __a9 = ____id66[0];
-    var __b6 = ____id66[1];
+    var __b5 = ____id66[1];
     var __hoist1 = [];
-    var __b11 = lower(__b6, __hoist1);
+    var __b11 = lower(__b5, __hoist1);
     if (some63(__hoist1)) {
       var __id67 = unique("id");
       var __e71;
       if (x === "and") {
-        __e71 = ["%if", __id67, __b6, __id67];
+        __e71 = ["%if", __id67, __b5, __id67];
       } else {
-        __e71 = ["%if", __id67, __id67, __b6];
+        __e71 = ["%if", __id67, __id67, __b5];
       }
       return lower(["do", ["%local", __id67, __a9], __e71], hoist);
     } else {
@@ -2468,39 +2468,39 @@ var create = (globals) => {
   var lowerTry = (args, hoist, tail63) => {
     return add(hoist, ["%try", lowerBody(args, tail63)]);
   };
-  lowerConditionCase = (__x340, hoist, stmt63, tail63) => {
-    var ____id68 = __x340;
+  lowerConditionCase = (__x342, hoist, stmt63, tail63) => {
+    var ____id68 = __x342;
     var ___var2 = ____id68[0];
     var __form3 = ____id68[1];
     var __clauses2 = cut(____id68, 2);
     if (stmt63) {
-      return add(hoist, join(["%condition-case", ___var2, lowerBody(["do", __form3], tail63)], map((__x343) => {
-        var ____id69 = __x343;
+      return add(hoist, join(["%condition-case", ___var2, lowerBody(["do", __form3], tail63)], map((__x345) => {
+        var ____id69 = __x345;
         var __which1 = ____id69[0];
-        var __body35 = cut(____id69, 1);
+        var __body36 = cut(____id69, 1);
         if (__which1 === "finally") {
-          return [__which1, lowerBody(__body35)];
+          return [__which1, lowerBody(__body36)];
         } else {
-          var ____id70 = __body35;
-          var __x345 = ____id70[0];
+          var ____id70 = __body36;
+          var __x347 = ____id70[0];
           var __args15 = cut(____id70, 1);
-          return [__which1, lower(__x345), lowerBody(__args15, tail63)];
+          return [__which1, lower(__x347), lowerBody(__args15, tail63)];
         }
       }, __clauses2)));
     } else {
       var __e35 = unique("e");
       add(hoist, ["%local", __e35]);
-      add(hoist, join(["%condition-case", ___var2, lower(["%set", __e35, __form3])], map((__x350) => {
-        var ____id71 = __x350;
+      add(hoist, join(["%condition-case", ___var2, lower(["%set", __e35, __form3])], map((__x352) => {
+        var ____id71 = __x352;
         var __which2 = ____id71[0];
-        var __body36 = cut(____id71, 1);
+        var __body37 = cut(____id71, 1);
         if (__which2 === "finally") {
-          return [__which2, lowerBody(__body36)];
+          return [__which2, lowerBody(__body37)];
         } else {
-          var ____id72 = __body36;
-          var __x352 = ____id72[0];
+          var ____id72 = __body37;
+          var __x354 = ____id72[0];
           var __args16 = cut(____id72, 1);
-          return [__which2, lower(__x352), lower(["%set", __e35, join(["do"], __args16)])];
+          return [__which2, lower(__x354), lower(["%set", __e35, join(["do"], __args16)])];
         }
       }, __clauses2)));
       return __e35;
@@ -2510,14 +2510,14 @@ var create = (globals) => {
   var lowerWhile = (args, hoist) => {
     var ____id73 = args;
     var __c5 = ____id73[0];
-    var __body37 = cut(____id73, 1);
+    var __body38 = cut(____id73, 1);
     var __pre = [];
     var __c6 = lower(__c5, __pre);
     var __e72;
     if (none63(__pre)) {
-      __e72 = ["while", __c6, lowerBody(__body37)];
+      __e72 = ["while", __c6, lowerBody(__body38)];
     } else {
-      __e72 = ["while", true, join(["do"], __pre, [["%if", ["not", __c6], ["break"]], lowerBody(__body37)])];
+      __e72 = ["while", true, join(["do"], __pre, [["%if", ["not", __c6], ["break"]], lowerBody(__body38)])];
     }
     return add(hoist, __e72);
   };
@@ -2525,31 +2525,31 @@ var create = (globals) => {
     var ____id74 = args;
     var __t4 = ____id74[0];
     var __k37 = ____id74[1];
-    var __body38 = cut(____id74, 2);
-    return add(hoist, ["%for", lower(__t4, hoist), __k37, lowerBody(__body38)]);
+    var __body39 = cut(____id74, 2);
+    return add(hoist, ["%for", lower(__t4, hoist), __k37, lowerBody(__body39)]);
   };
   lowerTable = (args, hoist, stmt63, tail63) => {
     var __expr3 = join(["%table"], keys(args));
-    var ____x365 = args;
+    var ____x367 = args;
     var ____i49 = 0;
-    while (____i49 < _35(____x365)) {
-      var __x366 = ____x365[____i49];
-      if (atom63(__x366)) {
-        add(__expr3, __x366);
+    while (____i49 < _35(____x367)) {
+      var __x368 = ____x367[____i49];
+      if (atom63(__x368)) {
+        add(__expr3, __x368);
       } else {
-        if (_35(__x366) <= 2) {
-          var ____id75 = __x366;
+        if (_35(__x368) <= 2) {
+          var ____id75 = __x368;
           var __name14 = ____id75[0];
           var __v27 = ____id75[1];
           add(__expr3, [lower(__name14, hoist), lower(__v27, hoist)]);
         } else {
-          var ____id76 = __x366;
+          var ____id76 = __x368;
           var __prefix2 = ____id76[0];
           var __name15 = ____id76[1];
           var __args17 = ____id76[2];
-          var __body39 = cut(____id76, 3);
-          if (some63(__body39)) {
-            add(__expr3, [__prefix2, lower(__name15, hoist), __args17, lowerBody(__body39, true)]);
+          var __body40 = cut(____id76, 3);
+          if (some63(__body40)) {
+            add(__expr3, [__prefix2, lower(__name15, hoist), __args17, lowerBody(__body40, true)]);
           } else {
             add(__expr3, [__prefix2, lower(__name15, hoist), lower(__args17, hoist)]);
           }
@@ -2560,16 +2560,16 @@ var create = (globals) => {
     return __expr3;
   };
   _G.lowerTable = lowerTable;
-  lowerClass = (__x370, hoist, stmt63, tail63) => {
-    var ____id77 = __x370;
-    var __x371 = ____id77[0];
-    var __body40 = cut(____id77, 1);
-    var __body41 = tl(lowerTable(__body40, hoist));
-    var ____id78 = __x371;
+  lowerClass = (__x372, hoist, stmt63, tail63) => {
+    var ____id77 = __x372;
+    var __x373 = ____id77[0];
+    var __body41 = cut(____id77, 1);
+    var __body42 = tl(lowerTable(__body41, hoist));
+    var ____id78 = __x373;
     var __name16 = ____id78[0];
     var __parent1 = ____id78[1];
     var __parent11 = lower(__parent1, hoist);
-    var __expr4 = join(["%class", [__name16, __parent11]], __body41);
+    var __expr4 = join(["%class", [__name16, __parent11]], __body42);
     if (stmt63 && ! tail63) {
       return add(hoist, ["%local", __name16, __expr4]);
     } else {
@@ -2580,15 +2580,15 @@ var create = (globals) => {
   var lowerFunction = (args) => {
     var ____id79 = args;
     var __a10 = ____id79[0];
-    var __body42 = cut(____id79, 1);
-    return ["%function", __a10, lowerBody(__body42, true)];
+    var __body43 = cut(____id79, 1);
+    return ["%function", __a10, lowerBody(__body43, true)];
   };
   var lowerDefinition = (kind, args, hoist) => {
     var ____id80 = args;
     var __name17 = ____id80[0];
     var __args18 = ____id80[1];
-    var __body43 = cut(____id80, 2);
-    return add(hoist, [kind, __name17, __args18, lowerBody(__body43, true)]);
+    var __body44 = cut(____id80, 2);
+    return add(hoist, [kind, __name17, __args18, lowerBody(__body44, true)]);
   };
   var lowerCall = (form, hoist) => {
     var __form4 = map((x) => {
@@ -2605,10 +2605,10 @@ var create = (globals) => {
     if (pairwise63(form)) {
       var __e36 = [];
       var ____id81 = form;
-      var __x378 = ____id81[0];
+      var __x380 = ____id81[0];
       var __args19 = cut(____id81, 1);
       reduce((a, b) => {
-        add(__e36, [__x378, a, b]);
+        add(__e36, [__x380, a, b]);
         return a;
       }, __args19);
       return join(["and"], reverse(__e36));
@@ -2622,14 +2622,14 @@ var create = (globals) => {
   var lowerInfix = (form, hoist) => {
     var __form5 = lowerPairwise(form);
     var ____id82 = __form5;
-    var __x381 = ____id82[0];
+    var __x383 = ____id82[0];
     var __args20 = cut(____id82, 1);
     return lower(reduce((a, b) => {
-      return [__x381, b, a];
+      return [__x383, b, a];
     }, reverse(__args20)), hoist);
   };
-  var lowerSpecial = (__x383, hoist) => {
-    var ____id83 = __x383;
+  var lowerSpecial = (__x385, hoist) => {
+    var ____id83 = __x385;
     var __name18 = ____id83[0];
     var __args21 = cut(____id83, 1);
     var __args141 = map((x) => {
@@ -2652,48 +2652,48 @@ var create = (globals) => {
             return lowerInfix(form, hoist);
           } else {
             var ____id84 = form;
-            var __x386 = ____id84[0];
+            var __x388 = ____id84[0];
             var __args22 = cut(____id84, 1);
-            if (__x386 === "do") {
+            if (__x388 === "do") {
               return lowerDo(__args22, hoist, stmt63, tail63);
             } else {
-              if (__x386 === "%call") {
+              if (__x388 === "%call") {
                 return lower(__args22, hoist, stmt63, tail63);
               } else {
-                if (__x386 === "%set") {
+                if (__x388 === "%set") {
                   return lowerSet(__args22, hoist, stmt63, tail63);
                 } else {
-                  if (__x386 === "%if") {
+                  if (__x388 === "%if") {
                     return lowerIf(__args22, hoist, stmt63, tail63);
                   } else {
-                    if (__x386 === "%try") {
+                    if (__x388 === "%try") {
                       return lowerTry(__args22, hoist, tail63);
                     } else {
-                      if (__x386 === "%condition-case") {
+                      if (__x388 === "%condition-case") {
                         return lowerConditionCase(__args22, hoist, stmt63, tail63);
                       } else {
-                        if (__x386 === "while") {
+                        if (__x388 === "while") {
                           return lowerWhile(__args22, hoist);
                         } else {
-                          if (__x386 === "%for") {
+                          if (__x388 === "%for") {
                             return lowerFor(__args22, hoist);
                           } else {
-                            if (__x386 === "%table") {
+                            if (__x388 === "%table") {
                               return lowerTable(__args22, hoist, stmt63, tail63);
                             } else {
-                              if (__x386 === "%class") {
+                              if (__x388 === "%class") {
                                 return lowerClass(__args22, hoist, stmt63, tail63);
                               } else {
-                                if (__x386 === "%function") {
+                                if (__x388 === "%function") {
                                   return lowerFunction(__args22);
                                 } else {
-                                  if (__x386 === "%local-function" || __x386 === "%global-function") {
-                                    return lowerDefinition(__x386, __args22, hoist);
+                                  if (__x388 === "%local-function" || __x388 === "%global-function") {
+                                    return lowerDefinition(__x388, __args22, hoist);
                                   } else {
-                                    if (in63(__x386, ["and", "or"])) {
-                                      return lowerShort(__x386, __args22, hoist);
+                                    if (in63(__x388, ["and", "or"])) {
+                                      return lowerShort(__x388, __args22, hoist);
                                     } else {
-                                      if (statement63(__x386)) {
+                                      if (statement63(__x388)) {
                                         return lowerSpecial(form, hoist);
                                       } else {
                                         return lowerCall(form, hoist);
@@ -2753,13 +2753,13 @@ var create = (globals) => {
   setenv("do", {["_stash"]: true, ["special"]: (...forms) => {
     var __forms1 = unstash(forms);
     var __s5 = "";
-    var ____x389 = __forms1;
+    var ____x391 = __forms1;
     var ____i50 = 0;
-    while (____i50 < _35(____x389)) {
-      var __x390 = ____x389[____i50];
-      __s5 = __s5 + compile(__x390, {["_stash"]: true, ["stmt"]: true});
-      if (! atom63(__x390)) {
-        if (hd(__x390) === "return" || hd(__x390) === "break") {
+    while (____i50 < _35(____x391)) {
+      var __x392 = ____x391[____i50];
+      __s5 = __s5 + compile(__x392, {["_stash"]: true, ["stmt"]: true});
+      if (! atom63(__x392)) {
+        if (hd(__x392) === "return" || hd(__x392) === "break") {
           break;
         }
       }
@@ -2770,15 +2770,15 @@ var create = (globals) => {
   setenv("%if", {["_stash"]: true, ["special"]: (cond, cons, alt) => {
     var __cond3 = compile(cond);
     indentLevel = indentLevel + 1;
-    var ____x391 = compile(cons, {["_stash"]: true, ["stmt"]: true});
+    var ____x393 = compile(cons, {["_stash"]: true, ["stmt"]: true});
     indentLevel = indentLevel - 1;
-    var __cons = ____x391;
+    var __cons = ____x393;
     var __e73;
     if (alt) {
       indentLevel = indentLevel + 1;
-      var ____x392 = compile(alt, {["_stash"]: true, ["stmt"]: true});
+      var ____x394 = compile(alt, {["_stash"]: true, ["stmt"]: true});
       indentLevel = indentLevel - 1;
-      __e73 = ____x392;
+      __e73 = ____x394;
     }
     var __alt = __e73;
     var __ind2 = indentation();
@@ -2792,34 +2792,34 @@ var create = (globals) => {
   setenv("while", {["_stash"]: true, ["special"]: (cond, form) => {
     var __cond4 = compile(cond);
     indentLevel = indentLevel + 1;
-    var ____x393 = compile(form, {["_stash"]: true, ["stmt"]: true});
+    var ____x395 = compile(form, {["_stash"]: true, ["stmt"]: true});
     indentLevel = indentLevel - 1;
-    var __body44 = ____x393;
+    var __body45 = ____x395;
     var __ind3 = indentation();
-    return __ind3 + "while (" + __cond4 + ") {\n" + __body44 + __ind3 + "}\n";
+    return __ind3 + "while (" + __cond4 + ") {\n" + __body45 + __ind3 + "}\n";
   }, ["stmt"]: true, ["tr"]: true});
   setenv("%for", {["_stash"]: true, ["special"]: (t, k, form) => {
     var __t5 = compile(t);
     var __ind4 = indentation();
     indentLevel = indentLevel + 1;
-    var ____x394 = compile(form, {["_stash"]: true, ["stmt"]: true});
+    var ____x396 = compile(form, {["_stash"]: true, ["stmt"]: true});
     indentLevel = indentLevel - 1;
-    var __body45 = ____x394;
-    return __ind4 + "for (" + k + " in " + __t5 + ") {\n" + __body45 + __ind4 + "}\n";
+    var __body46 = ____x396;
+    return __ind4 + "for (" + k + " in " + __t5 + ") {\n" + __body46 + __ind4 + "}\n";
   }, ["stmt"]: true, ["tr"]: true});
   setenv("%try", {["_stash"]: true, ["special"]: (form) => {
     var __e37 = unique("e");
     var __ind5 = indentation();
     indentLevel = indentLevel + 1;
-    var ____x395 = compile(form, {["_stash"]: true, ["stmt"]: true});
+    var ____x397 = compile(form, {["_stash"]: true, ["stmt"]: true});
     indentLevel = indentLevel - 1;
-    var __body46 = ____x395;
+    var __body47 = ____x397;
     var __hf = ["return", ["%array", false, __e37]];
     indentLevel = indentLevel + 1;
-    var ____x398 = compile(__hf, {["_stash"]: true, ["stmt"]: true});
+    var ____x400 = compile(__hf, {["_stash"]: true, ["stmt"]: true});
     indentLevel = indentLevel - 1;
-    var __h = ____x398;
-    return __ind5 + "try {\n" + __body46 + __ind5 + "}\n" + __ind5 + "catch (" + __e37 + ") {\n" + __h + __ind5 + "}\n";
+    var __h = ____x400;
+    return __ind5 + "try {\n" + __body47 + __ind5 + "}\n" + __ind5 + "catch (" + __e37 + ") {\n" + __h + __ind5 + "}\n";
   }, ["stmt"]: true, ["tr"]: true});
   setenv("%condition-case", {["_stash"]: true, ["special"]: (e, form, ...__r237) => {
     var ____r237 = unstash(__r237);
@@ -2829,20 +2829,20 @@ var create = (globals) => {
     var __clauses3 = cut(____id86, 0);
     var __ind6 = indentation();
     indentLevel = indentLevel + 1;
-    var ____x399 = compile(__form7, {["_stash"]: true, ["stmt"]: true});
+    var ____x401 = compile(__form7, {["_stash"]: true, ["stmt"]: true});
     indentLevel = indentLevel - 1;
-    var __body47 = ____x399;
-    var __str = __ind6 + "try {\n" + __body47 + __ind6 + "}";
+    var __body48 = ____x401;
+    var __str = __ind6 + "try {\n" + __body48 + __ind6 + "}";
     var __form8 = [];
-    var ____x401 = __clauses3;
+    var ____x403 = __clauses3;
     var ____i51 = 0;
-    while (____i51 < _35(____x401)) {
-      var __x402 = ____x401[____i51];
-      if (hd(__x402) === "catch") {
-        var ____id87 = __x402;
+    while (____i51 < _35(____x403)) {
+      var __x404 = ____x403[____i51];
+      if (hd(__x404) === "catch") {
+        var ____id87 = __x404;
         var ___2 = ____id87[0];
         var __type1 = ____id87[1];
-        var __body48 = ____id87[2];
+        var __body49 = ____id87[2];
         var __e74;
         if (boolean63(__type1)) {
           __e74 = __type1;
@@ -2850,7 +2850,7 @@ var create = (globals) => {
           __e74 = ["instanceof", __e38, __type1];
         }
         add(__form8, __e74);
-        add(__form8, __body48);
+        add(__form8, __body49);
       }
       ____i51 = ____i51 + 1;
     }
@@ -2858,9 +2858,9 @@ var create = (globals) => {
       add(__form8, ["%throw", __e38]);
       var __expr5 = hd(expandIf(__form8));
       indentLevel = indentLevel + 1;
-      var ____x405 = compile(__expr5, {["_stash"]: true, ["stmt"]: true});
+      var ____x407 = compile(__expr5, {["_stash"]: true, ["stmt"]: true});
       indentLevel = indentLevel - 1;
-      var __h1 = ____x405;
+      var __h1 = ____x407;
       __str = __str + " catch (" + __e38 + ") {\n" + __h1 + __ind6 + "}";
     }
     var __clause = first((x) => {
@@ -2869,11 +2869,11 @@ var create = (globals) => {
       }
     }, __clauses3);
     if (__clause) {
-      var __body49 = tl(__clause);
+      var __body50 = tl(__clause);
       indentLevel = indentLevel + 1;
-      var ____x406 = compile(join(["do"], __body49), {["_stash"]: true, ["stmt"]: true});
+      var ____x408 = compile(join(["do"], __body50), {["_stash"]: true, ["stmt"]: true});
       indentLevel = indentLevel - 1;
-      var __h2 = ____x406;
+      var __h2 = ____x408;
       __str = __str + " finally {\n" + __h2 + __ind6 + "}";
     }
     __str = __str + "\n";
@@ -2901,31 +2901,31 @@ var create = (globals) => {
     } else {
       __e75 = "return " + compile(x);
     }
-    var __x412 = __e75;
-    return indentation() + __x412;
+    var __x414 = __e75;
+    return indentation() + __x414;
   }, ["stmt"]: true});
   setenv("async", {["_stash"]: true, ["special"]: (...x) => {
-    var __x413 = unstash(x);
-    if (_35(__x413) > 1) {
-      return compile(join([["async", hd(__x413)]], tl(__x413)));
+    var __x415 = unstash(x);
+    if (_35(__x415) > 1) {
+      return compile(join([["async", hd(__x415)]], tl(__x415)));
     } else {
-      return "async " + compile(hd(__x413));
+      return "async " + compile(hd(__x415));
     }
   }});
   setenv("await", {["_stash"]: true, ["special"]: (...x) => {
-    var __x416 = unstash(x);
-    if (_35(__x416) > 1) {
-      return compile(join([["await", hd(__x416)]], tl(__x416)));
+    var __x418 = unstash(x);
+    if (_35(__x418) > 1) {
+      return compile(join([["await", hd(__x418)]], tl(__x418)));
     } else {
-      return "await (" + compile(hd(__x416)) + ")";
+      return "await (" + compile(hd(__x418)) + ")";
     }
   }});
   setenv("new", {["_stash"]: true, ["special"]: (...x) => {
-    var __x419 = unstash(x);
-    if (_35(__x419) > 1) {
-      return compile(join([["new", hd(__x419)]], tl(__x419)));
+    var __x421 = unstash(x);
+    if (_35(__x421) > 1) {
+      return compile(join([["new", hd(__x421)]], tl(__x421)));
     } else {
-      return "new " + compile(hd(__x419));
+      return "new " + compile(hd(__x421));
     }
   }});
   setenv("instanceof", {["_stash"]: true, ["special"]: (a, b) => {
@@ -3007,10 +3007,10 @@ var create = (globals) => {
     var __s8 = "{";
     var __c8 = "";
     var __sep = ": ";
-    var ____x424 = pair(__forms3);
+    var ____x426 = pair(__forms3);
     var ____i53 = 0;
-    while (____i53 < _35(____x424)) {
-      var ____id89 = ____x424[____i53];
+    while (____i53 < _35(____x426)) {
+      var ____id89 = ____x426[____i53];
       var __k40 = ____id89[0];
       var __v29 = ____id89[1];
       __s8 = __s8 + __c8 + key(__k40) + __sep + compile(__v29);
@@ -3027,24 +3027,24 @@ var create = (globals) => {
     var __comma = either(__forms4.comma, ", ");
     indentLevel = indentLevel + 1;
     var __ind8 = indentation();
-    var ____x426 = __forms4;
+    var ____x428 = __forms4;
     var ____i54 = 0;
-    while (____i54 < _35(____x426)) {
-      var __x427 = ____x426[____i54];
-      if (atom63(__x427)) {
-        __s9 = __s9 + __c9 + __ind8 + key(__x427) + __sep1 + compile(__x427);
+    while (____i54 < _35(____x428)) {
+      var __x429 = ____x428[____i54];
+      if (atom63(__x429)) {
+        __s9 = __s9 + __c9 + __ind8 + key(__x429) + __sep1 + compile(__x429);
       } else {
-        if (_35(__x427) <= 2) {
-          var ____id90 = __x427;
+        if (_35(__x429) <= 2) {
+          var ____id90 = __x429;
           var __name19 = ____id90[0];
           var __v30 = ____id90[1];
           __s9 = __s9 + __c9 + __ind8 + key(__name19) + __sep1 + compile(__v30);
         } else {
-          var ____id91 = __x427;
+          var ____id91 = __x429;
           var __prefix3 = ____id91[0];
           var __name20 = ____id91[1];
           var __args24 = ____id91[2];
-          var __body50 = cut(____id91, 3);
+          var __body51 = cut(____id91, 3);
           var __e79;
           if (in63(__prefix3, ["define", "def"])) {
             __e79 = "";
@@ -3053,8 +3053,8 @@ var create = (globals) => {
           }
           var __prefix4 = __e79;
           var __e80;
-          if (some63(__body50)) {
-            __e80 = compileFunction(__args24, join(["do"], __body50), {["_stash"]: true, ["name"]: key(__name20), ["prefix"]: __prefix4});
+          if (some63(__body51)) {
+            __e80 = compileFunction(__args24, join(["do"], __body51), {["_stash"]: true, ["name"]: key(__name20), ["prefix"]: __prefix4});
           } else {
             __e80 = key(__name20) + __sep1 + compile(__args24);
           }
@@ -3065,7 +3065,7 @@ var create = (globals) => {
       __c9 = inner(__comma) + "\n";
       ____i54 = ____i54 + 1;
     }
-    var ____x425;
+    var ____x427;
     indentLevel = indentLevel - 1;
     return __s9 + "\n" + indentation() + "}";
   }});
@@ -3073,7 +3073,7 @@ var create = (globals) => {
     var ____r252 = unstash(__r252);
     var __name21 = destash33(name, ____r252);
     var ____id92 = ____r252;
-    var __body51 = cut(____id92, 0);
+    var __body52 = cut(____id92, 0);
     var __e81;
     if (atom63(__name21)) {
       __e81 = [__name21];
@@ -3097,21 +3097,21 @@ var create = (globals) => {
       __e83 = [];
     }
     var __ext = __e83;
-    var ____x437 = ["%table"];
-    ____x437.comma = "\"\"";
-    return compile(join(["%literal", "\"class \""], __name23, __ext, [join(____x437, __body51)]));
+    var ____x439 = ["%table"];
+    ____x439.comma = "\"\"";
+    return compile(join(["%literal", "\"class \""], __name23, __ext, [join(____x439, __body52)]));
   }});
   setenv("%literal", {["_stash"]: true, ["special"]: (...args) => {
     var __args25 = unstash(args);
     var __s10 = "";
-    var ____x438 = __args25;
+    var ____x440 = __args25;
     var ____i55 = 0;
-    while (____i55 < _35(____x438)) {
-      var __x439 = ____x438[____i55];
-      if (stringLiteral63(__x439)) {
-        __s10 = __s10 + _eval(__x439);
+    while (____i55 < _35(____x440)) {
+      var __x441 = ____x440[____i55];
+      if (stringLiteral63(__x441)) {
+        __s10 = __s10 + _eval(__x441);
       } else {
-        __s10 = __s10 + compile(__x439);
+        __s10 = __s10 + compile(__x441);
       }
       ____i55 = ____i55 + 1;
     }
@@ -3120,14 +3120,14 @@ var create = (globals) => {
   setenv("%statement", {["_stash"]: true, ["special"]: (...args) => {
     var __args26 = unstash(args);
     var __s111 = indentation();
-    var ____x440 = __args26;
+    var ____x442 = __args26;
     var ____i56 = 0;
-    while (____i56 < _35(____x440)) {
-      var __x441 = ____x440[____i56];
-      if (stringLiteral63(__x441)) {
-        __s111 = __s111 + _eval(__x441);
+    while (____i56 < _35(____x442)) {
+      var __x443 = ____x442[____i56];
+      if (stringLiteral63(__x443)) {
+        __s111 = __s111 + _eval(__x443);
       } else {
-        __s111 = __s111 + compile(__x441);
+        __s111 = __s111 + compile(__x443);
       }
       ____i56 = ____i56 + 1;
     }
@@ -3224,9 +3224,9 @@ var create = (globals) => {
   };
   _G.readAll = readAll;
   readString = (str, more) => {
-    var __x442 = read(stream(str, more));
-    if (!( __x442 === eof)) {
-      return __x442;
+    var __x444 = read(stream(str, more));
+    if (!( __x444 === eof)) {
+      return __x444;
     }
   };
   _G.readString = readString;
@@ -3333,13 +3333,13 @@ var create = (globals) => {
         if (nil63(__c14)) {
           __r270 = expected(s, ")");
         } else {
-          var __x444 = read(s);
-          if (key63(__x444)) {
-            var __k41 = clip(__x444, 0, edge(__x444));
+          var __x446 = read(s);
+          if (key63(__x446)) {
+            var __k41 = clip(__x446, 0, edge(__x446));
             var __v31 = read(s);
             __l9[__k41] = __v31;
           } else {
-            add(__l9, __x444);
+            add(__l9, __x446);
           }
         }
       }
@@ -3363,8 +3363,8 @@ var create = (globals) => {
         if (nil63(__c15)) {
           __r273 = expected(s, "]");
         } else {
-          var __x446 = read(s);
-          add(__l10, __x446);
+          var __x448 = read(s);
+          add(__l10, __x448);
         }
       }
     }
@@ -3387,8 +3387,8 @@ var create = (globals) => {
         if (nil63(__c16)) {
           __r276 = expected(s, "}");
         } else {
-          var __x448 = read(s);
-          add(__l111, __x448);
+          var __x450 = read(s);
+          add(__l111, __x450);
         }
       }
     }
@@ -3597,11 +3597,11 @@ var create = (globals) => {
         return str(body);
       } else {
         var __s13 = "(";
-        var ____x450 = body;
+        var ____x452 = body;
         var ____i58 = 0;
-        while (____i58 < _35(____x450)) {
-          var __x451 = ____x450[____i58];
-          __s13 = __s13 + str(__x451) + "\n\n";
+        while (____i58 < _35(____x452)) {
+          var __x453 = ____x452[____i58];
+          __s13 = __s13 + str(__x453) + "\n\n";
           ____i58 = ____i58 + 1;
         }
         return __s13 + ")";
@@ -3616,22 +3616,22 @@ var create = (globals) => {
   _G.pp = pp;
   readFile = (path) => {
     var __s14 = reader.stream(system.readFile(path));
-    var __body52 = reader.readAll(__s14);
-    if (one63(__body52)) {
-      return hd(__body52);
+    var __body53 = reader.readAll(__s14);
+    if (one63(__body53)) {
+      return hd(__body53);
     } else {
-      return join(["do"], __body52);
+      return join(["do"], __body53);
     }
   };
   _G.readFile = readFile;
   expandFile = (path) => {
-    var __body53 = readFile(path);
-    return compiler.expand(__body53);
+    var __body54 = readFile(path);
+    return compiler.expand(__body54);
   };
   _G.expandFile = expandFile;
   compileFile = (path) => {
-    var __body54 = expandFile(path);
-    var __form11 = compiler.expand(join(["do"], __body54));
+    var __body55 = expandFile(path);
+    var __form11 = compiler.expand(join(["do"], __body55));
     return compiler.compile(__form11, {["_stash"]: true, ["stmt"]: true});
   };
   _G.compileFile = compileFile;
@@ -3639,10 +3639,10 @@ var create = (globals) => {
     var __code1 = compileFile(path);
     var __prev = _G.exports || {};
     _G.exports = {};
-    var __x454 = _G.exports;
+    var __x456 = _G.exports;
     compiler.run(__code1);
     _G.exports = __prev;
-    return __x454;
+    return __x456;
   };
   _G.load = load;
   var scriptFile63 = (path) => {
@@ -3720,10 +3720,10 @@ var create = (globals) => {
           }
           __i59 = __i59 + 1;
         }
-        var ____x455 = __pre1;
+        var ____x457 = __pre1;
         var ____i60 = 0;
-        while (____i60 < _35(____x455)) {
-          var __file = ____x455[____i60];
+        while (____i60 < _35(____x457)) {
+          var __file = ____x457[____i60];
           runFile(__file);
           ____i60 = ____i60 + 1;
         }

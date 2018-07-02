@@ -30,14 +30,13 @@
 
 (define-macro case (expr rest: clauses)
   (let-unique (x)
-    (let (eq (fn (_) `(= ,_ ,x))
-          cl (fn ((a b))
-               (if (nil? b) (list a)
-                   (or (string? a) (number? a) (= (hd a) 'quote)) (list (eq a) b)
-                   (one? a) (list (eq (hd a)) b)
-                   (> (# a) 1) (list `(or ,@(map eq a)) b))))
+    (let (eq (fn (_) (if (= _ 'else) `true `(= ,_ ,x)))
+          cl (fn ((a rest: body))
+               (if (or (string? a) (number? a) (= (hd a) 'quote)) (list (eq a) `(do ,@body))
+                   (one? a) (list (eq (hd a)) `(do ,@body))
+                   (> (# a) 1) (list `(or ,@(map eq a)) `(do ,@body)))))
       `(let ,x ,expr
-         (if ,@(apply join (map cl (pair clauses))))))))
+         (if ,@(apply join (map cl clauses)))))))
 
 (define-macro when (cond rest: body)
   `(if ,cond (do ,@body)))

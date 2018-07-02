@@ -19,7 +19,8 @@
     (let-unique (x y)
       `(let (,x ,a ,y ,b)
          (test (equal? ,x ,y)
-               (cat "failed: expected " (str ,x) ", was " (str ,y))))))
+               (cat "failed: expected " (str ,x) ", was " (str ,y) "\n"
+                    "(test= " (str ',a) " " (str ',b) ")")))))
 
   (define-macro define-test (name rest: body)
     `(add tests (list ',name (fn () ,@body)))))
@@ -435,19 +436,19 @@ c"
 
 (define-test case
   (let x 10
-    (test= 2 (case x 9 9 10 2 4))
-    (test= 2 (case x 9 9 (10) 2 4))
-    (test= 2 (case x 9 9 (10 20) 2 4)))
+    (test= 2 (case x (9 9) (10 2) (else 4)))
+    (test= 2 (case x (9 9) ((10) 2) (else 4)))
+    (test= 2 (case x (9 9) ((10 20) 2) (else 4))))
   (let x 'z
-    (test= 9 (case x 'z 9 10))
-    (test= 7 (case x 'a 1 'b 2 7))
-    (test= 2 (case x 'a 1 ('z) 2 7))
-    (test= 2 (case x 'a 1 ('b 'z) 2 7)))
+    (test= 9 (case x ('z 9) (else 10)))
+    (test= 7 (case x ('a 1) ('b 2) (else 7)))
+    (test= 2 (case x ('a 1) (('z) 2) (else 7)))
+    (test= 2 (case x ('a 1) (('b 'z) 2) (else 7))))
   (let (n 0 f (fn () (inc n))) ; no multiple eval
-    (test= 'b (case (f) 0 'a 1 'b 'c)))
-  (test= 'b ((fn () (case 2 0 (do) 1 'a 2 'b))))
+    (test= 'b (case (f) (0 'a) (1 'b) (else 'c))))
+  (test= 'b ((fn () (case 2 (0 (do)) (1 'a) (2 'b)))))
   (let (x "a" y "a")
-    (test= 1 (case x "b" 0 y 1 2))))
+    (test= 1 (case x ("b" 0) (y 1) (else 2)))))
 
 (define-test while
   (let i 0
