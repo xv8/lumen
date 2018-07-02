@@ -32,7 +32,7 @@
    (set (module .exports .create) create))
   (else
     (when-compiling
-      `(%literal ,(escape (system .read-file "vm.js" .replace |/[\r]/g| ""))))
+      `(%literal ,(escape (system .read-file "vm.js"))))
     (unless (window .require)
       (set (window .require) (fn (x) (window .DAX .shims [x]))))
     (set (window .DAX)

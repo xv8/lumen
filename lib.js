@@ -748,8 +748,8 @@ var create = (globals) => {
         try {
           return [true, readString(x)];
         }
-        catch (__e90) {
-          return [false, __e90];
+        catch (__e91) {
+          return [false, __e91];
         }
       })();
       var __ok = ____id[0];
@@ -3504,8 +3504,19 @@ var create = (globals) => {
   var childProcess = require("child_process");
   var path = require("path");
   var process = require("process");
-  var readFile = (path) => {
-    return fs.readFileSync(path, "utf8");
+  var readFile = (path, __x112) => {
+    var __e88;
+    if (is63(__x112)) {
+      __e88 = __x112;
+    } else {
+      __e88 = "text";
+    }
+    var __mode = __e88;
+    if (__mode === "text") {
+      return fs.readFileSync(path, "utf8").replace(/\r/g, "");
+    } else {
+      return fs.readFileSync(path);
+    }
   };
   var writeFile = (path, data) => {
     return fs.writeFileSync(path, data, "utf8");
@@ -3570,8 +3581,8 @@ var create = (globals) => {
       try {
         return [true, compiler["eval"](form)];
       }
-      catch (__e91) {
-        return [false, __e91];
+      catch (__e92) {
+        return [false, __e92];
       }
     })();
     var __ok1 = ____id97[0];
@@ -3613,11 +3624,11 @@ var create = (globals) => {
         return str(body);
       } else {
         var __s13 = "(";
-        var ____x112 = body;
+        var ____x113 = body;
         var ____i59 = 0;
-        while (____i59 < _35(____x112)) {
-          var __x113 = ____x112[____i59];
-          __s13 = __s13 + str(__x113) + "\n\n";
+        while (____i59 < _35(____x113)) {
+          var __x114 = ____x113[____i59];
+          __s13 = __s13 + str(__x114) + "\n\n";
           ____i59 = ____i59 + 1;
         }
         return __s13 + ")";
@@ -3655,10 +3666,10 @@ var create = (globals) => {
     var __code1 = compileFile(path);
     var __prev = _G.exports || {};
     _G.exports = {};
-    var __x114 = _G.exports;
+    var __x115 = _G.exports;
     compiler.run(__code1);
     _G.exports = __prev;
-    return __x114;
+    return __x115;
   };
   _G.load = load;
   var scriptFile63 = (path) => {
@@ -3736,10 +3747,10 @@ var create = (globals) => {
           }
           __i60 = __i60 + 1;
         }
-        var ____x115 = __pre1;
+        var ____x116 = __pre1;
         var ____i61 = 0;
-        while (____i61 < _35(____x115)) {
-          var __file = ____x115[____i61];
+        while (____i61 < _35(____x116)) {
+          var __file = ____x116[____i61];
           runFile(__file);
           ____i61 = ____i61 + 1;
         }
@@ -3750,19 +3761,19 @@ var create = (globals) => {
             return repl();
           }
         } else {
-          var __e88;
+          var __e89;
           if (__op2 === "expand") {
-            __e88 = ppToString(expandFile(__input));
+            __e89 = ppToString(expandFile(__input));
           } else {
-            var __e89;
+            var __e90;
             if (__op2 === "read") {
-              __e89 = ppToString(readFile(__input));
+              __e90 = ppToString(readFile(__input));
             } else {
-              __e89 = compileFile(__input);
+              __e90 = compileFile(__input);
             }
-            __e88 = __e89;
+            __e89 = __e90;
           }
-          var __code2 = __e88;
+          var __code2 = __e89;
           if (nil63(__output) || __output === "-") {
             return print(__code2);
           } else {
@@ -3788,8 +3799,8 @@ var create = (globals) => {
   Object.assign(_G, _G.main);
   return _G;
 };
-var ____x116 = typeof(window);
-if ("undefined" === ____x116) {
+var ____x117 = typeof(window);
+if ("undefined" === ____x117) {
   module.exports.create = create;
 } else {
   if (true) {

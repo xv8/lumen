@@ -3,8 +3,10 @@
 (define path (require "path"))
 (define process (require "process"))
 
-(define read-file (path)
-  (fs .read-file-sync path "utf8"))
+(define read-file (path (o mode 'text))
+  (if (= mode 'text)
+      (fs .read-file-sync path "utf8" .replace |/\r/g| "")
+    (fs .read-file-sync path)))
 
 (define write-file (path data)
   (fs .write-file-sync path data "utf8"))
