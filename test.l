@@ -349,7 +349,9 @@ c"
     (test= 20 (%literal b |.x|))
     (test= 30 (%literal f |()|))
     (test= "fooBar" (compile 'foo-bar))
-    (test= "FOO_BAR" (compile 'FOO-BAR))))
+    (test= "FOO_BAR" (compile 'FOO-BAR))
+    (test= "_fooBar" (compile '-foo-bar))
+    (test= "_143" (compile '1+))))
 
 (define-test names
   (let (a! 0
