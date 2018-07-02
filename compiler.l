@@ -40,7 +40,9 @@
 (define-global quoted (form)
   (if (string? form) (escape form)
       (atom? form) form
-    `(list ,@(map quoted form))))
+      (keys? form)
+      `(%object ,@(mapo quoted form))
+    `(%array ,@(map quoted form))))
 
 (define literal (s)
   (if (string-literal? s) s (quoted s)))

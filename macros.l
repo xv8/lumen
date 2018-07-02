@@ -15,15 +15,9 @@
   `(%delete ,place))
 
 (define-macro list body
-  (let-unique (x)
-    (let (l () forms ())
-      (each (k v) body
-        (if (number? k)
-            (set (get l k) v)
-          (add forms `(set (get ,x ',k) ,v))))
-      (if (some? forms)
-          `(let ,x (%array ,@l) ,@forms ,x)
-        `(%array ,@l)))))
+  (if (keys? body)
+      `(%object ,@(mapo (fn (x) x) body))
+    `(%array ,@body)))
 
 (define-macro if branches
   (hd (expand-if branches)))

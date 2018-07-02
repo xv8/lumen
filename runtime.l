@@ -11,7 +11,13 @@
   (l .has-own-property k))
 
 (define-global # (x)
-  (or (x .length) 0))
+  (let n (x .length)
+    (if (number? n) n
+    (let n -1
+      (each (k v) x
+        (when (and (number? k) (> k n))
+          (set n k)))
+      (+ n 1)))))
 
 (define-global none? (x) (= (# x) 0))
 (define-global some? (x) (> (# x) 0))
@@ -28,14 +34,27 @@
 (define-global number? (x) (type? x "number"))
 (define-global boolean? (x) (type? x "boolean"))
 (define-global function? (x) (type? x "function"))
-(define-global function? (x) (type? x "function"))
 (define-global symbol? (x) (type? x "symbol"))
 
 (define-global obj? (x)
   (and (is? x) (type? x "object")))
 
+(define-global array? (x)
+  (Array .is-array x))
+
 (define-global atom? (x)
   (or (nil? x) (string? x) (number? x) (boolean? x) (symbol? x)))
+
+(define-global fresh (x)
+  (case (type x)
+    ("object"
+     (if (nil? x) nil
+         (array? x) (list)
+       (obj)))
+    ("undefined" (list))
+    ("symbol" (Symbol))
+    ("string" "")
+    ("number" 0)))
 
 (define-global nan (/ 0 0))
 (define-global inf (/ 1 0))
@@ -51,7 +70,7 @@
   (s .substring from upto))
 
 (define-global cut (x from upto)
-  (with l ()
+  (with l (fresh x)
     (let (j 0
           i (if (or (nil? from) (< from 0)) 0 from)
           n (# x)
@@ -65,7 +84,7 @@
           (set (l [k]) v))))))
 
 (define-global keys (x)
-  (with t ()
+  (with t (obj)
     (each (k v) x
       (unless (number? k)
         (set (t [k]) v)))))
@@ -91,7 +110,10 @@
   (and (string? x) (= (char x 0) "|")))
 
 (define-global add (l x)
-  (do (l .push x) nil))
+  (if (l .push)
+      (l .push x)
+    (set (at l (# l)) x))
+  nil)
 
 (define-global drop (l)
   (l (.pop)))
@@ -103,11 +125,12 @@
   (cut l 0 (edge l)))
 
 (define-global reverse (l)
-  (with l1 (keys l)
-    (let i (edge l)
-      (while (>= i 0)
-        (add l1 (at l i))
-        (dec i)))))
+  (with l1 (fresh l)
+    (let n (edge l)
+      (each (k v) l
+        (when (number? k)
+          (set k (- n k)))
+        (set (at l1 k) v)))))
 
 (define-global reduce (f x)
   (if (none? x) nil
@@ -137,7 +160,7 @@
   (find (fn (y) (= x y)) t))
 
 (define-global pair (l)
-  (with l1 ()
+  (with l1 (fresh l)
     (for i (# l)
       (add l1 (list (at l i) (at l (+ i 1))))
       (inc i))))
@@ -146,7 +169,7 @@
   (l .sort (when f (fn (a b) (if (f a b) -1 1)))))
 
 (define-global map (f x)
-  (with t ()
+  (with t (fresh x)
     (step v x
       (let y (f v)
         (if (is? y)
@@ -172,17 +195,18 @@
   true)
 
 (define-global stash (args)
-  (when (keys? args)
-    (let p ()
-      (each (k v) args
-        (unless (number? k)
-          (set (p [k]) v)))
-      (set (p ._stash) true)
-      (add args p)))
-  args)
+  (if (args ._stash) args
+      (keys? args)
+      (with l ()
+        (step x args
+          (add l x))
+        (let p (keys args)
+          (set (p ._stash) (or (p ._stash) true))
+          (add l p)))
+    args))
 
 (define-global unstash (args)
-  (if (none? args) ()
+  (if (none? args) (fresh args)
     (let l (last args)
       (if (and (obj? l) (l ._stash))
           (with args1 (almost args)
@@ -231,7 +255,7 @@
 (define-global % xs
   (either (reduce (fn (b a) (% a b)) (reverse xs)) 0))
 
-(define pairwise (f xs)
+(define-global pairwise (f xs)
   (for i (edge xs)
     (let (a (at xs i)
           b (at xs (+ i 1)))
