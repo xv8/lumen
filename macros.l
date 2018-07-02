@@ -9,7 +9,7 @@
               (pair args))))
 
 (define-macro at (l i)
-  `(get ,l ,i))
+  `(,l [,i]))
 
 (define-macro wipe (place)
   `(%delete ,place))
@@ -81,7 +81,7 @@
   `(%setenv ,name symbol: ',expansion))
 
 (define-macro define-reader ((char s) rest: body)
-  `(set (get read-table ,char) (fn (,s) ,@body)))
+  `(set (read-table [,char]) (fn (,s) ,@body)))
 
 (define-macro define (name x rest: body)
   (setenv name variable: true)
@@ -151,7 +151,7 @@
                       (list i (hd x)))))
       `(let (,o ,t ,k nil)
          (%for ,o ,k
-           (let (,v (get ,o ,k))
+           (let (,v (,o [,k]))
              (let ,k (if (numeric? ,k)
                          (parseInt ,k)
                        ,k)
@@ -173,7 +173,7 @@
 (define-macro set-of xs
   (let l ()
     (each x xs
-      (set (get l x) true))
+      (set (l [x]) true))
     `(obj ,@l)))
 
 (define-macro join! (a rest: bs)
@@ -212,13 +212,13 @@
     `(%class ,x ,@body)))
 
 (define-macro . args
-  (if (none? args) `(get this 'constructor)
+  (if (none? args) `(this .constructor)
       (one? args) `(. this ,(hd args) ,@(tl args))
     (let ((name a rest: bs) args)
       (let (prop (if (atom? a) `',(compile a)
                      (= 'quote (hd a)) `',(compile (at a 1))
                     a)
-            expr `(get ,name ,prop))
+            expr `(,name [,prop]))
         (if (or (and (not (atom? a))
                      (= 'quote (hd a)))
                 (string-literal? a)
@@ -244,3 +244,13 @@
 
 (define-macro throw (x)
   `(%throw ,x))
+
+(define-macro brackets args
+  (case (# args)
+    (0 `(%brackets))
+    (1 `(%brackets ,@args))
+    (else `(%brackets ,args))))
+
+(define-macro braces args
+  `(%braces ,@args))
+

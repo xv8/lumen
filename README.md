@@ -58,11 +58,15 @@ Lists can contain values that are identified by their position, as well as value
 ```
 Note that values identified by name, known as keys, don't show up in any particular order.
 
-Positional values can be gotten out of lists using the `at` operator, and keys using the `get` operator:
+Objects can be indexed using `.dot` notation or `[index]` notation:
 ```
-> (at (list 1 2 3) 1)
-2
-> (get (list a: 10 b: 20) "b")
+> ((list 1 2 3) [0])
+1
+> ((list 1 2 3) .0)
+1
+> ((list 1 2 3) [+ 1 1])
+3
+> ((list a: 10 b: 20) .b)
 20
 ```
 
@@ -127,7 +131,7 @@ Variables and list values can be updated using `set`, which evaluates to the val
     a)
 (1 "b" 3)
 > (let a (list foo: 17)
-    (set (get a "foo") 19)
+    (set (a .foo) 19)
     a)
 (foo: 19)
 ```
@@ -386,7 +390,7 @@ Another way to write many strings is to simply quote their name:
 > 'a
 "a"
 > (let x '(a: 10 b: 20)
-    (get x 'a))
+    (x .a))
 10
 ```
 

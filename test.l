@@ -196,7 +196,7 @@
   (let x nil
     (test= 9 (do (list nothing fooey (set x 10)) 9))
     (test= 10 x))
-  (test= 12 (do (get but zz) 12))
+  (test= 12 (do (but [zz]) 12))
   (let y nil
     (let ignore (do (%literal y | = 10;|) 42)
       (test= 10 y))))
@@ -511,11 +511,9 @@ c"
     (set (t .foo) 'bar)
     (test= 'bar (t .foo))
     (test= 'bar (t ["foo"]))
-    (test= 'bar (get t "foo"))
     (let k "foo"
-      (test= 'bar (get t k))
       (test= 'bar (t [k])))
-    (test= 'bar (get t (cat "f" "oo"))))
+    (test= 'bar (t [cat "f" "oo"])))
   (let (t1 (obj) t2 (obj))
     (set ((or nil t1 t2) .foo) 'bar)
     (test= 'bar (t1 .foo))
@@ -1055,8 +1053,8 @@ c"
 ; (define-test str
 ;   (define f (x) x)
 ;   (let (l () l2 ())
-;     (set (get l f) true)
-;     (set (get l2 (str l)) true)
+;     (set (l [f]) true)
+;     (set (l2 [str l]) true)
 ;     (let k (str f)
 ;       (test= (cat "(" k ": true)") (str l))
 ;       (test= (cat "((" k ": true): true)") (str l2)))))

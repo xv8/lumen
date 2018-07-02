@@ -75,7 +75,7 @@
         (each (k v) lh
           (let x (if (= k 'rest)
                      `(cut ,id ,(# lh))
-                   `(get ,id ',(bias k)))
+                   `(,id [',k]))
             (when (is? k)
               (let k (if (= v true) k v)
                 (join! bs (bind k x))))))))))
@@ -185,7 +185,7 @@
                    ;; don't splice, just expand
                    (quasiexpand (at v 1))
                  (quasiexpand v depth))
-          (set (get (last xs) k) v))))
+          (set ((last xs) [k]) v))))
     ;; collect sibling lists
     (step x form
       (if (quasisplice? x depth)
@@ -295,11 +295,11 @@
   (define-global unique (x)
     (if (string? x)
         (let x (id x)
-          (if (get names x)
-              (let i (get names x)
-                (inc (get names x))
+          (if (names [x])
+              (let i (names [x])
+                (inc (names [x]))
                 (unique (cat x i)))
-            (do (set (get names x) 1)
+            (do (set (names [x]) 1)
                 (cat "__" x))))
       x)))
 
@@ -339,12 +339,13 @@
 (define precedence (form)
   (unless (or (atom? form) (unary? form))
     (each (k v) infix
-      (if (get v (hd form)) (return (index k)))))
+      (let x (hd form)
+        (if (v [x]) (return (index k))))))
   0)
 
 (define getop (op)
   (find (fn (level)
-          (let x (get level op)
+          (let x (level [op])
             (if (= x true) op
                 (is? x) (x .js))))
         infix))

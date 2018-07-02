@@ -42,7 +42,7 @@
   (cut (process .argv) 2))
 
 (define reload (module)
-  (wipe (get (require .cache) (require .resolve module)))
+  (wipe (require .cache [require .resolve module]))
   (require module))
 
 (define shell (command)
