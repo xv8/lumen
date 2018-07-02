@@ -3503,6 +3503,7 @@ var create = (globals) => {
   var fs = require("fs");
   var childProcess = require("child_process");
   var path = require("path");
+  var process = require("process");
   var readFile = (path) => {
     return fs.readFileSync(path, "utf8");
   };
@@ -3787,9 +3788,11 @@ var create = (globals) => {
   Object.assign(_G, _G.main);
   return _G;
 };
-if (typeof(window) === "undefined") {
+var ____x116 = typeof(window);
+if ("undefined" === ____x116) {
   module.exports.create = create;
 } else {
+  if (true) {
 (function () {
   var vm = {};
   var contextifiedSandboxes = [];
@@ -3879,11 +3882,12 @@ if (typeof(window) === "undefined") {
 })();
 
 ;
-  if (! window46require()) {
-    window.require = (x) => {
-      return window.DAX.shims[x];
-    };
+    if (! window.require) {
+      window.require = (x) => {
+        return window.DAX.shims[x];
+      };
+    }
+    window.DAX = Object.assign(window.DAX || {}, {["create"]: create, ["shims"]: {["fs"]: {}, ["child_process"]: {}, ["process"]: {["argv"]: []}, ["path"]: {["sep"]: ":"}, ["vm"]: window.vm}});
+    window.dax = window.DAX.create(window.dax || {});
   }
-  window.DAX = Object.assign(window.DAX || {}, {["create"]: create, ["shims"]: {["fs"]: {}, ["child_process"]: {}, ["process"]: {["argv"]: []}, ["path"]: {["sep"]: ":"}}});
-  window.dax = window.DAX.create(window.dax || {});
 }

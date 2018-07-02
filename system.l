@@ -1,6 +1,7 @@
 (define fs (require "fs"))
 (define child-process (require "child_process"))
 (define path (require "path"))
+(define process (require "process"))
 
 (define read-file (path)
   (fs .read-file-sync path "utf8"))
