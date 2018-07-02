@@ -63,16 +63,16 @@
       (list x y))))
 
 (define-global hex-prefix? (str)
-  (let i (if (= (code str 0) 45) 1 0)  ; "-"
-    (and (= (code str i) 48)           ; "0"
+  (let i (if (= (code str 0) ?-) 1 0)
+    (and (= (code str i) ?0)
          (let n (code str (inc i))
-           (or (= n 120) (= n 88)))))) ; "x" or "X"
+           (or (= n ?x) (= n ?X))))))
 
 (define-global maybe-number (str)
   (if (hex-prefix? str)
       (parseInt str 16)
       (and (number-code? (code str (edge str)))
-           (not (= (code str 0) 46))) ; "."
+           (not (= (code str 0) ?.)))
     (number str)))
 
 (define-global real? (x)

@@ -250,7 +250,7 @@
     (unless (isNaN n) n)))
 
 (define-global number-code? (n)
-  (and (> n 47) (< n 58)))
+  (and (>= n ?0) (<= n ?9)))
 
 (define-global numeric? (s)
   (let n (# s)

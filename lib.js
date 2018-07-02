@@ -610,7 +610,7 @@ var create = (globals) => {
   };
   _G.number = number;
   numberCode63 = (n) => {
-    return n > 47 && n < 58;
+    return n >= 48 && n <= 57;
   };
   _G.numberCode63 = numberCode63;
   numeric63 = (s) => {
@@ -1890,7 +1890,7 @@ var create = (globals) => {
   };
   _G.reserved63 = reserved63;
   var validCode63 = (n) => {
-    return numberCode63(n) || n > 64 && n < 91 || n > 96 && n < 123 || n === 95;
+    return numberCode63(n) || n >= 65 && n <= 90 || n >= 97 && n <= 122 || n === 95;
   };
   accessor63 = (x) => {
     return string63(x) && _35(x) > 1 && code(x, 0) === 46 && !( code(x, 1) === 46) || obj63(x) && hd(x) === "%brackets";

@@ -247,16 +247,16 @@
   (has? reserved x))
 
 (define valid-code? (n)
-  (or (number-code? n)         ; 0-9
-      (and (> n 64) (< n 91))  ; A-Z
-      (and (> n 96) (< n 123)) ; a-z
-      (= n 95)))               ; _
+  (or (number-code? n)
+      (and (>= n ?A) (<= n ?Z))
+      (and (>= n ?a) (<= n ?z))
+      (= n ?_)))
 
 (define-global accessor? (x)
   (or (and (string? x)
            (> (# x) 1)
-           (= (code x 0) 46)
-           (not (= (code x 1) 46))) ; .
+           (= (code x 0) ?.)
+           (not (= (code x 1) ?.)))
       (and (obj? x)
            (= (hd x) '%brackets))))
 
