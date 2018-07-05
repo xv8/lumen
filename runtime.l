@@ -201,7 +201,7 @@
 (define-global stash (args)
   (if (args ._stash) args
       (keys? args)
-      (with l ()
+      (with l (list)
         (step x args
           (add l x))
         (let p (keys args)
@@ -231,8 +231,8 @@
     (if (>= i 0) i)))
 
 (define-global split (s sep)
-  (if (or (= s "") (= sep "")) ()
-    (with l ()
+  (if (or (= s "") (= sep "")) (list)
+    (with l (list)
       (let n (# sep)
         (while true
           (let i (search s sep)
@@ -320,8 +320,8 @@
       (function? x) "function"
       (and stack (in? x stack)) "circular"
     (let (s "(" sp ""
-          xs () ks ()
-          l (or stack ()))
+          xs (list) ks (list)
+          l (or stack (list)))
       (add l x)
       (each (k v) x
         (if (number? k)

@@ -81,13 +81,13 @@
                 (join! bs (bind k x))))))))))
 
 (define-global bind* (args body)
-  (let args1 ()
+  (let args1 (list)
     (define rest (r)
       (set (args1 .rest) r)
       `(unstash ,r))
     (if (atom? args)
         (list args1 `(let ,(list args (rest args)) ,@body))
-      (let bs ()
+      (let bs (list)
         (let-unique (r)
           (each (k v) args
             (when (number? k)
@@ -313,7 +313,7 @@
     (compile k)))
 
 (define-global mapo (f t)
-  (with o ()
+  (with o (list)
     (each (k v) t
       (let x (f v)
         (when (is? x)
@@ -479,7 +479,7 @@
 
 (define lower-statement (form tail?)
   (either
-    (let (hoist () e (lower form hoist true tail?))
+    (let (hoist (list) e (lower form hoist true tail?))
       (if (and (some? hoist) (is? e))
           `(do ,@hoist ,e)
           (is? e) e
@@ -541,7 +541,7 @@
 
 (define lower-short (x args hoist)
   (let ((a b) args
-        hoist1 ()
+        hoist1 (list)
         b1 (lower b hoist1))
     (if (some? hoist1)
         (let-unique (id)
@@ -579,7 +579,7 @@
 
 (define lower-while (args hoist)
   (let ((c rest: body) args
-        pre ()
+        pre (list)
         c (lower c pre))
     (add hoist
       (if (none? pre)
@@ -634,7 +634,7 @@
 
 (define lower-pairwise (form)
   (if (pairwise? form)
-      (let (e () (x rest: args) form)
+      (let (e (list) (x rest: args) form)
         (reduce (fn (a b)
                   (add e `(,x ,a ,b)) a)
                 args)

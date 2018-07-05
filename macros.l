@@ -46,7 +46,7 @@
       (none? bs) `(do ,@body)
     (let ((lh rh rest: bs2) bs
           (id val rest: bs1) (bind lh (either rh 'nil)))
-      (let renames ()
+      (let renames (list)
         (unless (id-literal? id)
           (let id1 (unique id)
             (set renames (list id id1)
@@ -171,7 +171,7 @@
            ,@body)))))
 
 (define-macro set-of xs
-  (let l ()
+  (let l (list)
     (each x xs
       (set (l [x]) true))
     `(obj ,@l)))

@@ -38,7 +38,7 @@
       eof)))
 
 (define-global read-all (s)
-  (with l ()
+  (with l (list)
     (while true
       (let form (read s)
         (if (= form eof) (break))
@@ -96,7 +96,7 @@
 (define-reader ("(" s)
   (read-char s)
   (with r nil
-    (let l ()
+    (let l (list)
       (while (nil? r)
         (skip-non-code s)
         (let c (peek-char s)
@@ -115,7 +115,7 @@
 (define-reader ("[" s)
   (read-char s)
   (with r nil
-    (let l ()
+    (let l (list)
       (while (nil? r)
         (skip-non-code s)
         (let c (peek-char s)
@@ -130,7 +130,7 @@
 (define-reader ("{" s)
   (read-char s)
   (with r nil
-    (let l ()
+    (let l (list)
       (while (nil? r)
         (skip-non-code s)
         (let c (peek-char s)

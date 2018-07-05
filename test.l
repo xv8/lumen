@@ -2,7 +2,7 @@
 
 (define passed 0)
 (define failed 0)
-(define tests ())
+(define tests (list))
 
 (define equal? (a b)
   (if (atom? a) (= a b)
@@ -65,7 +65,7 @@
 (define-test read-more
   (let read (reader .read-string)
     (test= 17 (read "17" true))
-    (let more ()
+    (let more (list)
       (test= more (read "(open" more))
       (test= more (read "\"unterminated " more))
       (test= more (read "|identifier" more))
@@ -141,17 +141,17 @@
   (test= 4 (+ 2 2))
   (test= 0 (apply * '(0 0)))
   (test= 4 (apply + '(2 2)))
-  (test= 0 (apply + ()))
+  (test= 0 (apply + (list)))
   (test= 18 18.00)
   (test= 4 (- 7 3))
   (test= 4 (apply - '(7 3)))
-  (test= 0 (apply - ()))
+  (test= 0 (apply - (list)))
   (test= 5.0 (/ 10 2))
   (test= 5.0 (apply / '(10 2)))
-  (test= 1 (apply / ()))
+  (test= 1 (apply / (list)))
   (test= 6 (* 2 3.00))
   (test= 6 (apply * '(2 3.00)))
-  (test= 1 (apply * ()))
+  (test= 1 (apply * (list)))
   (test= true (> 2.01 2))
   (test= true (>= 5.0 5.0))
   (test= true (> 2.1e3 2000))
@@ -392,7 +392,7 @@ c"
     (test= true (x .b))
     (wipe (x .b))
     (test= nil (x .b))
-    (test= () x)))
+    (test= (list) x)))
 
 (define-test do
   (let a 17
@@ -474,11 +474,11 @@ c"
       (test= 19 i))))
 
 (define-test for
-  (let l ()
+  (let l (list)
     (for i 5
       (add l i))
     (test= '(0 1 2 3 4) l))
-  (test= '(0 1) (with l () (for i 2 (add l i))))
+  (test= '(0 1) (with l (list) (for i 2 (add l i))))
   (let (n 0 l '(a b c d e))
     (for i (# l)
       (inc n i)
@@ -490,7 +490,7 @@ c"
   (test= true ((obj a: true) .a)))
 
 (define-test empty
-  (test= true (empty? ()))
+  (test= true (empty? (list)))
   (test= true (empty? (obj)))
   (test= false (empty? '(1)))
   (test= false (empty? '(a: true)))
@@ -547,7 +547,7 @@ c"
     (step (x y) '((1 2) (3 4))
       (inc n (+ x y)))
     (test= 10 n))
-  (let xs ()
+  (let xs (list)
     (let l (list (obj a: 1 b: 2) (obj a: 2 b: 4))
       (step (a: true b: true) l
         (add xs (+ a b))))
@@ -842,18 +842,18 @@ c"
     (test= -NaN 'b)))
 
 (define-test add
-  (let l ()
+  (let l (list)
     (add l 'a)
     (add l 'b)
     (add l 'c)
     (test= '(a b c) l)
-    (test= nil (add () 'a)))
+    (test= nil (add (list) 'a)))
   (let l '(foo: true)
     (add l 'a)
     (add l 'b)
     (add l 'c)
     (test= '(a b c foo: true) l)
-    (test= nil (add () 'a))))
+    (test= nil (add (list) 'a))))
 
 (define-test drop
   (let l '(a b c)
@@ -869,19 +869,19 @@ c"
 
 (define-test last
   (test= 3 (last '(1 2 3)))
-  (test= nil (last ()))
+  (test= nil (last (list)))
   (test= 'c (last '(a b c))))
 
 (define-test join
   (test= '(1 2 3) (join '(1 2) '(3)))
-  (test= '(1 2) (join () '(1 2)))
-  (test= () (join () ()))
-  (test= () (join nil nil))
-  (test= () (join nil ()))
-  (test= () (join))
-  (test= () (join ()))
+  (test= '(1 2) (join (list) '(1 2)))
+  (test= (list) (join (list) (list)))
+  (test= (list) (join nil nil))
+  (test= (list) (join nil (list)))
+  (test= (list) (join))
+  (test= (list) (join (list)))
   (test= '(1) (join '(1) nil))
-  (test= '(a) (join '(a) ()))
+  (test= '(a) (join '(a) (list)))
   (test= '(a) (join nil '(a)))
   (test= '(a) (join '(a)))
   (test= '(a b: true) (join '(a) (obj b: true)))
@@ -897,12 +897,12 @@ c"
     (test= false (array? (join '(foo: true) l)))))
 
 (define-test reverse
-  (test= () (reverse ()))
+  (test= (list) (reverse (list)))
   (test= '(3 2 1) (reverse '(1 2 3)))
   (test= '(3 2 1 a: true) (reverse '(1 2 3 a: true))))
 
 (define-test map
-  (test= () (map (fn (x) x) ()))
+  (test= (list) (map (fn (x) x) (list)))
   (test= '(1) (map (fn (x) x) '(1)))
   (test= '(2 3 4) (map (fn (x) (+ x 1)) '(1 2 3)))
   (test= '(2 3 4 a: 5) (map (fn (x) (+ x 1)) (list 1 2 3 a: 4)))
@@ -914,7 +914,7 @@ c"
     (test= '(2 4 6 b: 8) (map evens '(1 2 3 4 5 6 a: 7 b: 8)))))
 
 (define-test cut
-  (test= () (cut ()))
+  (test= (list) (cut (list)))
   (test= '(a) (cut '(a)))
   (test= '(b c) (cut '(a b c) 1))
   (test= '(b c) (cut '(a b c d) 1 3))
@@ -924,7 +924,7 @@ c"
   (test= '(2 a: true) (cut '(1 2 a: true) 1))
   (test= '(a: true b: 2) (cut '(a: true b: 2)))
   (let t '(1 2 3)
-    (test= () (cut t (# t))))
+    (test= (list) (cut t (# t))))
   (let t '(1 2 3 a: true)
     (test= '(a: true) (cut t (# t)))))
 
@@ -946,8 +946,8 @@ c"
   (test= nil (search "abc" "z")))
 
 (define-test split
-  (test= () (split "" ""))
-  (test= () (split "" ","))
+  (test= (list) (split "" ""))
+  (test= (list) (split "" ","))
   (test= (list "a") (split "a" ","))
   (test= (list "a" "") (split "a," ","))
   (test= (list "a" "b") (split "a,b" ","))
@@ -969,7 +969,7 @@ c"
           '((1) (2 3) (4 5)))))
 
 (define-test keep
-  (test= () (keep (fn (x) x) ()))
+  (test= (list) (keep (fn (x) x) (list)))
   (test= '(0 1 2) (keep (fn (x) x) '(0 1 2)))
   (test= '((1) (2 3)) (keep some? '(() (1) () (2 3))))
   (let evens (fn (x) (= (% x 2) 0))
@@ -983,7 +983,7 @@ c"
   (test= nil (in? 'baz '(no can do))))
 
 (define-test find
-  (test= nil (find (fn (x) x) ()))
+  (test= nil (find (fn (x) x) (list)))
   (test= 7 (find (fn (x) x) '(7)))
   (test= true (find (fn (x) (= x 7)) '(2 4 7)))
   (test= true (find (fn (x) (= x 7)) '(2 4 foo: 7)))
@@ -993,7 +993,7 @@ c"
   (test= true (in? true '(2 4 bar: true))))
 
 (define-test first
-  (test= nil (first (fn (x) x) ()))
+  (test= nil (first (fn (x) x) (list)))
   (test= 7 (first (fn (x) x) '(7)))
   (test= true (first (fn (x) (= x 7)) '(2 4 7)))
   (test= 4 (first (fn (x) (and (> x 3) x)) '(1 2 3 4 5 6))))
@@ -1052,7 +1052,7 @@ c"
 ; TODO: fix
 ; (define-test str
 ;   (define f (x) x)
-;   (let (l () l2 ())
+;   (let (l (list) l2 (list))
 ;     (set (l [f]) true)
 ;     (set (l2 [str l]) true)
 ;     (let k (str f)
@@ -1108,7 +1108,7 @@ c"
     (test= '(1 2 3) (f 1 2 3)))
   (let f (fn args args)
     (test= '(1 2 3) (apply f (list 1 2 3))))
-  (let l ()
+  (let l (list)
     (define f (a: true) (add l a) a)
     (define g (a b c: true) (add l (list a b c)) c)
     (test= 42 (f a: (g (f a: 10) (f a: 20) c: (f a: 42))))
@@ -1125,7 +1125,7 @@ c"
     (test= '() l))
   (let l nil
     (define f (x rest: ys) (set l ys))
-    (define g () nil)
+    (define g (list) nil)
     (f 1 'x g)
     (test= (list 'x g) l)))
 

@@ -15,7 +15,7 @@
   (let buf ""
     (define rep1 (s)
       (cat! buf s)
-      (let (more ()
+      (let (more (list)
             form (reader .read-string buf more))
           (unless (= form more)
             (eval-print form)
@@ -88,7 +88,7 @@
         (or (= arg "-h")
             (= arg "--help"))
         (usage)
-      (let (pre ()
+      (let (pre (list)
             op nil
             input nil
             output nil
