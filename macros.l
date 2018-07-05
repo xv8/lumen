@@ -246,10 +246,7 @@
   `(%throw ,x))
 
 (define-macro brackets args
-  (case (# args)
-    (0 `(%brackets))
-    (1 `(%brackets ,@args))
-    (else `(%brackets ,args))))
+  `(%brackets ,@args))
 
 (define-macro braces args
   `(%braces ,@args))
