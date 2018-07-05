@@ -706,8 +706,8 @@
 (define-special %call (f rest: args)
   (compile-call f args))
 
-(define-special %brackets (x)
-  (cat "[" (compile x) "]"))
+(define-special %brackets args
+  (cat "[" (inner (compile-args args)) "]"))
 
 (define-special do forms stmt: true tr: true
   (with s ""

@@ -513,7 +513,7 @@ c"
     (test= 'bar (t ["foo"]))
     (let k "foo"
       (test= 'bar (t [k])))
-    (test= 'bar (t [cat "f" "oo"])))
+    (test= 'bar (t [(cat "f" "oo")])))
   (let (t1 (obj) t2 (obj))
     (set ((or nil t1 t2) .foo) 'bar)
     (test= 'bar (t1 .foo))

@@ -2772,8 +2772,9 @@ var create = (globals) => {
     var __args25 = cut(____id85, 0);
     return compileCall(__f2, __args25);
   }});
-  setenv("%brackets", {["_stash"]: true, ["special"]: (x) => {
-    return "[" + compile(x) + "]";
+  setenv("%brackets", {["_stash"]: true, ["special"]: (...args) => {
+    var __args26 = unstash(args);
+    return "[" + inner(compileArgs(__args26)) + "]";
   }});
   setenv("do", {["_stash"]: true, ["special"]: (...forms) => {
     var __forms = unstash(forms);
@@ -2846,11 +2847,11 @@ var create = (globals) => {
     var __h = ____x91;
     return __ind5 + "try {\n" + __body47 + __ind5 + "}\n" + __ind5 + "catch (" + __e37 + ") {\n" + __h + __ind5 + "}\n";
   }, ["stmt"]: true, ["tr"]: true});
-  setenv("%condition-case", {["_stash"]: true, ["special"]: (e, form, ...__r239) => {
-    var ____r239 = unstash(__r239);
-    var __e38 = destash33(e, ____r239);
-    var __form7 = destash33(form, ____r239);
-    var ____id86 = ____r239;
+  setenv("%condition-case", {["_stash"]: true, ["special"]: (e, form, ...__r238) => {
+    var ____r238 = unstash(__r238);
+    var __e38 = destash33(e, ____r238);
+    var __form7 = destash33(form, ____r238);
+    var ____id86 = ____r238;
     var __clauses3 = cut(____id86, 0);
     var __ind6 = indentation();
     indentLevel = indentLevel + 1;
@@ -3068,7 +3069,7 @@ var create = (globals) => {
           var ____id91 = __x104;
           var __prefix3 = ____id91[0];
           var __name20 = ____id91[1];
-          var __args26 = ____id91[2];
+          var __args27 = ____id91[2];
           var __body51 = cut(____id91, 3);
           var __e79;
           if (in63(__prefix3, ["define", "def"])) {
@@ -3079,9 +3080,9 @@ var create = (globals) => {
           var __prefix4 = __e79;
           var __e80;
           if (some63(__body51)) {
-            __e80 = compileFunction(__args26, join(["do"], __body51), {["_stash"]: true, ["name"]: key(__name20), ["prefix"]: __prefix4});
+            __e80 = compileFunction(__args27, join(["do"], __body51), {["_stash"]: true, ["name"]: key(__name20), ["prefix"]: __prefix4});
           } else {
-            __e80 = key(__name20) + __sep1 + compile(__args26);
+            __e80 = key(__name20) + __sep1 + compile(__args27);
           }
           var __h3 = __e80;
           __s9 = __s9 + __c9 + __ind8 + __h3;
@@ -3094,10 +3095,10 @@ var create = (globals) => {
     indentLevel = indentLevel - 1;
     return __s9 + "\n" + indentation() + "}";
   }});
-  setenv("%class", {["_stash"]: true, ["special"]: (name, ...__r254) => {
-    var ____r254 = unstash(__r254);
-    var __name21 = destash33(name, ____r254);
-    var ____id92 = ____r254;
+  setenv("%class", {["_stash"]: true, ["special"]: (name, ...__r253) => {
+    var ____r253 = unstash(__r253);
+    var __name21 = destash33(name, ____r253);
+    var ____id92 = ____r253;
     var __body52 = cut(____id92, 0);
     var __e81;
     if (atom63(__name21)) {
@@ -3125,9 +3126,9 @@ var create = (globals) => {
     return compile(join(["%literal", "\"class \""], __name23, __ext, [join({[0]: "%table", ["comma"]: "\"\""}, __body52)]));
   }});
   setenv("%literal", {["_stash"]: true, ["special"]: (...args) => {
-    var __args27 = unstash(args);
+    var __args28 = unstash(args);
     var __s10 = "";
-    var ____x105 = __args27;
+    var ____x105 = __args28;
     var ____i56 = 0;
     while (____i56 < _35(____x105)) {
       var __x106 = ____x105[____i56];
@@ -3141,9 +3142,9 @@ var create = (globals) => {
     return __s10;
   }});
   setenv("%statement", {["_stash"]: true, ["special"]: (...args) => {
-    var __args28 = unstash(args);
+    var __args29 = unstash(args);
     var __s111 = indentation();
-    var ____x107 = __args28;
+    var ____x107 = __args29;
     var ____i57 = 0;
     while (____i57 < _35(____x107)) {
       var __x108 = ____x107[____i57];
@@ -3345,17 +3346,17 @@ var create = (globals) => {
   };
   readTable["("] = (s) => {
     readChar(s);
-    var __r272 = undefined;
+    var __r271 = undefined;
     var __l9 = [];
-    while (nil63(__r272)) {
+    while (nil63(__r271)) {
       skipNonCode(s);
       var __c14 = peekChar(s);
       if (__c14 === ")") {
         readChar(s);
-        __r272 = __l9;
+        __r271 = __l9;
       } else {
         if (nil63(__c14)) {
-          __r272 = expected(s, ")");
+          __r271 = expected(s, ")");
         } else {
           var __x110 = read(s);
           if (key63(__x110)) {
@@ -3368,70 +3369,70 @@ var create = (globals) => {
         }
       }
     }
-    return __r272;
+    return __r271;
   };
   readTable[")"] = (s) => {
     throw new Error("Unexpected ) at " + s.pos);
   };
   readTable["["] = (s) => {
     readChar(s);
-    var __r275 = undefined;
+    var __r274 = undefined;
     var __l10 = [];
-    while (nil63(__r275)) {
+    while (nil63(__r274)) {
       skipNonCode(s);
       var __c15 = peekChar(s);
       if (__c15 === "]") {
         readChar(s);
-        __r275 = join(["brackets"], __l10);
+        __r274 = join(["brackets"], __l10);
       } else {
         if (nil63(__c15)) {
-          __r275 = expected(s, "]");
+          __r274 = expected(s, "]");
         } else {
           var __x1111 = read(s);
           add(__l10, __x1111);
         }
       }
     }
-    return __r275;
+    return __r274;
   };
   readTable["]"] = (s) => {
     throw new Error("Unexpected ] at " + s.pos);
   };
   readTable["{"] = (s) => {
     readChar(s);
-    var __r278 = undefined;
+    var __r277 = undefined;
     var __l111 = [];
-    while (nil63(__r278)) {
+    while (nil63(__r277)) {
       skipNonCode(s);
       var __c16 = peekChar(s);
       if (__c16 === "}") {
         readChar(s);
-        __r278 = join(["braces"], __l111);
+        __r277 = join(["braces"], __l111);
       } else {
         if (nil63(__c16)) {
-          __r278 = expected(s, "}");
+          __r277 = expected(s, "}");
         } else {
           var __x112 = read(s);
           add(__l111, __x112);
         }
       }
     }
-    return __r278;
+    return __r277;
   };
   readTable["}"] = (s) => {
     throw new Error("Unexpected } at " + s.pos);
   };
   readTable["\""] = (s) => {
     readChar(s);
-    var __r281 = undefined;
+    var __r280 = undefined;
     var __str2 = "\"";
-    while (nil63(__r281)) {
+    while (nil63(__r280)) {
       var __c17 = peekChar(s);
       if (__c17 === "\"") {
-        __r281 = __str2 + readChar(s);
+        __r280 = __str2 + readChar(s);
       } else {
         if (nil63(__c17)) {
-          __r281 = expected(s, "\"");
+          __r280 = expected(s, "\"");
         } else {
           if (__c17 === "\\") {
             __str2 = __str2 + readChar(s);
@@ -3440,25 +3441,25 @@ var create = (globals) => {
         }
       }
     }
-    return __r281;
+    return __r280;
   };
   readTable["|"] = (s) => {
     readChar(s);
-    var __r283 = undefined;
+    var __r282 = undefined;
     var __str3 = "|";
-    while (nil63(__r283)) {
+    while (nil63(__r282)) {
       var __c18 = peekChar(s);
       if (__c18 === "|") {
-        __r283 = __str3 + readChar(s);
+        __r282 = __str3 + readChar(s);
       } else {
         if (nil63(__c18)) {
-          __r283 = expected(s, "|");
+          __r282 = expected(s, "|");
         } else {
           __str3 = __str3 + readChar(s);
         }
       }
     }
-    return __r283;
+    return __r282;
   };
   readTable["'"] = (s) => {
     readChar(s);
