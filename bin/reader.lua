@@ -161,17 +161,17 @@ read_table[""] = function (s)
 end
 read_table["("] = function (s)
   read_char(s)
-  local __r16 = nil
+  local __r17 = nil
   local __l1 = {}
-  while nil63(__r16) do
+  while nil63(__r17) do
     skip_non_code(s)
     local __c4 = peek_char(s)
     if __c4 == ")" then
       read_char(s)
-      __r16 = __l1
+      __r17 = __l1
     else
       if nil63(__c4) then
-        __r16 = expected(s, ")")
+        __r17 = expected(s, ")")
       else
         local __x2 = read(s)
         if key63(__x2) then
@@ -188,22 +188,22 @@ read_table["("] = function (s)
       end
     end
   end
-  return __r16
+  return __r17
 end
 read_table[")"] = function (s)
   error("Unexpected ) at " .. s.pos)
 end
 read_table["\""] = function (s)
   read_char(s)
-  local __r19 = nil
+  local __r20 = nil
   local __str1 = "\""
-  while nil63(__r19) do
+  while nil63(__r20) do
     local __c5 = peek_char(s)
     if __c5 == "\"" then
-      __r19 = __str1 .. read_char(s)
+      __r20 = __str1 .. read_char(s)
     else
       if nil63(__c5) then
-        __r19 = expected(s, "\"")
+        __r20 = expected(s, "\"")
       else
         if __c5 == "\\" then
           __str1 = __str1 .. read_char(s)
@@ -212,25 +212,25 @@ read_table["\""] = function (s)
       end
     end
   end
-  return __r19
+  return __r20
 end
 read_table["|"] = function (s)
   read_char(s)
-  local __r21 = nil
+  local __r22 = nil
   local __str2 = "|"
-  while nil63(__r21) do
+  while nil63(__r22) do
     local __c6 = peek_char(s)
     if __c6 == "|" then
-      __r21 = __str2 .. read_char(s)
+      __r22 = __str2 .. read_char(s)
     else
       if nil63(__c6) then
-        __r21 = expected(s, "|")
+        __r22 = expected(s, "|")
       else
         __str2 = __str2 .. read_char(s)
       end
     end
   end
-  return __r21
+  return __r22
 end
 read_table["'"] = function (s)
   read_char(s)

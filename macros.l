@@ -85,7 +85,6 @@
 
 (define-macro define-special (name args rest: body)
   (let form `(setenv ',name special: (fn ,args ,@body) ,@(keys body))
-    (eval form)
     form))
 
 (define-macro define-symbol (name expansion)

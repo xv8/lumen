@@ -38,7 +38,9 @@ function two63(x)
   return _35(x) == 2
 end
 function hd(l)
-  return l[1]
+  if not atom63(l) then
+    return l[1]
+  end
 end
 function string63(x)
   return type(x) == "string"
@@ -56,7 +58,7 @@ function obj63(x)
   return is63(x) and type(x) == "table"
 end
 function atom63(x)
-  return nil63(x) or string63(x) or number63(x) or boolean63(x)
+  return nil63(x) or string63(x) or number63(x) or boolean63(x) or function63(x)
 end
 nan = 0 / 0
 inf = 1 / 0
@@ -122,7 +124,9 @@ function inner(x)
   return clip(x, 1, edge(x))
 end
 function tl(l)
-  return cut(l, 1)
+  if not atom63(l) then
+    return cut(l, 1)
+  end
 end
 function char(s, n)
   return clip(s, n, n + 1)
@@ -521,11 +525,11 @@ function str(x, stack)
             if string63(x) then
               return escape(x)
             else
-              if atom63(x) then
-                return tostring(x)
+              if function63(x) then
+                return "function"
               else
-                if function63(x) then
-                  return "function"
+                if atom63(x) then
+                  return tostring(x)
                 else
                   if stack and in63(x, stack) then
                     return "circular"
@@ -805,7 +809,6 @@ setenv("define-special", {_stash = true, macro = function (name, args, ...)
   local ____x121 = {"setenv", {"quote", __name3}}
   ____x121.special = join({"fn", __args5}, __body17)
   local __form3 = join(____x121, keys(__body17))
-  _eval(__form3)
   return __form3
 end})
 setenv("define-symbol", {_stash = true, macro = function (name, expansion)

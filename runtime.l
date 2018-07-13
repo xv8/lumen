@@ -24,7 +24,7 @@
 (define-global one? (x) (= (# x) 1))
 (define-global two? (x) (= (# x) 2))
 
-(define-global hd (l) (at l 0))
+(define-global hd (l) (unless (atom? l) (at l 0)))
 
 (target js: (define-global type (x) (typeof x)))
 
@@ -38,7 +38,7 @@
        (= (type x) (target lua: 'table js: 'object))))
 
 (define-global atom? (x)
-  (or (nil? x) (string? x) (number? x) (boolean? x)))
+  (or (nil? x) (string? x) (number? x) (boolean? x) (target lua: (function? x))))
 
 (define-global nan (/ 0 0))
 (define-global inf (/ 1 0))
@@ -80,7 +80,7 @@
 (define-global inner (x)
   (clip x 1 (edge x)))
 
-(define-global tl (l) (cut l 1))
+(define-global tl (l) (unless (atom? l) (cut l 1)))
 
 (define-global char (s n)
   (target js: ((get s 'charAt) n) lua: (clip s n (+ n 1))))
@@ -296,8 +296,8 @@
       (= x -inf) "-inf"
       (boolean? x) (if x "true" "false")
       (string? x) (escape x)
-      (atom? x) (tostring x)
       (function? x) "function"
+      (atom? x) (tostring x)
       (and stack (in? x stack)) "circular"
       (target js: false lua: (not (= (type x) 'table)))
       (escape (tostring x))

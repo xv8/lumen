@@ -38,7 +38,9 @@ two63 = function (x) {
   return _35(x) === 2;
 };
 hd = function (l) {
-  return l[0];
+  if (! atom63(l)) {
+    return l[0];
+  }
 };
 type = function (x) {
   return typeof(x);
@@ -139,7 +141,9 @@ inner = function (x) {
   return clip(x, 1, edge(x));
 };
 tl = function (l) {
-  return cut(l, 1);
+  if (! atom63(l)) {
+    return cut(l, 1);
+  }
 };
 char = function (s, n) {
   return s.charAt(n);
@@ -603,11 +607,11 @@ str = function (x, stack) {
             if (string63(x)) {
               return escape(x);
             } else {
-              if (atom63(x)) {
-                return tostring(x);
+              if (function63(x)) {
+                return "function";
               } else {
-                if (function63(x)) {
-                  return "function";
+                if (atom63(x)) {
+                  return tostring(x);
                 } else {
                   if (stack && in63(x, stack)) {
                     return "circular";
@@ -914,7 +918,6 @@ setenv("define-special", {_stash: true, macro: function (name, args) {
   var ____x109 = ["setenv", ["quote", __name3]];
   ____x109.special = join(["fn", __args5], __body17);
   var __form3 = join(____x109, keys(__body17));
-  _eval(__form3);
   return __form3;
 }});
 setenv("define-symbol", {_stash: true, macro: function (name, expansion) {

@@ -19,7 +19,7 @@
   (is? (getenv k 'special)))
 
 (define special-form? (form)
-  (and (not (atom? form)) (special? (hd form))))
+  (special? (hd form)))
 
 (define statement? (k)
   (and (special? k) (getenv k 'stmt)))
@@ -117,7 +117,6 @@
 
 (define quasisplice? (x depth)
   (and (can-unquote? depth)
-       (not (atom? x))
        (= (hd x) 'unquote-splicing)))
 
 (define expand-local ((x name value))
@@ -232,7 +231,14 @@
       (and (> n 96) (< n 123)) ; a-z
       (= n 95)))               ; _
 
-(define id (id)
+(define-global accessor? (x)
+  (or (and (string? x)
+           (> (# x) 1)
+           (= (code x 0) (when-compiling (code "." 0)))
+           (not (= (code x 1) (when-compiling (code "." 0)))))
+      (= (hd x) '%brackets)))
+
+(define id (id raw?)
   (let id1 (if (number-code? (code id 0)) "_" "")
     (for i (# id)
       (let (c (char id i)
@@ -244,7 +250,8 @@
                    (= i 0) (cat "_" n)
                  n))
         (cat! id1 c1)))
-    (if (reserved? id1)
+    (if raw? id1
+        (reserved? id1)
         (cat "_" id1)
         id1)))
 
@@ -308,14 +315,30 @@
   (is? (getop x)))
 
 (define-global infix-operator? (x)
-  (and (obj? x) (infix? (hd x))))
+  (infix? (hd x)))
 
-(define compile-args (args)
-  (let (s "(" c "")
-    (step x args
-      (cat! s c (compile x))
-      (set c ", "))
-    (cat s ")")))
+(define-global compile-next (x args call?)
+  (if (none? args)
+      (if call? (cat x "()") x)
+    (cat x (compile-args args call?))))
+
+(define-global compile-args (args call?)
+  (let a (hd args)
+    (if (accessor? a)
+        (compile-next (compile a) (tl args) call?)
+        (accessor? (hd a))
+        (let ((x rest: ys) a
+              s (compile-next (compile x) ys true))
+          (compile-next s (tl args) call?))
+      (let (s "" c "")
+        (for i (# args)
+          (let x (at args i)
+            (if (or (accessor? x)
+                    (accessor? (hd x)))
+                (return (compile-next (cat "(" s ")") (cut args i) call?))
+              (cat! s c (compile x)))
+            (set c ", ")))
+        (cat "(" s ")")))))
 
 (define escape-newlines (s)
   (with s1 ""
@@ -325,9 +348,16 @@
                      (= c "\r") "\\r"
                    c))))))
 
-(define compile-atom (x)
+(define-global accessor (x)
+  (let prop (id (clip x 1) true)
+    (if (valid-id? prop)
+        (cat "." prop)
+      (cat "[" (escape prop) "]"))))
+
+(define-global compile-atom (x)
   (if (and (= x "nil") (= target 'lua)) x
       (= x "nil") "undefined"
+      (accessor? x) (accessor x)
       (id-literal? x) (inner x)
       (string-literal? x) (escape-newlines x)
       (string? x) (id x)
@@ -350,17 +380,17 @@
     (cat (apply special args) tr)))
 
 (define parenthesize-call? (x)
-  (or (and (not (atom? x))
-           (= (hd x) '%function))
+  (or (= (hd x) '%function)
       (> (precedence x) 0)))
 
 (define compile-call (form)
   (let (f (hd form)
-        f1 (compile f)
-        args (compile-args (stash* (tl form))))
+        args (tl form)
+        f1 (if args (compile f) (compile-atom f))
+        args1 (if args (compile-args (stash* args)) ""))
     (if (parenthesize-call? f)
-        (cat "(" f1 ")" args)
-      (cat f1 args))))
+        (cat "(" f1 ")" args1)
+      (cat f1 args1))))
 
 (define op-delims (parent child :right)
   (if ((if right >= >)
@@ -398,9 +428,8 @@
 
 (define can-return? (form)
   (and (is? form)
-       (or (atom? form)
-           (and (not (= (hd form) 'return))
-                (not (statement? (hd form)))))))
+       (not (= (hd form) 'return))
+       (not (statement? (hd form)))))
 
 (define-global compile (form :stmt)
   (if (nil? form) ""
@@ -435,7 +464,8 @@
   (or (and (not (atom? form))
            (not (infix? (hd form)))
            (not (literal? form))
-           (not (= 'get (hd form))))
+           (not (= 'get (hd form)))
+           (not (and (two? form) (accessor? (at form 1)))))
       (id-literal? form)))
 
 (define lower-do (args hoist stmt? tail?)
@@ -589,7 +619,7 @@
       %result)))
 
 (define-global immediate-call? (x)
-  (and (obj? x) (obj? (hd x)) (= (hd (hd x)) '%function)))
+  (= (hd (hd x)) '%function))
 
 (define-special do forms :stmt :tr
   (with s ""
@@ -599,10 +629,9 @@
                  (= "\n" (char s (edge s))))
         (set s (cat (clip s 0 (edge s)) ";\n")))
       (cat! s (compile x :stmt))
-      (unless (atom? x)
-        (if (or (= (hd x) 'return)
-                (= (hd x) 'break))
-            (break))))))
+      (if (or (= (hd x) 'return)
+              (= (hd x) 'break))
+          (break)))))
 
 (define-special %if (cond cons alt) :stmt :tr
   (let (cond (compile cond)
@@ -698,16 +727,18 @@
     (cat (indentation) lh " = " rh)))
 
 (define-special get (t k)
-  (let (t1 (compile t)
-        k1 (compile k))
-    (when (or (and (= target 'lua)
-                   (= (char t1 0) "{"))
-              (infix-operator? t))
-      (set t1 (cat "(" t1 ")")))
-    (if (and (string-literal? k)
-             (valid-id? (inner k)))
-        (cat t1 "." (inner k))
-      (cat t1 "[" k1 "]"))))
+  (if (accessor? k)
+      (compile `(,t ,k))
+    (let (t1 (compile t)
+          k1 (compile k))
+      (when (or (and (= target 'lua)
+                     (= (char t1 0) "{"))
+                (infix-operator? t))
+        (set t1 (cat "(" t1 ")")))
+      (if (and (string-literal? k)
+               (valid-id? (inner k)))
+          (cat t1 "." (inner k))
+        (cat t1 "[" k1 "]")))))
 
 (define-special %array forms
   (let (open (if (= target 'lua) "{" "[")
