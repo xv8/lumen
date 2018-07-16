@@ -15,6 +15,7 @@
   `(%delete ,place))
 
 (define-macro list body
+  (set body (unstash body))
   (if (keys? body)
       `(%object ,@(mapo (fn (x) x) body))
     `(%array ,@body)))
@@ -39,6 +40,7 @@
   `(if (not ,cond) (do ,@body)))
 
 (define-macro obj body
+  (set body (unstash body))
   `(%object ,@(mapo (fn (x) x) body)))
 
 (define-macro let (bs rest: body)
@@ -68,17 +70,34 @@
 (define-macro void body
   `(do ,@body (do)))
 
-(define-macro %setenv (name rest: keys)
-  `(void (setenv ',name ,@keys)))
+(define-macro %setenv (name (o keys (obj)))
+  `(void (setenv ',name (obj ,@keys))))
 
 (define-macro define-macro (name args rest: body)
-  `(%setenv ,name macro: (fn ,args ,@body)))
+  `(%setenv ,name (macro: (fn ,args ,@body))))
+
+(define-global parse-body (body)
+  (let (doc nil
+        props (obj))
+    (let x (hd body)
+      (when (and (> (# body) 1) (string-literal? x))
+        (set doc x)
+        (set body (tl body))))
+    (let x (hd body)
+      (when (and (obj? x)
+                 (= (hd x) 'declare))
+        (step (k v) (tl x)
+          (set (get props k) v))
+        (set body (tl body))))
+    (set body (lower `(do ,@body)))
+    (list doc props body)))
 
 (define-macro define-special (name args rest: body)
-  `(%setenv ,name special: (fn ,args ,@body) ,@(keys body)))
+  (let ((doc props body1) (parse-body body))
+    `(%setenv ,name (special: (fn ,args ,@body) ,@(keys body) ,@props))))
 
 (define-macro define-symbol-macro (name expansion)
-  `(%setenv ,name symbol: ',expansion))
+  `(%setenv ,name (symbol: ',expansion)))
 
 (define-macro define-reader ((char s) rest: body)
   `(set (read-table [,char]) (fn (,s) ,@body)))

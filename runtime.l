@@ -210,7 +210,7 @@
     args))
 
 (define-global unstash (args)
-  (if (none? args) (fresh args)
+  (if (none? args) args
     (let l (last args)
       (if (and (obj? l) (l ._stash))
           (with args1 (almost args)
@@ -218,13 +218,6 @@
               (unless (= k "_stash")
                 (set (args1 [k]) v))))
         args))))
-
-(define-global destash! (l args1)
-  (if (and (obj? l) (l ._stash))
-      (each (k v) l
-        (unless (= k "_stash")
-          (set (args1 [k]) v)))
-    l))
 
 (define-global search (s pattern start)
   (let i (s .index-of pattern start)
@@ -341,7 +334,7 @@
 (define-global call (f rest: args)
   (apply f args))
 
-(define-global setenv (k rest: keys)
+(define-global setenv (k keys)
   (when (string? k)
     (let (frame (if (keys .toplevel)
                     (hd (_G .environment))
