@@ -1186,11 +1186,16 @@ local function repl()
     end
   end
 end
-function compile_file(path)
+function read_file(path)
   local __s1 = reader.stream(system["read-file"](path))
   local __body = reader["read-all"](__s1)
-  local __form1 = compiler.expand(join({"do"}, __body))
-  return compiler.compile(__form1, {_stash = true, stmt = true})
+  return join({"do"}, __body)
+end
+function expand_file(path)
+  return compiler.expand(read_file(path))
+end
+function compile_file(path)
+  return compiler.compile(expand_file(path))
 end
 function _load(path)
   local __previous = target

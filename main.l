@@ -26,17 +26,23 @@
   ((get system 'write) "> ")
   (target
     js: (let in (get process 'stdin)
+          ((get in 'removeAllListeners) 'data)
           ((get in 'setEncoding) 'utf8)
           ((get in 'on) 'data rep1))
     lua: (while true
            (let s ((get io 'read))
              (if s (rep1 (cat s "\n")) (break))))))
 
-(define-global compile-file (path)
+(define-global read-file (path)
   (let (s ((get reader 'stream) ((get system 'read-file) path))
-        body ((get reader 'read-all) s)
-        form ((get compiler 'expand) `(do ,@body)))
-    ((get compiler 'compile) form :stmt)))
+        body ((get reader 'read-all) s))
+    `(do ,@body)))
+
+(define-global expand-file (path)
+  ((get compiler 'expand) (read-file path)))
+
+(define-global compile-file (path)
+  ((get compiler 'compile) (expand-file path)))
 
 (define-global load (path)
   (let previous target
