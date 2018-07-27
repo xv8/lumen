@@ -1288,14 +1288,20 @@ var repl = function () {
   };
   system.write("> ");
   var ___in = process.stdin;
+  ___in.removeAllListeners("data");
   ___in.setEncoding("utf8");
   return ___in.on("data", rep1);
 };
-compile_file = function (path) {
+read_file = function (path) {
   var __s = reader.stream(system["read-file"](path));
   var __body = reader["read-all"](__s);
-  var __form1 = compiler.expand(join(["do"], __body));
-  return compiler.compile(__form1, {_stash: true, stmt: true});
+  return join(["do"], __body);
+};
+expand_file = function (path) {
+  return compiler.expand(read_file(path));
+};
+compile_file = function (path) {
+  return compiler.compile(expand_file(path));
 };
 _load = function (path) {
   var __previous = target;
